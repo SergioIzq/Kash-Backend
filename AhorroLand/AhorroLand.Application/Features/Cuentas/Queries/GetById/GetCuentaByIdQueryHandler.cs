@@ -14,7 +14,7 @@ public sealed class GetCuentaByIdQueryHandler
 {
     public GetCuentaByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepository<Cuenta> readOnlyRepository
+        IReadRepositoryWithDto<Cuenta, CuentaDto> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

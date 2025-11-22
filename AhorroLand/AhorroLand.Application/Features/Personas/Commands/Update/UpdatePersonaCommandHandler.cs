@@ -18,7 +18,7 @@ public sealed class UpdatePersonaCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Persona> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Persona> readOnlyRepository
+        IReadRepositoryWithDto<Persona, PersonaDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

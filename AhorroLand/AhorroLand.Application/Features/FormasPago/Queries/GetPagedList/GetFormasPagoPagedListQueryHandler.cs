@@ -6,15 +6,11 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 namespace AhorroLand.Application.Features.FormasPago.Queries;
 
-/// <summary>
-/// Manejador concreto para la consulta de lista paginada de Categorías.
-/// Implementa la lógica específica de filtrado y ordenación.
-/// </summary>
 public sealed class GetFormasPagoPagedListQueryHandler
     : GetPagedListQueryHandler<FormaPago, FormaPagoDto, GetFormasPagoPagedListQuery>
 {
     public GetFormasPagoPagedListQueryHandler(
-        IReadRepository<FormaPago> repository,
+      IReadRepositoryWithDto<FormaPago, FormaPagoDto> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

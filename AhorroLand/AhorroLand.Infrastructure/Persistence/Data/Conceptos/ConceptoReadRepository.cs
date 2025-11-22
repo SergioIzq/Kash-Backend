@@ -52,6 +52,29 @@ FROM conceptos";
             return "ORDER BY nombre ASC";
         }
 
+        /// <summary>
+        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
+        /// </summary>
+        protected override Dictionary<string, string> GetSortableColumns()
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Nombre", "nombre" },
+                { "FechaCreacion", "fecha_creacion" }
+            };
+        }
+
+        /// <summary>
+        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
+        /// </summary>
+        protected override List<string> GetSearchableColumns()
+        {
+            return new List<string>
+            {
+                "nombre"
+            };
+        }
+
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();

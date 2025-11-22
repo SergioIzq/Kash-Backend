@@ -18,7 +18,7 @@ public sealed class UpdateCategoriaCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Categoria> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Categoria> readOnlyRepository
+        IReadRepositoryWithDto<Categoria, CategoriaDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

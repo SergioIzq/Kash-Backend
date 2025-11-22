@@ -18,9 +18,22 @@ public class GastosController : AbsController
     {
     }
 
+    /// <summary>
+    /// Obtiene una lista paginada de gastos con soporte para búsqueda y ordenamiento.
+    /// </summary>
+    /// <param name="page">Número de página (por defecto: 1)</param>
+    /// <param name="pageSize">Tamaño de página (por defecto: 10)</param>
+    /// <param name="searchTerm">Término de búsqueda opcional (busca en: descripción, concepto, categoría, proveedor, persona, cuenta)</param>
+    /// <param name="sortColumn">Columna por la cual ordenar (Fecha, Importe, ConceptoNombre, CategoriaNombre, ProveedorNombre, PersonaNombre, CuentaNombre, FormaPagoNombre)</param>
+    /// <param name="sortOrder">Orden: 'asc' o 'desc' (por defecto: 'desc')</param>
     [Authorize]
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("paginated")]
+    public async Task<IActionResult> GetPaginated(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? sortColumn = null,
+        [FromQuery] string? sortOrder = null)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
             ?? User.FindFirst("sub")?.Value
@@ -31,8 +44,8 @@ public class GastosController : AbsController
             return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
         }
 
-        // 🚀 Pasar el UsuarioId al query para aprovechar índices de BD
-        var query = new GetGastosPagedListQuery(page, pageSize)
+        // 🚀 Crear query con todos los parámetros
+        var query = new GetGastosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
             UsuarioId = usuarioId
         };

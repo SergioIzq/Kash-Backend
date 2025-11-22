@@ -1,8 +1,7 @@
-﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
-
-namespace AhorroLand.Domain
+﻿namespace AhorroLand.Domain
 {
-    public interface IGastoReadRepository : IReadRepository<Gasto>
+    // 🔥 Interfaz de marcador - la implementación en Infrastructure usa IReadRepositoryWithDto
+    public interface IGastoReadRepository
     {
     }
 }

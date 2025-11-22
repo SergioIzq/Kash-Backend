@@ -7,13 +7,12 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 namespace AhorroLand.Application.Features.Ingresos.Queries;
 
 public sealed class GetIngresoByIdQueryHandler
-    : GetByIdQueryHandler<Ingreso, IngresoDto, GetIngresoByIdQuery>
+  : GetByIdQueryHandler<Ingreso, IngresoDto, GetIngresoByIdQuery>
 {
-    public GetIngresoByIdQueryHandler(
-        ICacheService cacheService,
-   IReadRepository<Ingreso> readOnlyRepository
-        )
-        : base(readOnlyRepository, cacheService)
+ public GetIngresoByIdQueryHandler(
+   IReadRepositoryWithDto<Ingreso, IngresoDto> repository,
+ICacheService cacheService)
+        : base(repository, cacheService)
     {
     }
 }

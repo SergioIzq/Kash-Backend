@@ -18,7 +18,7 @@ public sealed class UpdateConceptoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Concepto> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Concepto> readOnlyRepository
+        IReadRepositoryWithDto<Concepto, ConceptoDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

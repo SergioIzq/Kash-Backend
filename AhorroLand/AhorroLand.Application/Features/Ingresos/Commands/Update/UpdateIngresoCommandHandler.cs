@@ -19,7 +19,7 @@ public sealed class UpdateIngresoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Ingreso> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Ingreso> readOnlyRepository,
+        IReadRepositoryWithDto<Ingreso, IngresoDto> readOnlyRepository,
         IDomainValidator validator
         )
         : base(unitOfWork, writeRepository, cacheService)

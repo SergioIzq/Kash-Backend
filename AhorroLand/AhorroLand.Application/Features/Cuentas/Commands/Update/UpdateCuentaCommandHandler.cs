@@ -18,7 +18,7 @@ public sealed class UpdateCuentaCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Cuenta> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Cuenta> readOnlyRepository
+        IReadRepositoryWithDto<Cuenta, CuentaDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

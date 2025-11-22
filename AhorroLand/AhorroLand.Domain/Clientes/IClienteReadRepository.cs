@@ -1,12 +1,12 @@
-﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
-using AhorroLand.Shared.Domain.ValueObjects;
+﻿using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Domain;
 
 /// <summary>
 /// Interfaz para el repositorio de lectura de Clientes.
 /// </summary>
-public interface IClienteReadRepository : IReadRepository<Cliente>
+// 🔥 Solo contiene métodos de validación personalizados
+public interface IClienteReadRepository
 {
     /// <summary>
     /// Verifica si ya existe un cliente con el mismo nombre para un usuario.

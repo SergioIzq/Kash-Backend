@@ -9,10 +9,6 @@ public sealed class Traspaso : AbsEntity, IDomainEvent
     private readonly List<IDomainEvent> _domainEvents = new();
     public IReadOnlyList<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
 
-    // ⭐ 2. Limpia los eventos después de que el UnitOfWork los publica
-    public void ClearDomainEvents() => _domainEvents.Clear();
-
-    // ⭐ 3. Método para que las entidades añadan eventos
     public void RaiseDomainEvent(IDomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);

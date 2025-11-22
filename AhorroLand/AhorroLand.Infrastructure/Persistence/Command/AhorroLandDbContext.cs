@@ -1,5 +1,6 @@
 ﻿using AhorroLand.Infrastructure.Persistence.Interceptors;
 using AhorroLand.Shared.Domain.Abstractions;
+using AhorroLand.Domain; // ⭐ AGREGAR: Para referenciar el assembly de Domain
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -31,8 +32,9 @@ public class AhorroLandDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. Obtener la assembly que contiene las entidades de dominio
-        var domainAssembly = Assembly.GetAssembly(typeof(AbsEntity));
+        // 1. 🔥 FIX: Obtener la assembly correcta donde están las entidades (AhorroLand.Domain)
+        // Usamos typeof(Gasto) o cualquier entidad del dominio para obtener el assembly correcto
+        var domainAssembly = Assembly.GetAssembly(typeof(Gasto));
 
         if (domainAssembly == null)
         {

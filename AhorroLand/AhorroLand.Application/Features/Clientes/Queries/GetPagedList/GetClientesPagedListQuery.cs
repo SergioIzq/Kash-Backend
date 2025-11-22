@@ -10,14 +10,9 @@ namespace AhorroLand.Application.Features.Clientes.Queries;
 /// </summary>
 public sealed record GetClientesPagedListQuery : AbsGetPagedListQuery<Cliente, ClienteDto>
 {
-    public int Page { get; init; }
-    public int PageSize { get; init; }
     public string? SearchTerm { get; init; }
     public string? SortColumn { get; init; }
     public string? SortOrder { get; init; }
-
-    // 🔥 CRÍTICO: Permite asignar el UsuarioId después de la creación
-    public Guid? UsuarioId { get; set; }
 
     public GetClientesPagedListQuery(int page, int pageSize, string? searchTerm = null, string? sortColumn = null, string? sortOrder = null)
         : base(page, pageSize, null) // Null aquí porque lo asignaremos después

@@ -1,37 +1,34 @@
 ﻿using AhorroLand.Application.Interfaces;
 using AhorroLand.Domain;
 using AhorroLand.Domain.Traspasos.Eventos;
+using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 // ⭐ Este Event Handler maneja la lógica de actualización de saldos.
 public sealed class ActualizarSaldosCuentaOnTraspasoRegistrado : IDomainEventHandler<TraspasoRegistradoDomainEvent>
 {
-    // ⭐ ELIMINAMOS IReadRepository<Traspaso> de las inyecciones
-    private readonly IReadRepository<Cuenta> _cuentaReadRepo;
+    // ⭐ Usamos SOLO el WriteRepository para cargar entidades con tracking
     private readonly IWriteRepository<Cuenta> _cuentaWriteRepo;
 
     public ActualizarSaldosCuentaOnTraspasoRegistrado(
-        IReadRepository<Cuenta> cuentaReadRepo,
         IWriteRepository<Cuenta> cuentaWriteRepo
-        )
+    )
     {
-        _cuentaReadRepo = cuentaReadRepo;
         _cuentaWriteRepo = cuentaWriteRepo;
     }
 
     public async Task Handle(TraspasoRegistradoDomainEvent notification, CancellationToken cancellationToken)
     {
         // 1. CARGA DE CUENTAS EN PARALELO (Máxima Optimización I/O)
-        // No necesitamos cargar el Traspaso, usamos los datos del evento.
-        var origenTask = _cuentaReadRepo.GetByIdAsync(notification.CuentaOrigenId);
-        var destinoTask = _cuentaReadRepo.GetByIdAsync(notification.CuentaDestinoId);
+        // Usamos GetByIdAsync del WriteRepository para obtener entidades con tracking
+        var origenTask = _cuentaWriteRepo.GetByIdAsync(notification.CuentaOrigenId, cancellationToken);
+        var destinoTask = _cuentaWriteRepo.GetByIdAsync(notification.CuentaDestinoId, cancellationToken);
 
         // Espera a que ambas tareas finalicen y asigna los resultados.
         var (cuentaOrigen, cuentaDestino) = await GetParallelResultsAsync(origenTask, destinoTask);
 
         if (cuentaOrigen is null || cuentaDestino is null)
         {
-
             return;
         }
 
@@ -47,7 +44,7 @@ public sealed class ActualizarSaldosCuentaOnTraspasoRegistrado : IDomainEventHan
         }
         catch (InvalidOperationException)
         {
-
+            // Manejo de error cuando no hay fondos suficientes
         }
     }
 

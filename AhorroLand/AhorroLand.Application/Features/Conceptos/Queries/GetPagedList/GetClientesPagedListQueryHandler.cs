@@ -7,17 +7,15 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 namespace AhorroLand.Application.Features.Conceptos.Queries;
 
 /// <summary>
-/// Manejador concreto para la consulta de lista paginada de Categorías.
-/// Implementa la lógica específica de filtrado y ordenación.
+/// Manejador concreto para la consulta de lista paginada de Conceptos.
 /// </summary>
 public sealed class GetConceptosPagedListQueryHandler
     : GetPagedListQueryHandler<Concepto, ConceptoDto, GetConceptosPagedListQuery>
 {
     public GetConceptosPagedListQueryHandler(
-        IReadRepository<Concepto> repository,
+        IReadRepositoryWithDto<Concepto, ConceptoDto> repository,
         ICacheService cacheService)
-        : base(repository, cacheService)
+    : base(repository, cacheService)
     {
-        // No se necesita lógica adicional en el constructor.
     }
 }

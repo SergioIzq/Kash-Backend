@@ -10,9 +10,9 @@ public sealed class GetTraspasosProgramadosPagedListQueryHandler
     : GetPagedListQueryHandler<TraspasoProgramado, TraspasoProgramadoDto, GetTraspasosProgramadosPagedListQuery>
 {
     public GetTraspasosProgramadosPagedListQueryHandler(
-   IReadRepository<TraspasoProgramado> repository,
+   IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto> repository,
      ICacheService cacheService)
-        : base(repository, cacheService)
+  : base(repository, cacheService)
     {
     }
 }

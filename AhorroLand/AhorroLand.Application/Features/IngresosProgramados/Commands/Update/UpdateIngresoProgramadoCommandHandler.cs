@@ -14,7 +14,7 @@ public sealed class UpdateIngresoProgramadoCommandHandler
   IUnitOfWork unitOfWork,
    IWriteRepository<IngresoProgramado> writeRepository,
         ICacheService cacheService,
-        IReadRepository<IngresoProgramado> readOnlyRepository
+        IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto> readOnlyRepository
         )
      : base(unitOfWork, writeRepository, cacheService)
     {

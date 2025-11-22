@@ -9,8 +9,8 @@ namespace AhorroLand.Application.Features.GastosProgramados.Queries;
 public sealed class GetGastosProgramadosPagedListQueryHandler
   : GetPagedListQueryHandler<GastoProgramado, GastoProgramadoDto, GetGastosProgramadosPagedListQuery>
 {
-    public GetGastosProgramadosPagedListQueryHandler(
-   IReadRepository<GastoProgramado> repository,
+ public GetGastosProgramadosPagedListQueryHandler(
+   IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto> repository,
  ICacheService cacheService)
       : base(repository, cacheService)
     {

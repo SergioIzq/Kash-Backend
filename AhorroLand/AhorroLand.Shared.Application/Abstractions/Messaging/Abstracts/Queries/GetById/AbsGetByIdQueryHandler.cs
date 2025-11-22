@@ -16,16 +16,16 @@ public abstract class GetByIdQueryHandler<TEntity, TDto, TQuery>
     where TDto : class
   where TQuery : AbsGetByIdQuery<TEntity, TDto>
 {
-    // 🔧 Usar la interfaz IReadRepositoryWithDto para acceder a GetReadModelByIdAsync
+    // 🔥 ÚNICO REPOSITORIO: Solo usamos IReadRepositoryWithDto
     protected readonly IReadRepositoryWithDto<TEntity, TDto> _dtoRepository;
 
+    // 🔥 Constructor simplificado
     public GetByIdQueryHandler(
-     IReadRepository<TEntity> repository,
+     IReadRepositoryWithDto<TEntity, TDto> dtoRepository,
         ICacheService cacheService)
-   : base(repository, cacheService)
+   : base(cacheService)
     {
-        // 🔧 Castear a IReadRepositoryWithDto para acceder a métodos específicos de DTOs
-        _dtoRepository = (IReadRepositoryWithDto<TEntity, TDto>)repository;
+        _dtoRepository = dtoRepository;
     }
 
     public async Task<Result<TDto>> Handle(TQuery query, CancellationToken cancellationToken)
@@ -45,12 +45,12 @@ public abstract class GetByIdQueryHandler<TEntity, TDto, TQuery>
         if (dto is null)
         {
             return Result.Failure<TDto>(Error.NotFound(
-                $"Entidad con ID '{query.Id}' de tipo {typeof(TEntity).Name} no fue encontrada."));
+           $"Entidad con ID '{query.Id}' de tipo {typeof(TEntity).Name} no fue encontrada."));
         }
 
         // 3. Cachear el DTO
         await _cacheService.SetAsync(
-            cacheKey,
+      cacheKey,
             dto,
             absoluteExpiration: TimeSpan.FromMinutes(30)
         );

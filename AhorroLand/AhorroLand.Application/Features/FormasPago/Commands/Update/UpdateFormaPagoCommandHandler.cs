@@ -18,7 +18,7 @@ public sealed class UpdateFormaPagoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<FormaPago> writeRepository,
         ICacheService cacheService,
-        IReadRepository<FormaPago> readOnlyRepository
+        IReadRepositoryWithDto<FormaPago, FormaPagoDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

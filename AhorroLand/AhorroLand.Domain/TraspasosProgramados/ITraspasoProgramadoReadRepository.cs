@@ -1,8 +1,7 @@
-﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
-
-namespace AhorroLand.Domain
+﻿namespace AhorroLand.Domain
 {
-    public interface ITraspasoProgramadoReadRepository : IReadRepository<TraspasoProgramado>
+    // 🔥 Interfaz de marcador - la implementación en Infrastructure hereda de IReadRepositoryWithDto
+    public interface ITraspasoProgramadoReadRepository
     {
     }
 }

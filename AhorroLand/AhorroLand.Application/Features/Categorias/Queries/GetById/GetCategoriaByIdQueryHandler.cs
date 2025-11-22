@@ -14,7 +14,7 @@ public sealed class GetCategoriaByIdQueryHandler
 {
     public GetCategoriaByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepository<Categoria> readOnlyRepository
+        IReadRepositoryWithDto<Categoria, CategoriaDto> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

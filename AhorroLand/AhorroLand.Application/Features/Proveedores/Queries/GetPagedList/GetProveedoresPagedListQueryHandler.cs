@@ -6,18 +6,13 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 namespace AhorroLand.Application.Features.Proveedores.Queries;
 
-/// <summary>
-/// Manejador concreto para la consulta de lista paginada de Categorías.
-/// Implementa la lógica específica de filtrado y ordenación.
-/// </summary>
 public sealed class GetProveedoresPagedListQueryHandler
     : GetPagedListQueryHandler<Proveedor, ProveedorDto, GetProveedoresPagedListQuery>
 {
     public GetProveedoresPagedListQueryHandler(
-        IReadRepository<Proveedor> repository,
-        ICacheService cacheService)
-        : base(repository, cacheService)
+        IReadRepositoryWithDto<Proveedor, ProveedorDto> repository,
+     ICacheService cacheService)
+  : base(repository, cacheService)
     {
-        // No se necesita lógica adicional en el constructor.
     }
 }

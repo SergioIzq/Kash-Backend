@@ -11,7 +11,7 @@ public sealed class GetTraspasoProgramadoByIdQueryHandler
 {
     public GetTraspasoProgramadoByIdQueryHandler(
     ICacheService cacheService,
-           IReadRepository<TraspasoProgramado> readOnlyRepository
+           IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto> readOnlyRepository
            )
      : base(readOnlyRepository, cacheService)
     {

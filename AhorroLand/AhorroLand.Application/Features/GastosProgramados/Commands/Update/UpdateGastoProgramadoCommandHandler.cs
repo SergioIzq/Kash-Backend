@@ -14,7 +14,7 @@ public sealed class UpdateGastoProgramadoCommandHandler
  IUnitOfWork unitOfWork,
         IWriteRepository<GastoProgramado> writeRepository,
         ICacheService cacheService,
-        IReadRepository<GastoProgramado> readOnlyRepository
+        IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto> readOnlyRepository
       )
         : base(unitOfWork, writeRepository, cacheService)
     {

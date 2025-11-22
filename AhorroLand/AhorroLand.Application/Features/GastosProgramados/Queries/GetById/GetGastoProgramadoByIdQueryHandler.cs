@@ -11,7 +11,7 @@ public sealed class GetGastoProgramadoByIdQueryHandler
 {
     public GetGastoProgramadoByIdQueryHandler(
   ICacheService cacheService,
-      IReadRepository<GastoProgramado> readOnlyRepository
+      IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

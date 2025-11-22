@@ -18,7 +18,7 @@ public sealed class UpdateProveedorCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Proveedor> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Proveedor> readOnlyRepository
+        IReadRepositoryWithDto<Proveedor, ProveedorDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

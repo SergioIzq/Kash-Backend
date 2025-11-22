@@ -14,7 +14,7 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
         IUnitOfWork unitOfWork,
    IWriteRepository<TraspasoProgramado> writeRepository,
     ICacheService cacheService,
- IReadRepository<TraspasoProgramado> readOnlyRepository
+ IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto> readOnlyRepository
 )
  : base(unitOfWork, writeRepository, cacheService)
     {

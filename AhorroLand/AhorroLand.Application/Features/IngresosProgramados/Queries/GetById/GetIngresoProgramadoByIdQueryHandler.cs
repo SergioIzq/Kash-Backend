@@ -10,10 +10,9 @@ public sealed class GetIngresoProgramadoByIdQueryHandler
     : GetByIdQueryHandler<IngresoProgramado, IngresoProgramadoDto, GetIngresoProgramadoByIdQuery>
 {
     public GetIngresoProgramadoByIdQueryHandler(
-        ICacheService cacheService,
-        IReadRepository<IngresoProgramado> readOnlyRepository
-     )
-        : base(readOnlyRepository, cacheService)
+  IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto> repository,
+    ICacheService cacheService)
+        : base(repository, cacheService)
     {
     }
 }

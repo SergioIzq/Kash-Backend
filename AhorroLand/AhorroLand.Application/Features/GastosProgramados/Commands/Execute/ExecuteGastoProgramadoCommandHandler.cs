@@ -1,6 +1,7 @@
 using AhorroLand.Application.Features.Gastos.Commands;
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging;
+using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using MediatR;
@@ -14,12 +15,12 @@ namespace AhorroLand.Application.Features.GastosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<ExecuteGastoProgramadoCommand>
 {
-    private readonly IReadRepository<GastoProgramado> _gastoProgramadoReadRepository;
+    private readonly IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto> _gastoProgramadoReadRepository;
     private readonly IMediator _mediator;
     private readonly ILogger<ExecuteGastoProgramadoCommandHandler> _logger;
 
     public ExecuteGastoProgramadoCommandHandler(
-        IReadRepository<GastoProgramado> gastoProgramadoReadRepository,
+        IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto> gastoProgramadoReadRepository,
         IMediator mediator,
         ILogger<ExecuteGastoProgramadoCommandHandler> logger)
     {
@@ -39,9 +40,8 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
             }
 
             // 1. Obtener el GastoProgramado (AsNoTracking para mejor rendimiento)
-            var gastoProgramado = await _gastoProgramadoReadRepository.GetByIdAsync(
+            var gastoProgramado = await _gastoProgramadoReadRepository.GetReadModelByIdAsync(
                 request.GastoProgramadoId,
-                asNoTracking: true,
                 cancellationToken);
 
             if (gastoProgramado == null)
@@ -60,18 +60,18 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
             }
 
             // ?? OPTIMIZACIÓN: Crear el comando de forma más eficiente
-            var descripcion = gastoProgramado.Descripcion?._Value;
+            var descripcion = gastoProgramado.Descripcion;
             var createGastoCommand = new CreateGastoCommand
             {
-                Importe = gastoProgramado.Importe.Valor,
+                Importe = gastoProgramado.Importe,
                 Fecha = DateTime.Now,
-                ConceptoId = gastoProgramado.ConceptoId.Value,
-                CategoriaId = gastoProgramado.CategoriaId.Value,
-                ProveedorId = gastoProgramado.ProveedorId.Value,
-                PersonaId = gastoProgramado.PersonaId.Value,
-                CuentaId = gastoProgramado.CuentaId.Value,
-                FormaPagoId = gastoProgramado.FormaPagoId.Value,
-                UsuarioId = gastoProgramado.UsuarioId.Value,
+                ConceptoId = gastoProgramado.ConceptoId,
+                CategoriaId = gastoProgramado.CategoriaId,
+                ProveedorId = gastoProgramado.ProveedorId,
+                PersonaId = gastoProgramado.PersonaId,
+                CuentaId = gastoProgramado.CuentaId,
+                FormaPagoId = gastoProgramado.FormaPagoId,
+                UsuarioId = gastoProgramado.UsuarioId,
                 // ?? OPTIMIZACIÓN: Evitar string interpolation si no es necesario
                 Descripcion = !string.IsNullOrEmpty(descripcion)
                     ? descripcion

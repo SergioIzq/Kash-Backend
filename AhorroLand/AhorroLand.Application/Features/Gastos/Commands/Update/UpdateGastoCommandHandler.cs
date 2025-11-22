@@ -19,7 +19,7 @@ public sealed class UpdateGastoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Gasto> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Gasto> readOnlyRepository,
+        IReadRepositoryWithDto<Gasto, GastoDto> readOnlyRepository,
         IDomainValidator validator
         )
         : base(unitOfWork, writeRepository, cacheService)

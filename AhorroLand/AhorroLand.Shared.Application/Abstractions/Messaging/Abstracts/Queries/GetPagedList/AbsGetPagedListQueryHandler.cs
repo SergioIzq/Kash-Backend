@@ -19,16 +19,16 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         where TQuery : AbsGetPagedListQuery<TEntity, TDto>
         where TDto : class
     {
-        // 🔧 FIX: Usar la interfaz IReadRepositoryWithDto para acceder a GetPagedReadModelsAsync
+        // 🔥 ÚNICO REPOSITORIO: Solo usamos IReadRepositoryWithDto
         protected readonly IReadRepositoryWithDto<TEntity, TDto> _dtoRepository;
 
+        // 🔥 Constructor simplificado
         public GetPagedListQueryHandler(
-            IReadRepository<TEntity> repository,
+            IReadRepositoryWithDto<TEntity, TDto> dtoRepository,
             ICacheService cacheService)
-            : base(repository, cacheService)
+            : base(cacheService)
         {
-            // 🔧 FIX: Castear a IReadRepositoryWithDto para acceder a métodos específicos de DTOs
-            _dtoRepository = (IReadRepositoryWithDto<TEntity, TDto>)repository;
+            _dtoRepository = dtoRepository;
         }
 
         /// <summary>
@@ -76,10 +76,14 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
             if (query.UsuarioId.HasValue)
             {
                 // 🚀 USA ÍNDICES: Filtrar por usuario (reduce 370ms a ~50ms)
+                // Pasar null, null, null para searchTerm, sortColumn, sortOrder por compatibilidad
                 pagedDtos = await _dtoRepository.GetPagedReadModelsByUserAsync(
                     query.UsuarioId.Value,
                     query.Page,
                     query.PageSize,
+                    null, // searchTerm
+                    null, // sortColumn
+                    null, // sortOrder
                     cancellationToken);
             }
             else

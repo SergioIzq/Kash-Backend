@@ -18,7 +18,7 @@ public sealed class UpdateClienteCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Cliente> writeRepository,
         ICacheService cacheService,
-        IReadRepository<Cliente> readOnlyRepository
+        IReadRepositoryWithDto<Cliente, ClienteDto> readOnlyRepository
         )
         : base(unitOfWork, writeRepository, cacheService)
     {

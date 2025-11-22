@@ -50,42 +50,65 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Proveedores
    return "ORDER BY nombre ASC";
         }
 
-        public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
-        {
-            using var connection = _dbConnectionFactory.CreateConnection();
-
-            const string sql = @"
-         SELECT EXISTS(
-    SELECT 1 
-            FROM proveedores 
-   WHERE nombre = @Nombre AND id_usuario = @UsuarioId
-) as Exists";
-
-   var exists = await connection.ExecuteScalarAsync<bool>(
-                new CommandDefinition(sql,
-         new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
-         cancellationToken: cancellationToken));
-
-            return exists;
+   /// <summary>
+        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
+      /// </summary>
+        protected override Dictionary<string, string> GetSortableColumns()
+    {
+        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+   {
+   { "Nombre", "nombre" },
+ { "FechaCreacion", "fecha_creacion" }
+    };
         }
 
-  public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
-      {
-            using var connection = _dbConnectionFactory.CreateConnection();
+     /// <summary>
+  /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
+   /// </summary>
+  protected override List<string> GetSearchableColumns()
+        {
+  return new List<string>
+    {
+      "nombre"
+   };
+ }
 
-            const string sql = @"
-    SELECT EXISTS(
-         SELECT 1 
-      FROM proveedores 
-        WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
-   ) as Exists";
+        public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
+{
+      using var connection = _dbConnectionFactory.CreateConnection();
 
- var exists = await connection.ExecuteScalarAsync<bool>(
-        new CommandDefinition(sql,
- new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
-        cancellationToken: cancellationToken));
+       const string sql = @"
+      SELECT EXISTS(
+     SELECT 1 
+    FROM proveedores 
+          WHERE nombre = @Nombre AND id_usuario = @UsuarioId
+  ) as Exists";
 
-            return exists;
-     }
+         var exists = await connection.ExecuteScalarAsync<bool>(
+  new CommandDefinition(sql,
+      new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
+   cancellationToken: cancellationToken));
+
+return exists;
+   }
+
+        public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
+        {
+using var connection = _dbConnectionFactory.CreateConnection();
+
+       const string sql = @"
+   SELECT EXISTS(
+    SELECT 1 
+    FROM proveedores 
+      WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
+         ) as Exists";
+
+     var exists = await connection.ExecuteScalarAsync<bool>(
+       new CommandDefinition(sql,
+      new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
+    cancellationToken: cancellationToken));
+
+    return exists;
+   }
     }
 }

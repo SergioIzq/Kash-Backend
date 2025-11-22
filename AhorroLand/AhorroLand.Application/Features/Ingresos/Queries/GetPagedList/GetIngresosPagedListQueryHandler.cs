@@ -10,7 +10,7 @@ public sealed class GetIngresosPagedListQueryHandler
     : GetPagedListQueryHandler<Ingreso, IngresoDto, GetIngresosPagedListQuery>
 {
     public GetIngresosPagedListQueryHandler(
-        IReadRepository<Ingreso> repository,
+        IReadRepositoryWithDto<Ingreso, IngresoDto> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

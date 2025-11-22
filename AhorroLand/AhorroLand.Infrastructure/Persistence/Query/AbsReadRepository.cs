@@ -10,29 +10,29 @@ namespace AhorroLand.Infrastructure.Persistence.Query
     /// <summary>
     /// Repositorio de lectura base abstracto implementado con Dapper.
     /// ✅ OPTIMIZADO: Usa DTOs directamente desde SQL sin mapeo intermedio.
-    /// 🔧 Implementa IReadRepositoryWithDto para soporte de DTOs optimizados.
+    /// 🔧 Implementa IReadRepositoryWithDto como la ÚNICA interfaz de lectura.
     /// </summary>
     /// <typeparam name="T">La entidad que debe heredar de AbsEntity</typeparam>
     /// <typeparam name="TReadModel">El modelo de lectura (DTO plano para Dapper)</typeparam>
     public abstract class AbsReadRepository<T, TReadModel> : IReadRepositoryWithDto<T, TReadModel>
-        where T : AbsEntity
-        where TReadModel : class
+  where T : AbsEntity
+    where TReadModel : class
     {
-        protected readonly IDbConnectionFactory _dbConnectionFactory;
+   protected readonly IDbConnectionFactory _dbConnectionFactory;
         protected readonly string _tableName;
         private readonly IDistributedCache? _cache;
 
         protected AbsReadRepository(
-            IDbConnectionFactory dbConnectionFactory,
-            string tableName,
-            IDistributedCache? cache = null)
-        {
+   IDbConnectionFactory dbConnectionFactory,
+    string tableName,
+   IDistributedCache? cache = null)
+{
             _dbConnectionFactory = dbConnectionFactory;
-            _tableName = tableName;
-            _cache = cache;
+     _tableName = tableName;
+  _cache = cache;
         }
 
-        #region Query Builders - Override para personalizar SQL
+   #region Query Builders - Override para personalizar SQL
 
         /// <summary>
         /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query de GetById.
@@ -44,8 +44,8 @@ namespace AhorroLand.Infrastructure.Persistence.Query
             return $@"
  SELECT 
       id as Id,
-        id_usuario as UsuarioId,
-         fecha_creacion as FechaCreacion
+    id_usuario as UsuarioId,
+       fecha_creacion as FechaCreacion
         FROM {_tableName} 
     WHERE id = @id";
         }
@@ -55,43 +55,43 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// Por defecto solo incluye columnas básicas (id, id_usuario, fecha_creacion).
         /// DEBES SOBRESCRIBIR si tu tabla tiene más columnas (nombre, descripcion, importe, etc.).
         /// </summary>
-     protected virtual string BuildGetAllQuery()
-    {
+        protected virtual string BuildGetAllQuery()
+        {
             return $@"
-           SELECT 
-           id as Id,
-     id_usuario as UsuarioId,
-          fecha_creacion as FechaCreacion
+   SELECT 
+     id as Id,
+ id_usuario as UsuarioId,
+       fecha_creacion as FechaCreacion
     FROM {_tableName}";
         }
 
         /// <summary>
-      /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query base de paginación (SIN ORDER BY).
+        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query base de paginación (SIN ORDER BY).
         /// Por defecto usa BuildGetAllQuery(), pero puedes personalizarlo.
-    /// El ORDER BY se agrega dinámicamente en cada método según el contexto.
+        /// El ORDER BY se agrega dinámicamente en cada método según el contexto.
         /// </summary>
         protected virtual string BuildGetPagedQuery()
         {
-     return BuildGetAllQuery();
-      }
-
-        /// <summary>
-      /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de conteo total.
-        /// Por defecto cuenta por id_usuario (campo común).
-        /// </summary>
-      protected virtual string BuildCountQuery()
- {
-  return $"SELECT COUNT(*) FROM {_tableName}";
+            return BuildGetAllQuery();
         }
 
-    /// <summary>
+        /// <summary>
+        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de conteo total.
+        /// Por defecto cuenta por id_usuario (campo común).
+        /// </summary>
+        protected virtual string BuildCountQuery()
+        {
+            return $"SELECT COUNT(*) FROM {_tableName}";
+        }
+
+        /// <summary>
         /// 🔥 NUEVO: Devuelve el alias de la tabla principal para filtros con JOINs.
-    /// Por defecto no usa alias (tablas simples sin JOINs).
-     /// DEBES SOBRESCRIBIR si usas JOINs para especificar el alias de la tabla principal.
- /// </summary>
+        /// Por defecto no usa alias (tablas simples sin JOINs).
+        /// DEBES SOBRESCRIBIR si usas JOINs para especificar el alias de la tabla principal.
+        /// </summary>
         protected virtual string GetTableAlias()
-    {
-    return string.Empty; // Sin alias por defecto
+        {
+            return string.Empty; // Sin alias por defecto
         }
 
         /// <summary>
@@ -100,40 +100,160 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// </summary>
         protected virtual string GetUserIdColumn()
         {
-var alias = GetTableAlias();
-         return string.IsNullOrEmpty(alias) ? "id_usuario" : $"{alias}.id_usuario";
+            var alias = GetTableAlias();
+            return string.IsNullOrEmpty(alias) ? "id_usuario" : $"{alias}.id_usuario";
         }
 
         /// <summary>
-  /// 🔥 OVERRIDE RECOMENDADO: Proporciona el ORDER BY por defecto para paginación sin filtros.
-/// Por defecto ordena por fecha_creacion DESC.
-   /// Sobrescribe si prefieres otro orden (ej: por nombre, por importe, etc.).
+        /// 🔥 OVERRIDE RECOMENDADO: Proporciona el ORDER BY por defecto para paginación sin filtros.
+        /// Por defecto ordena por fecha_creacion DESC.
+        /// Sobrescribe si prefieres otro orden (ej: por nombre, por importe, etc.).
         /// </summary>
-      protected virtual string GetDefaultOrderBy()
+        protected virtual string GetDefaultOrderBy()
         {
-        return "ORDER BY fecha_creacion DESC";
-     }
+            return "ORDER BY fecha_creacion DESC";
+        }
 
-     /// <summary>
-    /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY para paginación filtrada por usuario.
-  /// Por defecto usa GetDefaultOrderBy(), pero puedes personalizarlo.
-  /// </summary>
+        /// <summary>
+        /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY para paginación filtrada por usuario.
+        /// Por defecto usa GetDefaultOrderBy(), pero puedes personalizarlo.
+        /// </summary>
         protected virtual string GetUserFilterOrderBy()
-   {
-  return GetDefaultOrderBy();
-  }
+        {
+            return GetDefaultOrderBy();
+        }
 
         /// <summary>
         /// 🔥 NUEVO: Permite agregar parámetros adicionales para filtros (como id_usuario)
-   /// </summary>
+        /// </summary>
         protected virtual void AddCustomParameters(DynamicParameters parameters)
         {
- // Override en repositorios concretos si necesitas agregar parámetros personalizados
+            // Override en repositorios concretos si necesitas agregar parámetros personalizados
         }
 
-    #endregion
+        /// <summary>
+        /// 🔥 NUEVO: Devuelve las columnas válidas para ordenamiento.
+        /// Por defecto solo permite ordenar por fecha_creacion.
+        /// DEBES SOBRESCRIBIR para permitir ordenamiento por otras columnas.
+        /// </summary>
+   protected virtual Dictionary<string, string> GetSortableColumns()
+        {
+   return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+  {
+        { "FechaCreacion", "fecha_creacion" },
+     { "Fecha", "fecha_creacion" }
+};
+  }
 
-        #region IReadRepositoryWithDto Implementation - Métodos optimizados con DTOs
+   /// <summary>
+        /// 🔥 NUEVO: Devuelve las columnas de texto sobre las cuales se puede realizar búsqueda con LIKE.
+      /// Por defecto no hay columnas de búsqueda.
+        /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas de texto (nombre, descripcion, etc.).
+        /// </summary>
+        protected virtual List<string> GetSearchableColumns()
+        {
+     return new List<string>(); // Sin búsqueda por defecto
+ }
+
+  /// <summary>
+        /// 🔥 NUEVO: Devuelve las columnas numéricas sobre las cuales se puede realizar búsqueda con comparación exacta.
+        /// Por defecto no hay columnas numéricas de búsqueda.
+   /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas numéricas (importe, cantidad, etc.).
+  /// </summary>
+        protected virtual List<string> GetNumericSearchableColumns()
+        {
+          return new List<string>(); // Sin búsqueda numérica por defecto
+        }
+
+        /// <summary>
+     /// 🔥 NUEVO: Devuelve las columnas de fecha sobre las cuales se puede realizar búsqueda con comparación de fecha.
+        /// Por defecto no hay columnas de fecha de búsqueda.
+        /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas de fecha (fecha, fecha_registro, etc.).
+        /// </summary>
+        protected virtual List<string> GetDateSearchableColumns()
+ {
+            return new List<string>(); // Sin búsqueda por fecha por defecto
+        }
+
+        /// <summary>
+     /// 🔥 MEJORADO: Construye la cláusula WHERE para la búsqueda con soporte para texto, números y fechas.
+  /// </summary>
+   protected virtual string BuildSearchWhereClause(string searchTerm, DynamicParameters parameters)
+      {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+          return string.Empty;
+ }
+
+            var conditions = new List<string>();
+
+        // 1. Búsqueda en columnas de TEXTO (usa LIKE)
+            var textColumns = GetSearchableColumns();
+      if (textColumns.Count > 0)
+            {
+       var textConditions = textColumns.Select(col => $"{col} LIKE @SearchTerm");
+     conditions.AddRange(textConditions);
+            parameters.Add("SearchTerm", $"%{searchTerm}%");
+   }
+
+            // 2. Búsqueda en columnas NUMÉRICAS (usa comparación exacta o conversión a string)
+            var numericColumns = GetNumericSearchableColumns();
+     if (numericColumns.Count > 0 && decimal.TryParse(searchTerm, out var numericValue))
+      {
+         foreach (var col in numericColumns)
+     {
+            conditions.Add($"{col} = @NumericSearchTerm");
+      }
+    parameters.Add("NumericSearchTerm", numericValue);
+      }
+
+            // 3. Búsqueda en columnas de FECHA (usa DATE() para buscar por día completo)
+     var dateColumns = GetDateSearchableColumns();
+            if (dateColumns.Count > 0 && DateTime.TryParse(searchTerm, out var dateValue))
+            {
+ foreach (var col in dateColumns)
+    {
+          // Buscar por fecha exacta (ignora hora)
+conditions.Add($"DATE({col}) = @DateSearchTerm");
+       }
+           parameters.Add("DateSearchTerm", dateValue.Date);
+         }
+    // También permite buscar por formato de texto en fecha (ej: "2024", "2024-01", "01-15")
+        else if (dateColumns.Count > 0)
+  {
+    foreach (var col in dateColumns)
+              {
+    conditions.Add($"DATE_FORMAT({col}, '%Y-%m-%d') LIKE @DateTextSearchTerm");
+      }
+     parameters.Add("DateTextSearchTerm", $"%{searchTerm}%");
+            }
+
+            return conditions.Count > 0 ? $"({string.Join(" OR ", conditions)})" : string.Empty;
+        }
+
+        /// <summary>
+        /// 🔥 NUEVO: Construye la cláusula ORDER BY dinámica.
+        /// </summary>
+        protected virtual string BuildOrderByClause(string? sortColumn, string? sortOrder)
+        {
+    var sortableColumns = GetSortableColumns();
+
+            // Si no se especifica columna o no es válida, usar el orden por defecto
+ if (string.IsNullOrWhiteSpace(sortColumn) ||
+     !sortableColumns.TryGetValue(sortColumn, out var dbColumn))
+     {
+     return GetDefaultOrderBy();
+  }
+
+ // Validar sortOrder (solo 'asc' o 'desc')
+            var order = string.Equals(sortOrder, "asc", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+
+            return $"ORDER BY {dbColumn} {order}";
+        }
+
+      #endregion
+
+  #region IReadRepositoryWithDto Implementation - Métodos optimizados con DTOs
 
         /// <summary>
         /// 🚀 OPTIMIZADO: Obtiene el DTO con cache opcional.
@@ -161,8 +281,8 @@ var alias = GetTableAlias();
 
             var sql = BuildGetByIdQuery();
             var result = await connection.QueryFirstOrDefaultAsync<TReadModel>(
-                new CommandDefinition(sql, parameters, cancellationToken: cancellationToken)
-            );
+   new CommandDefinition(sql, parameters, cancellationToken: cancellationToken)
+   );
 
             // 3. Guardar en cache si existe
             if (result != null && _cache != null)
@@ -189,7 +309,7 @@ var alias = GetTableAlias();
             var sql = BuildGetAllQuery();
 
             return await connection.QueryAsync<TReadModel>(
-                new CommandDefinition(sql, cancellationToken: cancellationToken)
+           new CommandDefinition(sql, cancellationToken: cancellationToken)
             );
         }
 
@@ -198,9 +318,9 @@ var alias = GetTableAlias();
         /// Retorna DTOs directamente mapeados desde la BD.
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsAsync(
-            int page,
-            int pageSize,
-            CancellationToken cancellationToken = default)
+       int page,
+        int pageSize,
+ CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
 
@@ -211,11 +331,11 @@ var alias = GetTableAlias();
             var orderBy = GetDefaultOrderBy();
 
             var sql = $@"
-                {baseQuery}
-                {orderBy}
-                LIMIT @PageSize OFFSET @Offset;
-                
-                {countQuery};";
+        {baseQuery}
+    {orderBy}
+      LIMIT @PageSize OFFSET @Offset;
+     
+        {countQuery};";
 
             var parameters = new DynamicParameters();
             parameters.Add("PageSize", pageSize);
@@ -225,7 +345,7 @@ var alias = GetTableAlias();
             AddCustomParameters(parameters);
 
             using var multi = await connection.QueryMultipleAsync(
-                new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+    new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
             var items = (await multi.ReadAsync<TReadModel>()).ToList();
             var total = await multi.ReadFirstAsync<int>();
@@ -237,20 +357,20 @@ var alias = GetTableAlias();
         /// 🚀 OPTIMIZADO: Paginación filtrada por usuario (USA ÍNDICES).
         /// Reduce el tiempo de consulta de 370ms a ~50ms.
         /// </summary>
-  public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
-            Guid usuarioId,
-            int page,
-   int pageSize,
-            CancellationToken cancellationToken = default)
- {
+        public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
+             Guid usuarioId,
+        int page,
+         int pageSize,
+              CancellationToken cancellationToken = default)
+        {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var offset = (page - 1) * pageSize;
 
             var baseQuery = BuildGetPagedQuery();
             var countQuery = BuildCountQuery();
-    var orderBy = GetUserFilterOrderBy();
-         var userIdColumn = GetUserIdColumn(); // 🔥 NUEVO: Usa el alias correcto
+            var orderBy = GetUserFilterOrderBy();
+            var userIdColumn = GetUserIdColumn(); // 🔥 NUEVO: Usa el alias correcto
 
             // 🚀 OPTIMIZACIÓN: Query única con múltiples resultsets (reduce roundtrips)
             var sql = $@"
@@ -260,64 +380,79 @@ var alias = GetTableAlias();
  LIMIT @PageSize OFFSET @Offset;
   
      {countQuery}
-          WHERE {userIdColumn} = @usuarioId;";
+    WHERE {userIdColumn} = @usuarioId;";
 
-   var parameters = new DynamicParameters();
-  // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
-  parameters.Add("usuarioId", usuarioId);
- parameters.Add("PageSize", pageSize);
+            var parameters = new DynamicParameters();
+            // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
+            parameters.Add("usuarioId", usuarioId);
+            parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);
 
             using var multi = await connection.QueryMultipleAsync(
            new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
-         var items = (await multi.ReadAsync<TReadModel>()).ToList();
+            var items = (await multi.ReadAsync<TReadModel>()).ToList();
             var total = await multi.ReadFirstAsync<int>();
 
-     return new PagedList<TReadModel>(items, page, pageSize, total);
-    }
-
-        #endregion
-
-        #region IReadRepository Implementation - Solo para Commands que necesitan entidades
-
-        /// <summary>
-        /// ⚠️ ADVERTENCIA: Este método NO debe usarse en Queries.
-        /// Solo para Commands que necesitan validar/eliminar entidades de dominio.
-        /// Para Queries, usa GetReadModelByIdAsync que devuelve DTOs directamente.
-        /// </summary>
-        public virtual Task<T?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            throw new NotSupportedException(
-                $"GetByIdAsync no debe usarse desde el repositorio de lectura. " +
-                $"Para Queries: usa GetReadModelByIdAsync() que devuelve DTOs. " +
-                $"Para Commands: usa el repositorio de escritura (IWriteRepository) en lugar del de lectura.");
+            return new PagedList<TReadModel>(items, page, pageSize, total);
         }
 
         /// <summary>
-        /// ⚠️ ADVERTENCIA: Este método NO debe usarse.
-        /// Para Queries: usa GetAllReadModelsAsync que devuelve DTOs directamente.
-        /// Para Commands: usa el repositorio de escritura.
+        /// 🚀 NUEVO: Paginación con búsqueda y ordenamiento dinámico.
         /// </summary>
-        public virtual Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
+       Guid usuarioId,
+    int page,
+ int pageSize,
+    string? searchTerm = null,
+  string? sortColumn = null,
+         string? sortOrder = null,
+       CancellationToken cancellationToken = default)
         {
-            throw new NotSupportedException(
-                $"GetAllAsync está deprecado. " +
-                $"Para Queries: usa GetAllReadModelsAsync() que devuelve DTOs. " +
-                $"Para Commands: usa el repositorio de escritura.");
-        }
+            using var connection = _dbConnectionFactory.CreateConnection();
 
-        /// <summary>
-        /// ⚠️ ADVERTENCIA: Este método NO debe usarse.
-        /// Para Queries: usa GetPagedReadModelsAsync que devuelve DTOs directamente.
-        /// Para Commands: usa el repositorio de escritura.
-        /// </summary>
-        public virtual Task<PagedList<T>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
-        {
-            throw new NotSupportedException(
-                $"GetPagedAsync está deprecado. " +
-                $"Para Queries: usa GetPagedReadModelsAsync() que devuelve DTOs. " +
-                $"Para Commands: usa el repositorio de escritura.");
+            var offset = (page - 1) * pageSize;
+
+            var baseQuery = BuildGetPagedQuery();
+            var countQuery = BuildCountQuery();
+            var userIdColumn = GetUserIdColumn();
+
+            var parameters = new DynamicParameters();
+            parameters.Add("usuarioId", usuarioId);
+            parameters.Add("PageSize", pageSize);
+            parameters.Add("Offset", offset);
+
+            // Construir cláusula WHERE
+            var whereClauses = new List<string> { $"{userIdColumn} = @usuarioId" };
+
+            var searchWhereClause = BuildSearchWhereClause(searchTerm ?? string.Empty, parameters);
+            if (!string.IsNullOrWhiteSpace(searchWhereClause))
+            {
+                whereClauses.Add(searchWhereClause);
+            }
+
+            var whereClause = $"WHERE {string.Join(" AND ", whereClauses)}";
+
+            // Construir cláusula ORDER BY dinámica
+            var orderBy = BuildOrderByClause(sortColumn, sortOrder);
+
+            // 🚀 OPTIMIZACIÓN: Query única con múltiples resultsets
+            var sql = $@"
+      {baseQuery}
+        {whereClause}
+      {orderBy}
+     LIMIT @PageSize OFFSET @Offset;
+ 
+    {countQuery}
+      {whereClause};";
+
+            using var multi = await connection.QueryMultipleAsync(
+        new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+
+            var items = (await multi.ReadAsync<TReadModel>()).ToList();
+            var total = await multi.ReadFirstAsync<int>();
+
+            return new PagedList<TReadModel>(items, page, pageSize, total);
         }
 
         #endregion
