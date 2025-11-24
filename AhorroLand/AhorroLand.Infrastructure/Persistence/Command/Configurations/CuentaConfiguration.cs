@@ -1,4 +1,5 @@
 using AhorroLand.Domain;
+using AhorroLand.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,31 +10,49 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
     {
         public void Configure(EntityTypeBuilder<Cuenta> builder)
         {
-            builder.ToTable("cuenta");
+            builder.ToTable("cuentas"); // ?? FIX: Nombre correcto de tabla (plural)
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
 
+            // ?? FIX CRÍTICO: Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)
-            .HasColumnName("nombre")
-            .HasColumnType("varchar")
-            .HasMaxLength(100)
-            .IsRequired();
+                .HasColumnName("nombre")
+                .HasColumnType("varchar")
+                .HasMaxLength(100)
+                .IsRequired()
+                .HasConversion(
+                    nombre => nombre.Value,
+                    value => new Nombre(value));
 
             builder.Property(e => e.Saldo)
-            .HasColumnName("saldo")
-            .IsRequired();
+                .HasColumnName("saldo")
+                .HasColumnType("decimal(18,2)")
+                .IsRequired()
+                .HasConversion(
+                    saldo => saldo.Valor,
+                    value => new Cantidad(value));
 
             builder.Property(e => e.UsuarioId)
-            .HasColumnName("id_usuario")
-            .IsRequired();
+                .HasColumnName("usuario_id") // ?? FIX: Nombre consistente
+                .IsRequired()
+                .HasConversion(
+                    usuarioId => usuarioId.Value,
+                    value => new UsuarioId(value));
 
             builder.Property(e => e.FechaCreacion)
-            .HasColumnName("fecha_creacion")
-            .IsRequired()
-            .ValueGeneratedOnAdd();
+                .HasColumnName("fecha_creacion")
+                .IsRequired()
+                .ValueGeneratedOnAdd();
 
             builder.Property(e => e.FechaCreacion)
-            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            // ?? OPTIMIZACIÓN: Índices
+            builder.HasIndex(e => new { e.UsuarioId, e.FechaCreacion })
+                .HasDatabaseName("idx_cuentas_usuario_fecha");
+
+            builder.HasIndex(e => new { e.UsuarioId, e.Nombre })
+                .HasDatabaseName("idx_cuentas_usuario_nombre");
         }
     }
 }

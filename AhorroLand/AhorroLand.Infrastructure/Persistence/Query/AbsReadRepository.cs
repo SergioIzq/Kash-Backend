@@ -465,28 +465,28 @@ namespace AhorroLand.Infrastructure.Persistence.Query
             int limit = 10,
        CancellationToken cancellationToken = default)
         {
-     using var connection = _dbConnectionFactory.CreateConnection();
+            using var connection = _dbConnectionFactory.CreateConnection();
 
             var baseQuery = BuildGetPagedQuery();
-    var userIdColumn = GetUserIdColumn();
+            var userIdColumn = GetUserIdColumn();
 
-       var parameters = new DynamicParameters();
- parameters.Add("usuarioId", usuarioId);
-      parameters.Add("limit", limit);
+            var parameters = new DynamicParameters();
+            parameters.Add("usuarioId", usuarioId);
+            parameters.Add("limit", limit);
 
-   // Construir cláusula WHERE
+            // Construir cláusula WHERE
             var whereClauses = new List<string> { $"{userIdColumn} = @usuarioId" };
 
             var searchWhereClause = BuildSearchWhereClause(searchTerm ?? string.Empty, parameters);
-       if (!string.IsNullOrWhiteSpace(searchWhereClause))
-     {
-           whereClauses.Add(searchWhereClause);
+            if (!string.IsNullOrWhiteSpace(searchWhereClause))
+            {
+                whereClauses.Add(searchWhereClause);
             }
 
             var whereClause = $"WHERE {string.Join(" AND ", whereClauses)}";
 
-       // 🚀 OPTIMIZACIÓN: Usar el ORDER BY por defecto + LIMIT para resultados rápidos
-        var orderBy = GetDefaultOrderBy();
+            // 🚀 OPTIMIZACIÓN: Usar el ORDER BY por defecto + LIMIT para resultados rápidos
+            var orderBy = GetDefaultOrderBy();
 
             var sql = $@"
 {baseQuery}
@@ -494,43 +494,43 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         {orderBy}
         LIMIT @limit";
 
-     return await connection.QueryAsync<TReadModel>(
-     new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+            return await connection.QueryAsync<TReadModel>(
+            new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
         }
 
         /// <summary>
-     /// 🚀 NUEVO: Obtiene los elementos más recientes de un usuario.
+        /// 🚀 NUEVO: Obtiene los elementos más recientes de un usuario.
         /// Ultra-rápido: usa índice en (usuario_id, fecha_creacion).
         /// </summary>
-public virtual async Task<IEnumerable<TReadModel>> GetRecentAsync(
-    Guid usuarioId,
-       int limit = 5,
- CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<TReadModel>> GetRecentAsync(
+            Guid usuarioId,
+               int limit = 5,
+         CancellationToken cancellationToken = default)
         {
-   using var connection = _dbConnectionFactory.CreateConnection();
+            using var connection = _dbConnectionFactory.CreateConnection();
 
             var baseQuery = BuildGetPagedQuery();
-       var userIdColumn = GetUserIdColumn();
-      var alias = GetTableAlias();
+            var userIdColumn = GetUserIdColumn();
+            var alias = GetTableAlias();
 
-    var parameters = new DynamicParameters();
-      parameters.Add("usuarioId", usuarioId);
-        parameters.Add("limit", limit);
+            var parameters = new DynamicParameters();
+            parameters.Add("usuarioId", usuarioId);
+            parameters.Add("limit", limit);
 
-        // 🔥 OPTIMIZACIÓN: ORDER BY con alias de tabla para evitar ambigüedad
-        var orderByColumn = string.IsNullOrEmpty(alias) 
-      ? "fecha_creacion" 
- : $"{alias}.fecha_creacion";
+            // 🔥 OPTIMIZACIÓN: ORDER BY con alias de tabla para evitar ambigüedad
+            var orderByColumn = string.IsNullOrEmpty(alias)
+          ? "fecha_creacion"
+     : $"{alias}.fecha_creacion";
 
-    var sql = $@"
+            var sql = $@"
 {baseQuery}
 WHERE {userIdColumn} = @usuarioId
 ORDER BY {orderByColumn} DESC
 LIMIT @limit";
 
-      return await connection.QueryAsync<TReadModel>(
-   new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
-    }
+            return await connection.QueryAsync<TReadModel>(
+         new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+        }
 
         #endregion
     }
