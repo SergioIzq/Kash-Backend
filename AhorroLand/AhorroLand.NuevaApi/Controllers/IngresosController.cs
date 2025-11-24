@@ -137,17 +137,17 @@ public class IngresosController : AbsController
 }
 
 public record CreateIngresoRequest(
- decimal Importe,
- DateTime Fecha,
+    decimal Importe,
+    DateTime Fecha,
     string? Descripcion,
-Guid CategoriaId,
+    Guid CategoriaId,
     string CategoriaNombre,
     Guid ConceptoId,
     string ConceptoNombre,
     Guid ClienteId,
-  string ClienteNombre,
+    string ClienteNombre,
     Guid PersonaId,
- string PersonaNombre,
+    string PersonaNombre,
     Guid CuentaId,
     string CuentaNombre,
     Guid FormaPagoId,
@@ -156,7 +156,7 @@ Guid CategoriaId,
 );
 
 public record UpdateIngresoRequest(
-decimal Importe,
+    decimal Importe,
     DateTime Fecha,
     string? Descripcion,
     Guid CategoriaId,
@@ -165,5 +165,5 @@ decimal Importe,
     Guid PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-  Guid UsuarioId
+    Guid UsuarioId
 );

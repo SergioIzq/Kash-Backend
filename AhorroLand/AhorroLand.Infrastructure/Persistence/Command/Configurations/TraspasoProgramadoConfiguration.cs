@@ -1,4 +1,5 @@
 using AhorroLand.Domain;
+using AhorroLand.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,32 +14,79 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
 
+            // ? Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)
-            .HasColumnName("importe")
-            .IsRequired();
+    .HasColumnName("importe")
+                .HasColumnType("decimal(18,2)")
+  .IsRequired()
+    .HasConversion(
+         importe => importe.Valor,
+      value => new Cantidad(value));
 
+    // ? Configurar conversión de Frecuencia
             builder.Property(e => e.Frecuencia)
-            .HasColumnName("frecuencia")
-            .IsRequired();
+.HasColumnName("frecuencia")
+           .HasColumnType("varchar(100)")
+      .IsRequired()
+       .HasConversion(
+     frecuencia => frecuencia.Value,
+       value => new Frecuencia(value));
 
-            builder.Property(e => e.CuentaOrigenId)
-            .HasColumnName("id_cuenta_origen")
-            .IsRequired();
+            // ? Configurar conversión de Value Objects de IDs
+     builder.Property(e => e.CuentaOrigenId)
+ .HasColumnName("id_cuenta_origen")
+    .IsRequired()
+ .HasConversion(
+           cuentaId => cuentaId.Value,
+            value => new CuentaId(value));
 
-            builder.Property(e => e.CuentaDestinoId)
-            .HasColumnName("id_cuenta_destino")
-            .IsRequired();
+    builder.Property(e => e.CuentaDestinoId)
+          .HasColumnName("id_cuenta_destino")
+       .IsRequired()
+    .HasConversion(
+         cuentaId => cuentaId.Value,
+    value => new CuentaId(value));
 
-            builder.Property(e => e.UsuarioId)
-            .HasColumnName("id_usuario")
-            .IsRequired();
+       builder.Property(e => e.UsuarioId)
+                .HasColumnName("id_usuario")
+      .IsRequired()
+                .HasConversion(
+         usuarioId => usuarioId.Value,
+      value => new UsuarioId(value));
+
+            // ? Configurar Descripcion nullable
+       builder.Property(e => e.Descripcion)
+ .HasColumnName("descripcion")
+        .HasColumnType("varchar(200)")
+        .IsRequired(false)
+      .HasConversion(
+              descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
+           value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
+
+  // ? FechaEjecucion
+            builder.Property(e => e.FechaEjecucion)
+      .HasColumnName("fecha_ejecucion")
+        .IsRequired();
+
+// ? Activo
+            builder.Property(e => e.Activo)
+        .HasColumnName("activo")
+    .IsRequired();
+
+            // ? HangfireJobId
+      builder.Property(e => e.HangfireJobId)
+.HasColumnName("hangfire_job_id")
+        .HasColumnType("varchar(100)")
+     .IsRequired();
+
+      // ? Ignorar propiedades derivadas (solo para proyecciones)
+            builder.Ignore(e => e.SaldoCuentaOrigen);
+   builder.Ignore(e => e.SaldoCuentaDestino);
 
             builder.Property(e => e.FechaCreacion)
-            .HasColumnName("fecha_creacion")
-            .IsRequired()
-            .ValueGeneratedOnAdd();
-
-            builder.Property(e => e.FechaCreacion)
+   .HasColumnName("fecha_creacion")
+  .IsRequired()
+    .ValueGeneratedOnAdd()
             .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
     }

@@ -14,6 +14,11 @@ public sealed class Traspaso : AbsEntity, IDomainEvent
         _domainEvents.Add(domainEvent);
     }
 
+    private Traspaso() : base(Guid.Empty)
+    {
+        
+    }
+
     private Traspaso(
         Guid id,
         CuentaId cuentaOrigen,
@@ -23,8 +28,8 @@ public sealed class Traspaso : AbsEntity, IDomainEvent
         UsuarioId usuarioId,
         Descripcion? descripcion) : base(id)
     {
-        CuentaOrigen = cuentaOrigen;
-        CuentaDestino = cuentaDestino;
+        CuentaOrigenId = cuentaOrigen;
+        CuentaDestinoId = cuentaDestino;
         Importe = importe;
         Fecha = fecha;
         UsuarioId = usuarioId;
@@ -32,8 +37,8 @@ public sealed class Traspaso : AbsEntity, IDomainEvent
     }
 
 
-    public CuentaId CuentaOrigen { get; }
-    public CuentaId CuentaDestino { get; }
+    public CuentaId CuentaOrigenId { get; }
+    public CuentaId CuentaDestinoId { get; }
 
     public Cantidad Importe { get; }
     public FechaRegistro Fecha { get; }

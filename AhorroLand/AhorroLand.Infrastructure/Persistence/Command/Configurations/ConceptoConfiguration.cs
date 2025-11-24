@@ -41,15 +41,13 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.Property(e => e.FechaCreacion)
                 .HasColumnName("fecha_creacion")
                 .IsRequired()
-                .ValueGeneratedOnAdd();
-
-            builder.Property(e => e.FechaCreacion)
+                .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            // ?? Relación con Categoria
+            // ? FIX: Relación con Categoria usando el nombre de columna en lugar de la propiedad
             builder.HasOne(e => e.Categoria)
                 .WithMany()
-                .HasForeignKey(e => e.CategoriaId)
+                .HasForeignKey("categoria_id")  // ? Usar nombre de columna, no propiedad
                 .OnDelete(DeleteBehavior.Restrict);
 
             // ?? OPTIMIZACIÓN: Índices

@@ -7,6 +7,10 @@ namespace AhorroLand.Domain;
 
 public sealed class GastoProgramado : AbsEntity
 {
+    private GastoProgramado() : base(Guid.Empty)
+    {
+    }
+
     private GastoProgramado(
         Guid id,
         Cantidad importe,
@@ -49,7 +53,7 @@ public sealed class GastoProgramado : AbsEntity
     public CuentaId CuentaId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
-    public string HangfireJobId { get; private set; }
+    public string HangfireJobId { get; private set; } = string.Empty;
 
     public static GastoProgramado Create(
         Cantidad importe,

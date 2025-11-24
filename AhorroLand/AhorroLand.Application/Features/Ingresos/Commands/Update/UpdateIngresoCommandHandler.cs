@@ -55,7 +55,6 @@ public sealed class UpdateIngresoCommandHandler
             importeVO,
             fechaVO,
             conceptoIdVO,
-            categoriaIdVO,
             clienteId,
             personaIdVO,
             cuentaIdVO,

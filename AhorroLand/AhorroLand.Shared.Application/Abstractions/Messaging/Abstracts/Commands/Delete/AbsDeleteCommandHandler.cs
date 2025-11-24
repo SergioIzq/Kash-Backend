@@ -4,43 +4,61 @@ using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands
 {
     /// <summary>
     /// Handler genérico para eliminar entidades.
-    /// Busca la entidad, elimina del repositorio, persiste y limpia la caché.
-    /// ✅ OPTIMIZADO: Usa el repositorio de escritura para obtener la entidad con tracking.
+    /// ✅ OPTIMIZADO: Crea un stub de la entidad con solo el ID para DELETE directo.
+    /// No carga la entidad completa ni valida existencia (EF Core lanzará DbUpdateConcurrencyException si no existe).
     /// </summary>
     public abstract class DeleteCommandHandler<TEntity, TCommand>
         : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result>
-        where TEntity : AbsEntity
-        where TCommand : AbsDeleteCommand<TEntity>
+      where TEntity : AbsEntity
+  where TCommand : AbsDeleteCommand<TEntity>
     {
-        // Se inyectan las mismas dependencias que el AbsCommandHandler
         public DeleteCommandHandler(
-            IUnitOfWork unitOfWork,
-            IWriteRepository<TEntity> writeRepository,
+                IUnitOfWork unitOfWork,
+                IWriteRepository<TEntity> writeRepository,
             ICacheService cacheService)
-            : base(unitOfWork, writeRepository, cacheService)
+           : base(unitOfWork, writeRepository, cacheService)
         {
         }
 
         public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
         {
-            // 1. 🔧 FIX: Usar el repositorio de escritura para obtener la entidad con tracking
-            var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
-
-            if (entity is null)
+            try
             {
+                // 1. ✅ Crear una entidad "stub" solo con el ID para eliminar (sin cargar de BD)
+                var entity = CreateEntityStub(command.Id);
+
+                // 2. Persistencia: Eliminar, SaveChanges y Cache Invalidation
+                var result = await DeleteAsync(entity, cancellationToken);
+
+                return result;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Si la entidad no existe, EF Core lanza DbUpdateConcurrencyException
                 return Result.Failure(Error.NotFound($"Entidad {typeof(TEntity).Name} con ID '{command.Id}' no encontrada para eliminación."));
             }
+        }
 
-            // 2. Persistencia: Usar el método base, que maneja la eliminación, SaveChanges y Cache Invalidation
-            var result = await DeleteAsync(entity, cancellationToken);
+        /// <summary>
+        /// Crea una entidad "stub" solo con el ID para eliminar sin cargar de la BD.
+        /// EF Core solo necesita el ID para hacer DELETE.
+        /// </summary>
+        private TEntity CreateEntityStub(Guid id)
+        {
+            // Usar Activator para crear instancia sin constructor público
+            var entity = (TEntity)Activator.CreateInstance(typeof(TEntity), true)!;
 
-            // 3. Devolver el resultado de la operación
-            return result;
+            // Establecer el ID usando reflexión
+            var idProperty = typeof(TEntity).GetProperty("Id");
+            idProperty?.SetValue(entity, id);
+
+            return entity;
         }
     }
 }

@@ -21,8 +21,8 @@ namespace AhorroLand.Shared.Application.Mappings
                 .Map(dest => dest.ConceptoNombre, src => src.Concepto.Nombre.Value)
 
                 // --- Categoria (ID + Nombre desde navegación) ---
-                .Map(dest => dest.CategoriaId, src => src.CategoriaId.Value)
-                .Map(dest => dest.CategoriaNombre, src => src.Categoria.Nombre.Value)
+                .Map(dest => dest.CategoriaId, src => src.Concepto.CategoriaId.Value)
+                .Map(dest => dest.CategoriaNombre, src => src.Concepto.Categoria!.Nombre.Value)
 
                 // --- Proveedor (ID + Nombre desde navegación) ---
                 .Map(dest => dest.ProveedorId, src => src.ProveedorId.Value)

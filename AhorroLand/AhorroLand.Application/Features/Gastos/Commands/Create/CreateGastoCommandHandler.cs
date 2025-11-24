@@ -67,7 +67,6 @@ public sealed class CreateGastoCommandHandler
                 importeVO,
                 fechaVO,
                 conceptoId,
-                categoriaId,
                 proveedorId,
                 personaId,
                 cuentaId,

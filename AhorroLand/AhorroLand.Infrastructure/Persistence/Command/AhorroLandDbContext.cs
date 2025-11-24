@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Infrastructure.Persistence.Interceptors;
 using AhorroLand.Shared.Domain.Abstractions;
-using AhorroLand.Domain; // ⭐ AGREGAR: Para referenciar el assembly de Domain
+using AhorroLand.Domain;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -32,8 +32,7 @@ public class AhorroLandDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. 🔥 FIX: Obtener la assembly correcta donde están las entidades (AhorroLand.Domain)
-        // Usamos typeof(Gasto) o cualquier entidad del dominio para obtener el assembly correcto
+        // 1. Obtener el assembly de Domain para registrar las entidades
         var domainAssembly = Assembly.GetAssembly(typeof(Gasto));
 
         if (domainAssembly == null)
@@ -42,59 +41,62 @@ public class AhorroLandDbContext : DbContext
         }
 
         var entityTypes = domainAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(AbsEntity)))
-            .ToArray(); // Materializar una sola vez
+      .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(AbsEntity)))
+     .ToArray();
 
-        // 3. Registrar cada entidad encontrada
+// 2. Registrar cada entidad encontrada
         foreach (var type in entityTypes)
         {
             modelBuilder.Entity(type);
         }
 
-        modelBuilder.ApplyConfigurationsFromAssembly(domainAssembly);
+        // 3. ✅ FIX CRÍTICO: Aplicar configuraciones desde Infrastructure (no Domain)
+        // Las configuraciones (IEntityTypeConfiguration) están en Infrastructure.Persistence.Command.Configurations
+     modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            // Ignorar DomainEvents de todas las entidades
+        // 4. Configuración adicional para todas las entidades
+     foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+ {
+// Ignorar DomainEvents de todas las entidades
             var domainEventsProperty = entityType.FindProperty("_domainEvents");
-            if (domainEventsProperty != null)
-            {
-                entityType.RemoveProperty(domainEventsProperty);
-            }
+       if (domainEventsProperty != null)
+    {
+        entityType.RemoveProperty(domainEventsProperty);
+      }
 
-            // Configurar índices por defecto en Id
-            var idProperty = entityType.FindProperty("Id");
+  // Configurar índices por defecto en Id
+    var idProperty = entityType.FindProperty("Id");
             if (idProperty != null)
             {
-                var existingIndex = entityType.GetIndexes()
-                    .FirstOrDefault(i => i.Properties.Any(p => p.Name == "Id"));
+      var existingIndex = entityType.GetIndexes()
+         .FirstOrDefault(i => i.Properties.Any(p => p.Name == "Id"));
 
-                if (existingIndex == null)
+    if (existingIndex == null)
                 {
-                    modelBuilder.Entity(entityType.ClrType)
-                        .HasIndex("Id")
-                        .IsUnique();
-                }
+            modelBuilder.Entity(entityType.ClrType)
+   .HasIndex("Id")
+        .IsUnique();
+  }
             }
-        }
+      }
 
-        base.OnModelCreating(modelBuilder);
+      base.OnModelCreating(modelBuilder);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Optimizar detección de cambios
-        ChangeTracker.AutoDetectChangesEnabled = false;
+  ChangeTracker.AutoDetectChangesEnabled = false;
 
-        try
-        {
+     try
+      {
             // Detectar cambios manualmente una sola vez
             ChangeTracker.DetectChanges();
-            return await base.SaveChangesAsync(cancellationToken);
+    return await base.SaveChangesAsync(cancellationToken);
         }
         finally
         {
-            ChangeTracker.AutoDetectChangesEnabled = true;
+       ChangeTracker.AutoDetectChangesEnabled = true;
         }
-    }
+ }
 }

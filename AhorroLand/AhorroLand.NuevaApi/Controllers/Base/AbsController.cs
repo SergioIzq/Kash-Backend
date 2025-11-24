@@ -40,7 +40,7 @@ public abstract class AbsController : ControllerBase
     {
         if (result.IsSuccess)
         {
-            return NoContent();
+            return NoContent(); // ✅ 204 No Content para DELETE/UPDATE exitosos
         }
 
         return HandleFailure(result.Error);
@@ -97,9 +97,36 @@ public abstract class AbsController : ControllerBase
         return HandleFailure(result.Error);
     }
 
+    /// <summary>
+    /// ✅ Maneja errores y devuelve el código HTTP apropiado según el código de error
+    /// </summary>
     private IActionResult HandleFailure(Error error)
     {
-        return Ok();
+        // Determinar el código de estado HTTP según el código de error
+        var statusCode = error.Code switch
+        {
+            "Error.NotFound" => StatusCodes.Status404NotFound,
+            "Error.Conflict" => StatusCodes.Status409Conflict,
+            "Error.Validation" => StatusCodes.Status400BadRequest,
+            "Error.UpdateFailure" => StatusCodes.Status500InternalServerError,
+            "Error.DeleteFailure" => StatusCodes.Status500InternalServerError,
+            _ => StatusCodes.Status500InternalServerError
+        };
+
+        // Crear respuesta de error usando el formato de ApiResponse
+        var errorResponse = new
+        {
+            success = false,
+            error = new
+            {
+                code = error.Code,
+                title = error.Name,
+                detail = error.Message
+            },
+            timestamp = DateTime.UtcNow
+        };
+
+        return StatusCode(statusCode, errorResponse);
     }
 
     // 🍪 Métodos helper para cookies

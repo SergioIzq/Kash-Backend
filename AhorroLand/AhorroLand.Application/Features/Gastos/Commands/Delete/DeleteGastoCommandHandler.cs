@@ -7,8 +7,7 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 namespace AhorroLand.Application.Features.Gastos.Commands;
 
 /// <summary>
-/// Manejador concreto para eliminar una Gasto.
-/// Hereda toda la lógica de la clase base genérica.
+/// Manejador concreto para eliminar un Gasto.
 /// </summary>
 public sealed class DeleteGastoCommandHandler
     : DeleteCommandHandler<Gasto, DeleteGastoCommand>

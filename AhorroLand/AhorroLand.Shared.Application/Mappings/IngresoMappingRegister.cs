@@ -13,7 +13,6 @@ namespace AhorroLand.Shared.Application.Mappings
 
                 // Mapeo de Relaciones Aplanadas
                 .Map(dest => dest.ConceptoId, src => src.ConceptoId)
-                .Map(dest => dest.CategoriaId, src => src.CategoriaId)
                 .Map(dest => dest.ClienteId, src => src.ClienteId)
                 .Map(dest => dest.PersonaId, src => src.PersonaId)
                 .Map(dest => dest.CuentaId, src => src.CuentaId)

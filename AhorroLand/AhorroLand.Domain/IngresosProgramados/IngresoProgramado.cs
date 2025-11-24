@@ -7,6 +7,9 @@ namespace AhorroLand.Domain;
 
 public sealed class IngresoProgramado : AbsEntity
 {
+    private IngresoProgramado() : base(Guid.Empty)
+    {
+    }
     private IngresoProgramado(
         Guid id,
         Cantidad importe,
@@ -49,7 +52,7 @@ public sealed class IngresoProgramado : AbsEntity
     public CuentaId CuentaId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
-    public string HangfireJobId { get; private set; }
+    public string HangfireJobId { get; private set; } = string.Empty;
 
     public static IngresoProgramado Create(
         Cantidad importe,

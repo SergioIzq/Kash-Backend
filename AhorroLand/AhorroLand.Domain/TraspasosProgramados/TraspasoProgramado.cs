@@ -7,6 +7,11 @@ namespace AhorroLand.Domain;
 
 public sealed class TraspasoProgramado : AbsEntity
 {
+    private TraspasoProgramado() : base(Guid.Empty)
+    {
+
+    }
+
     private TraspasoProgramado(
         Guid id,
         CuentaId cuentaOrigenId,
@@ -40,7 +45,7 @@ public sealed class TraspasoProgramado : AbsEntity
     // --- Atributos simples ---
     public DateTime FechaEjecucion { get; private set; }
     public bool Activo { get; private set; }
-    public string HangfireJobId { get; private set; }
+    public string HangfireJobId { get; private set; } = string.Empty;
 
     // --- Propiedades derivadas (opcional: para proyecciones) ---
     public Cantidad SaldoCuentaOrigen { get; private set; }

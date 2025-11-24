@@ -69,7 +69,6 @@ public sealed class CreateIngresoCommandHandler
                 importeVO,
                 fechaVO,
                 conceptoId,
-                categoriaId,
                 clienteId,
                 personaId,
                 cuentaId,

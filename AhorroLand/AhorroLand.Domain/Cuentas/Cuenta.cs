@@ -5,12 +5,16 @@ namespace AhorroLand.Domain;
 
 public sealed class Cuenta : AbsEntity
 {
+    // Constructor privado sin parámetros para EF Core
+    private Cuenta() : base(Guid.Empty)
+    {
+    }
+
     private Cuenta(Guid id, Nombre nombre, Cantidad saldo, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;
         Saldo = saldo;
         UsuarioId = usuarioId;
-
     }
 
     public Nombre Nombre { get; private set; }

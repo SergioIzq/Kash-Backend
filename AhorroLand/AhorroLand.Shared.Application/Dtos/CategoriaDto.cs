@@ -6,6 +6,7 @@
     public record CategoriaDto(
             Guid Id,
             string Nombre,
+            string? Descripcion,
             Guid UsuarioId,
             DateTime FechaCreacion
         );

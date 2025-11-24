@@ -5,6 +5,11 @@ namespace AhorroLand.Domain;
 
 public sealed class Proveedor : AbsEntity
 {
+    // Constructor privado sin parámetros para EF Core
+    private Proveedor() : base(Guid.Empty)
+    {
+    }
+
     private Proveedor(Guid id, Nombre nombre, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;

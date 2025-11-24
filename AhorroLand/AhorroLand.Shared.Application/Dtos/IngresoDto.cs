@@ -12,7 +12,7 @@
         // Relaciones (Flattened)
         Guid ConceptoId,
         string ConceptoNombre,
-        Guid? CategoriaId, // 🔥 NULLABLE: CategoriaId viene del Concepto (LEFT JOIN)
+        Guid CategoriaId,
         string? CategoriaNombre, // 🔥 NULLABLE: puede ser null si no hay categoría
 
         Guid? ClienteId, // 🔥 NULLABLE: el ingreso puede no tener cliente

@@ -14,7 +14,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
         }
 
         /// <summary>
-        /// 🔥 Query específico para Categoría con todas sus columnas.
+        /// 🔥 Query específico para Categoría con todas sus columnas incluyendo Descripcion.
         /// IMPORTANTE: La tabla categorias usa usuario_id (sin prefijo id_)
         /// </summary>
         protected override string BuildGetByIdQuery()
@@ -22,111 +22,114 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
             return @"
          SELECT 
      id as Id,
-          nombre as Nombre,
- usuario_id as UsuarioId,
+        nombre as Nombre,
+   descripcion as Descripcion,
+          usuario_id as UsuarioId,
        fecha_creacion as FechaCreacion
-            FROM categorias 
+   FROM categorias 
    WHERE id = @id";
-        }
+ }
 
         /// <summary>
-        /// 🔥 Query para obtener todas las categorías.
+        /// 🔥 Query para obtener todas las categorías con Descripcion.
         /// </summary>
-        protected override string BuildGetAllQuery()
-        {
-            return @"
+      protected override string BuildGetAllQuery()
+  {
+    return @"
    SELECT 
      id as Id,
       nombre as Nombre,
+      descripcion as Descripcion,
      usuario_id as UsuarioId,
        fecha_creacion as FechaCreacion
      FROM categorias";
+    }
+
+        /// <summary>
+  /// 🔥 Query para paginación (debe ser igual a BuildGetAllQuery).
+        /// </summary>
+     protected override string BuildGetPagedQuery()
+        {
+        return BuildGetAllQuery();
         }
 
         /// <summary>
-        /// 🔥 Query para paginación (debe ser igual a BuildGetAllQuery).
-        /// </summary>
-        protected override string BuildGetPagedQuery()
-        {
-    return BuildGetAllQuery();
-   }
-
-        /// <summary>
- /// 🔥 Columna WHERE para filtrar por usuario.
-    /// IMPORTANTE: Usa usuario_id (sin prefijo id_)
+        /// 🔥 Columna WHERE para filtrar por usuario.
+        /// IMPORTANTE: Usa usuario_id (sin prefijo id_)
         /// </summary>
         protected override string GetUserIdColumn()
         {
-        return "usuario_id";
+      return "usuario_id";
         }
 
         /// <summary>
         /// 🔥 ORDER BY por nombre ascendente.
         /// </summary>
-        protected override string GetDefaultOrderBy()
+    protected override string GetDefaultOrderBy()
         {
-     return "ORDER BY nombre ASC";
-     }
+  return "ORDER BY nombre ASC";
+        }
 
-     /// <summary>
-      /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
+ /// <summary>
+        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
         /// </summary>
-     protected override Dictionary<string, string> GetSortableColumns()
-        {
-         return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
- {
-      { "Nombre", "nombre" },
+        protected override Dictionary<string, string> GetSortableColumns()
+     {
+  return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+  { "Nombre", "nombre" },
   { "FechaCreacion", "fecha_creacion" }
-  };
-      }
+            };
+        }
 
-      /// <summary>
-        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
+        /// <summary>
+      /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
         /// </summary>
-      protected override List<string> GetSearchableColumns()
-   {
-        return new List<string>
- {
-    "nombre"
- };
-     }
+        protected override List<string> GetSearchableColumns()
+  {
+     return new List<string>
+       {
+        "nombre",
+"descripcion"
+            };
+ }
 
-    public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
+      public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
         {
-          using var connection = _dbConnectionFactory.CreateConnection();
+            using var connection = _dbConnectionFactory.CreateConnection();
 
-  const string sql = @"
+         const string sql = @"
         SELECT EXISTS(
       SELECT 1 
    FROM categorias 
      WHERE nombre = @Nombre AND usuario_id = @UsuarioId
    ) as Exists";
 
-     var exists = await connection.ExecuteScalarAsync<bool>(
-       new CommandDefinition(sql,
-      new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
-        cancellationToken: cancellationToken));
-
-   return exists;
-        }
-
-     public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
-        {
-        using var connection = _dbConnectionFactory.CreateConnection();
-
- const string sql = @"
-   SELECT EXISTS(
-    SELECT 1 
-        FROM categorias 
-   WHERE nombre = @Nombre AND usuario_id = @UsuarioId AND id != @ExcludeId
-      ) as Exists";
-
-        var exists = await connection.ExecuteScalarAsync<bool>(
- new CommandDefinition(sql,
-     new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
+          var exists = await connection.ExecuteScalarAsync<bool>(
+                new CommandDefinition(sql,
+     new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
      cancellationToken: cancellationToken));
 
-            return exists;
-      }
+        return exists;
+        }
+
+        public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+
+          const string sql = @"
+   SELECT EXISTS(
+    SELECT 1 
+    FROM categorias 
+      WHERE nombre = @Nombre AND usuario_id = @UsuarioId AND id != @ExcludeId
+      ) as Exists";
+
+            var exists = await connection.ExecuteScalarAsync<bool>(
+   new CommandDefinition(sql,
+                new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
+      cancellationToken: cancellationToken));
+
+         return exists;
+        }
     }
 }

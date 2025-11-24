@@ -55,7 +55,6 @@ public sealed class UpdateGastoCommandHandler
             importeVO,
             fechaVO,
             conceptoIdVO,
-            categoriaIdVO,
             proveedorIdVO,
             personaIdVO,
             cuentaIdVO,

@@ -5,6 +5,11 @@ namespace AhorroLand.Domain;
 
 public sealed class Concepto : AbsEntity
 {
+    // Constructor privado sin parámetros para EF Core
+    private Concepto() : base(Guid.Empty)
+    {
+    }
+
     private Concepto(Guid id, Nombre nombre, CategoriaId categoriaId, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;

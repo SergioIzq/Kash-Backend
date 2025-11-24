@@ -10,35 +10,36 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
     {
         public void Configure(EntityTypeBuilder<Categoria> builder)
         {
-            builder.ToTable("categorias"); // ?? FIX: Nombre correcto de tabla (plural)
+            builder.ToTable("categorias");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
 
-            // ?? FIX CRÍTICO: Configurar conversiones de Value Objects
+            // Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)
                 .HasColumnName("nombre")
                 .HasColumnType("varchar")
                 .HasMaxLength(100)
                 .IsRequired()
                 .HasConversion(
-                    nombre => nombre.Value,              // Value Object -> DB
-                    value => new Nombre(value));         // DB -> Value Object
+                    nombre => nombre.Value,
+                    value => new Nombre(value));
 
+            // ? RESTAURADO: Mapeo de Descripcion como Value Object nullable
             builder.Property(e => e.Descripcion)
                 .HasColumnName("descripcion")
                 .HasColumnType("varchar")
                 .HasMaxLength(200)
                 .IsRequired(false)
                 .HasConversion(
-                    descripcion => descripcion.HasValue ? descripcion.Value._Value : null,  // Value Object -> DB
-                    value => string.IsNullOrEmpty(value) ? (Descripcion?)null : new Descripcion(value)); // DB -> Value Object
+                    descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
+                    value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
             builder.Property(e => e.IdUsuario)
-                .HasColumnName("usuario_id") // ?? FIX: Nombre consistente con otras tablas
+                .HasColumnName("usuario_id")
                 .IsRequired()
                 .HasConversion(
-                    usuarioId => usuarioId.Value,        // Value Object -> DB
-                    value => new UsuarioId(value));      // DB -> Value Object
+                    usuarioId => usuarioId.Value,
+                    value => new UsuarioId(value));
 
             builder.Property(e => e.FechaCreacion)
                 .HasColumnName("fecha_creacion")
@@ -48,7 +49,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.Property(e => e.FechaCreacion)
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            // ?? OPTIMIZACIÓN: Índices para mejorar rendimiento
+            // Índices para mejorar rendimiento
             builder.HasIndex(e => new { e.IdUsuario, e.FechaCreacion })
                 .HasDatabaseName("idx_categorias_usuario_fecha");
 
