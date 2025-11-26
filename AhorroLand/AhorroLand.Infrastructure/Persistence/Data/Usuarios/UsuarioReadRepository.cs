@@ -1,9 +1,10 @@
 ﻿using AhorroLand.Domain;
 using AhorroLand.Infrastructure.Persistence.Query;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.ValueObjects;
-using Dapper;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using Dapper;
 
 namespace AhorroLand.Infrastructure.Persistence.Data.Usuarios;
 
@@ -48,14 +49,26 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
         var constructor = typeof(Usuario).GetConstructor(
           System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
                     null,
-                    new[] { typeof(Guid), typeof(Email), typeof(PasswordHash), typeof(ConfirmationToken?), typeof(bool) },
+                    new[] { typeof(UsuarioId), typeof(Email), typeof(PasswordHash), typeof(ConfirmationToken?), typeof(bool) },
             null);
 
+        var usuarioId = new UsuarioId(dto.Id); // <--- AQUÍ ESTABA EL ERROR
         var email = new Email(dto.Correo);
         var passwordHash = new PasswordHash(dto.Contrasena);
-        ConfirmationToken? token = dto.TokenConfirmacion != null ? new ConfirmationToken(dto.TokenConfirmacion) : null;
 
-        return (Usuario)constructor!.Invoke([dto.Id, email, passwordHash, token, dto.Activo]);
+        // Asumiendo que ConfirmationToken es un struct o class con constructor que recibe string
+        ConfirmationToken? token = dto.TokenConfirmacion != null
+            ? new ConfirmationToken(dto.TokenConfirmacion)
+            : null;
+
+        // 2. Pasar los objetos tipados al constructor
+        return (Usuario)constructor!.Invoke([
+            usuarioId,    // Ahora pasas un UsuarioId, no un Guid
+            email,
+            passwordHash,
+            token,
+            dto.Activo
+        ]);
     }
 
     private class UsuarioDataModel
