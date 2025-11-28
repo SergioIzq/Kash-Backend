@@ -13,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("gastos");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new GastoId(value)
+            ); ;
 
             // Configurar conversiones de Value Objects
             builder.Property(e => e.Importe)

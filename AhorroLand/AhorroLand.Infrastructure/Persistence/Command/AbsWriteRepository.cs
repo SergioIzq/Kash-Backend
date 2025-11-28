@@ -43,15 +43,6 @@ public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     /// </summary>
     public virtual void Update(T entity)
     {
-        // Verificar si la entidad existe en la base de datos
-        var exists = _context.Set<T>().Any(e => e.Id.Value == entity.Id.Value);
-
-        if (!exists)
-        {
-            throw new InvalidOperationException(
-                $"No se puede actualizar la entidad {typeof(T).Name} con Id '{entity.Id.Value}' porque no existe en la base de datos.");
-        }
-
         _context.Set<T>().Update(entity);
     }
 

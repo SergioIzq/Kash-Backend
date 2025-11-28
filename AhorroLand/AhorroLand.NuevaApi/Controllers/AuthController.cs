@@ -1,6 +1,7 @@
 ﻿using AhorroLand.Application.Features.Auth.Commands.ConfirmEmail;
 using AhorroLand.Application.Features.Auth.Commands.Login;
 using AhorroLand.Application.Features.Auth.Commands.Register;
+using AhorroLand.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using AhorroLand.NuevaApi.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -34,10 +35,10 @@ public class AuthController : ControllerBase
 
         if (result.IsFailure)
         {
-            return BadRequest(new { mensaje = result.Error.Message });
+            return BadRequest(new { mensaje = result.Error.Name });
         }
 
-        return Ok(result.Value);
+        return Ok(result);
     }
 
     /// <summary>
@@ -117,28 +118,13 @@ public class AuthController : ControllerBase
         return Ok(result.Value);
     }
 
-    /// <summary>
-    /// Endpoint de prueba que requiere autenticación (funciona con header Authorization o cookie).
-    /// </summary>
-    [HttpGet("test-auth")]
-    [Authorize]
-    public IActionResult TestAuth()
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationEmailCommand request)
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var command = new ResendConfirmationEmailCommand(request.Correo);
+        var result = await _mediator.Send(command);
 
-        // Verificar si el token vino de una cookie
-        var tokenFromCookie = Request.GetAuthToken();
-        var usandoCookie = !string.IsNullOrEmpty(tokenFromCookie);
-
-        return Ok(new
-        {
-            mensaje = "Autenticación exitosa",
-            userId,
-            email,
-            usandoCookie,
-            metodoAuth = usandoCookie ? "Cookie HttpOnly" : "Header Authorization"
-        });
+        return result.IsSuccess ? Ok() : BadRequest(result.Error);
     }
 
     /// <summary>

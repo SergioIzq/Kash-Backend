@@ -1,5 +1,6 @@
 ﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Domain.ValueObjects;
+using AhorroLand.Shared.Domain.ValueObjects.Ids;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("ingresos");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new IngresoId(value)
+            ); ;
 
             // --- VALUE OBJECTS (Importe, Fecha, Descripción) ---
             // (Esta parte estaba bien, la dejo igual por brevedad)

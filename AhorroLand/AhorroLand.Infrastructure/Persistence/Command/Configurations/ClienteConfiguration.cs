@@ -15,7 +15,11 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.Property(e => e.Id)
                            .HasColumnName("id")
                            .IsRequired()
-                           .ValueGeneratedOnAdd();
+                           .ValueGeneratedOnAdd()
+                           .HasConversion(
+                                id => id.Value,
+                                value => new ClienteId(value)
+                           );
 
             // 🔧 FIX CRÍTICO: Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)

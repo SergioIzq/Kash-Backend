@@ -43,7 +43,6 @@ public sealed class CreateIngresoProgramadoCommandHandler
             importeVO,
             command.FechaEjecucion!.Value,
             conceptoIdVO,
-            categoriaIdVO,
             clienteIdVO,
             frecuenciaVO,
             personaIdVO,

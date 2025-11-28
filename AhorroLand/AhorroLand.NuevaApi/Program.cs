@@ -3,6 +3,7 @@ using AhorroLand.Infrastructure;
 using AhorroLand.Infrastructure.Configuration;
 using AhorroLand.Infrastructure.TypesHandlers;
 using AhorroLand.Middleware;
+using AhorroLand.Middleware.Filters;
 using AhorroLand.Shared.Application;
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,11 +12,11 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Serilog;
 
 // 🔥 CONFIGURACIÓN SERILOG: Antes de crear el builder
 Log.Logger = new LoggerConfiguration()
@@ -91,24 +92,29 @@ try
            .SetVaryByQuery("page", "pageSize"));
     });
 
-    builder.Services.AddControllers()
-        .AddJsonOptions(options =>
-        {
-            // 🔥 Configuración JSON FLEXIBLE para recibir cualquier formato
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; // Respuestas en camelCase
-            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // ✅ ACEPTA cualquier casing en requests
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            options.JsonSerializerOptions.WriteIndented = false;
-            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString; // ✅ Acepta números como strings
-            options.JsonSerializerOptions.AllowTrailingCommas = true; // ✅ Tolera comas finales
-            options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip; // ✅ Ignora comentarios en JSON
+    builder.Services.AddControllers(options =>
+    {
 
-            // Converters adicionales para mayor flexibilidad
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // Enums como strings
+        options.Filters.Add<ResultMappingFilter>();
+    }
+    )
+    .AddJsonOptions(options =>
+    {
+        // 🔥 Configuración JSON FLEXIBLE para recibir cualquier formato
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; // Respuestas en camelCase
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // ✅ ACEPTA cualquier casing en requests
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.WriteIndented = false;
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString; // ✅ Acepta números como strings
+        options.JsonSerializerOptions.AllowTrailingCommas = true; // ✅ Tolera comas finales
+        options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip; // ✅ Ignora comentarios en JSON
 
-            // 🔥 Source Generators para mejor rendimiento
-            options.JsonSerializerOptions.TypeInfoResolverChain.Add(AppJsonSerializerContext.Default);
-        });
+        // Converters adicionales para mayor flexibilidad
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // Enums como strings
+
+        // 🔥 Source Generators para mejor rendimiento
+        options.JsonSerializerOptions.TypeInfoResolverChain.Add(AppJsonSerializerContext.Default);
+    });
 
     // 🔧 Configurar comportamiento de validación de modelos (no devolver 400 automáticamente)
     builder.Services.Configure<ApiBehaviorOptions>(options =>

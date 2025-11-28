@@ -18,7 +18,6 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        CategoriaId categoriaId,
         ClienteId clienteId,
         PersonaId personaId,
         CuentaId cuentaId,
@@ -31,7 +30,6 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         FechaEjecucion = fechaEjecucion;
 
         ConceptoId = conceptoId;
-        CategoriaId = categoriaId;
         ClienteId = clienteId;
         PersonaId = personaId;
         CuentaId = cuentaId;
@@ -48,7 +46,6 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
     public Descripcion? Descripcion { get; private set; }
     public DateTime FechaEjecucion { get; private set; }
     public bool Activo { get; private set; }
-    public CategoriaId CategoriaId { get; private set; }
     public ConceptoId ConceptoId { get; private set; }
     public ClienteId ClienteId { get; private set; }
     public PersonaId PersonaId { get; private set; }
@@ -61,7 +58,6 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        CategoriaId categoriaId,
         ClienteId clienteId,
         Frecuencia frecuencia,
         PersonaId personaId,
@@ -75,7 +71,6 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
             importe,
             fechaEjecucion,
             conceptoId,
-            categoriaId,
             clienteId,
             personaId,
             cuentaId,

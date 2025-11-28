@@ -13,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("traspasos_programados");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new TraspasoProgramadoId(value)
+            ); ;
 
             // ? Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)

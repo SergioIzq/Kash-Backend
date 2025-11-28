@@ -13,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("gastos_programados");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new GastoProgramadoId(value)
+            ); ;
 
             // ✅ Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)
@@ -31,13 +34,6 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
          .HasConversion(
         cuentaId => cuentaId.Value,
            value => new CuentaId(value));
-
-            builder.Property(e => e.CategoriaId)
-          .HasColumnName("id_categoria")
-                   .IsRequired()
-        .HasConversion(
-              categoriaId => categoriaId.Value,
-              value => new CategoriaId(value));
 
             // ✅ Estos NO son nullable en la entidad, son structs requeridos
             builder.Property(e => e.ProveedorId)

@@ -11,9 +11,12 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
     {
         public void Configure(EntityTypeBuilder<Concepto> builder)
         {
-            builder.ToTable("conceptos"); // ?? FIX: Nombre correcto de tabla (plural)
+            builder.ToTable("conceptos");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new ConceptoId(value)
+            );
 
             // ?? FIX CRÍTICO: Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)
@@ -45,11 +48,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            // ? FIX: Relación con Categoria usando el nombre de columna en lugar de la propiedad
             builder.HasOne(e => e.Categoria)
-                .WithMany()
-                .HasForeignKey("categoria_id")  // ? Usar nombre de columna, no propiedad
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany()
+                            .HasForeignKey(e => e.CategoriaId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
             // ?? OPTIMIZACIÓN: Índices
             builder.HasIndex(e => new { e.UsuarioId, e.FechaCreacion })

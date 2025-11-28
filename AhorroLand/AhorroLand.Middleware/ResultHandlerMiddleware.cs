@@ -56,7 +56,7 @@ public sealed class ResultHandlerMiddleware
                     {
                         _logger.LogInformation(
                             "Result con error detectado: {ErrorCode} - Status: {StatusCode} - Path: {Path}",
-                            errorResponse.Code, statusCode, context.Request.Path);
+                            errorResponse!.Code, statusCode, context.Request.Path);
 
                         await WriteErrorResponseAsync(context, originalBodyStream, errorResponse, statusCode);
                         return;
@@ -158,12 +158,24 @@ public sealed class ResultHandlerMiddleware
 
     private static string? GetStringProperty(JsonElement element, string propertyName)
     {
-        // Busca CamelCase o PascalCase
-        if (element.TryGetProperty(propertyName, out var prop) ||
-            element.TryGetProperty(char.ToUpper(propertyName[0]) + propertyName[1..], out prop))
+        // Validación de seguridad por si acaso
+        if (string.IsNullOrEmpty(propertyName)) return null;
+
+        // Intenta obtener la propiedad tal cual ("code")
+        if (element.TryGetProperty(propertyName, out var prop))
         {
             return prop.GetString();
         }
+
+        // Intenta obtener la propiedad en PascalCase ("Code")
+        // ✅ CORRECTO: propertyName[1..] toma desde el 1 hasta el final automáticamente
+        var pascalCaseName = char.ToUpper(propertyName[0]) + propertyName[1..];
+
+        if (element.TryGetProperty(pascalCaseName, out prop))
+        {
+            return prop.GetString();
+        }
+
         return null;
     }
 

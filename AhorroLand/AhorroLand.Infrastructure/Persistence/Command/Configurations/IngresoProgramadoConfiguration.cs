@@ -13,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("ingresos_programados");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new IngresoProgramadoId(value)
+            ); ;
 
             // ? Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)
@@ -40,13 +43,6 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
        .HasConversion(
             cuentaId => cuentaId.Value,
           value => new CuentaId(value));
-
-            builder.Property(e => e.CategoriaId)
-        .HasColumnName("id_categoria")
-        .IsRequired()
-        .HasConversion(
-       categoriaId => categoriaId.Value,
-           value => new CategoriaId(value));
 
             builder.Property(e => e.FormaPagoId)
 .HasColumnName("id_forma_pago")

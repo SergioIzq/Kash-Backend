@@ -5,8 +5,4 @@ namespace AhorroLand.Application.Features.Auth.Commands.Register;
 public sealed record RegisterCommand(
     string Correo,
     string Contrasena
-) : ICommand<RegisterResponse>;
-
-public sealed record RegisterResponse(
-  string Mensaje
-);
+) : ICommand;

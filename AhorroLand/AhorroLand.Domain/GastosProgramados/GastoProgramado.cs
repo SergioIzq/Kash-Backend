@@ -19,7 +19,6 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        CategoriaId categoriaId,
         ProveedorId proveedorId,
         PersonaId personaId,
         CuentaId cuentaId,
@@ -32,7 +31,6 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         FechaEjecucion = fechaEjecucion;
 
         ConceptoId = conceptoId;
-        CategoriaId = categoriaId;
         ProveedorId = proveedorId;
         PersonaId = personaId;
         CuentaId = cuentaId;
@@ -49,7 +47,6 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     public Descripcion? Descripcion { get; private set; }
     public DateTime FechaEjecucion { get; private set; }
     public bool Activo { get; private set; }
-    public CategoriaId CategoriaId { get; private set; }
     public ConceptoId ConceptoId { get; private set; }
     public ProveedorId ProveedorId { get; private set; }
     public PersonaId PersonaId { get; private set; }
@@ -62,7 +59,6 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        CategoriaId categoriaId,
         ProveedorId proveedorId,
         Frecuencia frecuencia,
         PersonaId personaId,
@@ -76,7 +72,6 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
             importe,
             fechaEjecucion,
             conceptoId,
-            categoriaId,
             proveedorId,
             personaId,
             cuentaId,

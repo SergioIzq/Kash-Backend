@@ -68,4 +68,9 @@ public sealed class Usuario : AbsEntity<UsuarioId>
         Activo = true;
         TokenConfirmacion = null;
     }
+
+    public void SetTokenConfirmacion(ConfirmationToken token)
+    {
+        TokenConfirmacion = token;
+    }
 }

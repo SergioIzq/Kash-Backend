@@ -9,7 +9,7 @@ using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Application.Features.Auth.Commands.Register;
 
-public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
+public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
 {
     private readonly IUsuarioWriteRepository _usuarioWriteRepository;
     private readonly IUsuarioReadRepository _usuarioReadRepository;
@@ -31,7 +31,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         _emailService = emailService;
     }
 
-    public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -41,7 +41,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
 
             if (existingUser != null)
             {
-                return Result.Failure<RegisterResponse>(new Error("Auth.EmailExists", $"El correo '{request.Correo}' ya está registrado."));
+                return Result.Failure(new Error("Auth.EmailExists", $"El correo '{request.Correo}' ya está registrado."));
             }
 
             // 2. Hash de la contraseña
@@ -76,11 +76,11 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
 
             _emailService.EnqueueEmail(emailMessage);
 
-            return Result.Success(new RegisterResponse("Usuario registrado correctamente. Por favor, confirma tu correo."));
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            return Result.Failure<RegisterResponse>(new Error("Auth.RegisterError", ex.Message));
+            return Result.Failure(new Error("Auth.RegisterError", ex.Message));
         }
     }
 }

@@ -13,7 +13,10 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         {
             builder.ToTable("personas"); // ?? FIX: Nombre correcto de tabla (plural)
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
+                id => id.Value,
+                value => new PersonaId(value)
+            ); ;
 
             // ?? FIX CRÍTICO: Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)

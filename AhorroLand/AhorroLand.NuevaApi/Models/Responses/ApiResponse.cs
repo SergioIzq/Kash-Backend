@@ -29,9 +29,9 @@ public sealed record ApiResponse<T>
     public ApiResponse(T data, string? message = null, bool success = true)
     {
         Data = data;
-    Message = message;
+        Message = message;
         Success = success;
-   Timestamp = DateTime.UtcNow;
+        Timestamp = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public sealed record ApiResponse<T>
     public static ApiResponse<T> Ok(T data, string? message = null)
     => new(data, message, true);
 
-/// <summary>
+    /// <summary>
     /// Crea una respuesta de error
     /// </summary>
     public static ApiResponse<T> Error(string message)

@@ -1,4 +1,6 @@
-﻿namespace AhorroLand.Shared.Domain.ValueObjects;
+﻿using System.Security.Cryptography;
+
+namespace AhorroLand.Shared.Domain.ValueObjects;
 
 public readonly record struct ConfirmationToken
 {
@@ -22,19 +24,38 @@ public readonly record struct ConfirmationToken
     /// </summary>
     public static ConfirmationToken GenerateNew()
     {
-        // 🔑 Lógica de Generación Segura: Usar una fuente criptográficamente segura.
-        // Se genera un GUID y se codifica de forma compacta (ej. Base64 URL-safe, truncado).
-        // Para simplicidad, usaremos Guid.NewGuid() y lo procesaremos.
+        // Calculamos los bytes necesarios para obtener al menos 32 caracteres Base64
+        // 24 bytes * 1.33 = 32 caracteres
+        var bytes = new byte[24];
 
-        // Generación simple: utiliza el Guid para una cadena aleatoria
-        var tokenRaw = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(bytes);
+        }
+
+        // Convertimos a Base64 URL Safe
+        var tokenRaw = Convert.ToBase64String(bytes)
             .Replace("=", "")
             .Replace("+", "-")
             .Replace("/", "_");
 
-        // Aseguramos la longitud definida por la regla de negocio
-        var token = tokenRaw.Substring(0, TokenLength);
+        // Aseguramos que tomamos exactamente 32 (aunque con 24 bytes suele dar 32 exactos)ññ
+        var token = tokenRaw.Length > TokenLength
+            ? tokenRaw.Substring(0, TokenLength)
+            : tokenRaw;
 
         return new ConfirmationToken(token);
+    }
+
+    /// <summary>
+    /// Compara el Token actual con una cadena de texto cruda.
+    /// Incluye limpieza (Trim) y comparación segura.
+    /// </summary>
+    public bool Equals(string? other)
+    {
+        if (string.IsNullOrWhiteSpace(other))
+            return false;
+
+        return string.Equals(Value, other.Trim(), StringComparison.Ordinal);
     }
 }

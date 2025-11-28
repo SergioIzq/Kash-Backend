@@ -80,7 +80,6 @@ public sealed class CreateGastoProgramadoCommandHandler
                 importe,
                 command.FechaEjecucion!.Value,
                 conceptoId,
-                categoriaId,
                 proveedorId,
                 frecuencia,
                 personaId,
