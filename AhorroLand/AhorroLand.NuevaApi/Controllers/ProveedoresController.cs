@@ -1,12 +1,13 @@
-using AhorroLand.Application.Features.Proveedores.Commands;
+ï»¿using AhorroLand.Application.Features.Proveedores.Commands;
 using AhorroLand.Application.Features.Proveedores.Queries;
 using AhorroLand.Application.Features.Proveedores.Queries.Recent;
-using AhorroLand.Application.Features.Proveedores.Queries.Search;
+using AhorroLand.Application.Features.Proveedores.Queries.Search; // AsegÃºrate de tener este namespace
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -19,66 +20,75 @@ public class ProveedoresController : AbsController
     {
     }
 
-    [Authorize]
+    /// <summary>
+    /// Obtiene lista paginada de proveedores del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetProveedoresPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear query filtrando por usuario
+        var query = new GetProveedoresPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // ðŸ‘ˆ IMPORTANTE: Asignar el ID
+        };
+
         var result = await _sender.Send(query);
-        return HandleResult(result); // ??
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// ?? NUEVO: Búsqueda rápida para autocomplete (selectores asíncronos).
+    /// BÃºsqueda rÃ¡pida para autocomplete.
     /// </summary>
-    [Authorize]
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-        ?? User.FindFirst("sub")?.Value
-         ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new SearchProveedoresQuery(search, limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // ??
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// ?? NUEVO: Obtiene los proveedores más recientes del usuario.
+    /// Obtiene los proveedores mÃ¡s recientes.
     /// </summary>
-    [Authorize]
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-         ?? User.FindFirst("sub")?.Value
-                   ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetRecentProveedoresQuery(limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // ??
+        return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -87,26 +97,28 @@ public class ProveedoresController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProveedorRequest request)
     {
+        // AsignaciÃ³n inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateProveedorCommand
         {
             Nombre = request.Nombre,
-            UsuarioId = request.UsuarioId
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
 
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
             result,
-           nameof(GetById),
-                new { id = result.Value }
-             );
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProveedorRequest request)
     {
@@ -120,7 +132,6 @@ public class ProveedoresController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -130,6 +141,7 @@ public class ProveedoresController : AbsController
     }
 }
 
+// DTOs
 public record CreateProveedorRequest(
     string Nombre,
     Guid UsuarioId

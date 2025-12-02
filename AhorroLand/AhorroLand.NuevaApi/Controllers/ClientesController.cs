@@ -3,11 +3,11 @@ using AhorroLand.Application.Features.Clientes.Queries;
 using AhorroLand.Application.Features.Clientes.Queries.Recent;
 using AhorroLand.Application.Features.Clientes.Queries.Search;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using System.Security.Claims;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -21,126 +21,106 @@ public class ClientesController : AbsController
     }
 
     /// <summary>
-    /// 🚀 OPTIMIZADO: Obtiene lista paginada de clientes del usuario autenticado.
-    /// Extrae el UsuarioId del JWT para usar índices de BD (reduce 400ms a ~50ms + cache ~5ms).
-    /// 🔥 Output Cache: Cachea la respuesta HTTP completa (aún más rápido que Redis).
+    /// Obtiene lista paginada de clientes del usuario autenticado.
+    /// Cacheada por 30s.
     /// </summary>
-    [Authorize]
     [HttpGet]
-    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize", "searchTerm" })] // Agregué searchTerm por si acaso
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        // 🔥 OPTIMIZACIÓN CRÍTICA: Extraer UsuarioId del JWT
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            // Retornamos un 401 usando el formato estandarizado
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        // 🚀 Pasar el UsuarioId al query para aprovechar índices de BD
         var query = new GetClientesPagedListQuery(page, pageSize)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Búsqueda rápida para autocomplete (selectores asíncronos).
-    /// Devuelve solo los clientes que coincidan con el término de búsqueda, limitados a 10 resultados.
-    /// Ultra-rápido: <10ms de respuesta.
+    /// Búsqueda rápida para autocomplete (selectores asíncronos).
     /// </summary>
-    /// <param name="search">Término de búsqueda (ej: "Jua" busca "Juan Pérez", "Juana María", etc.)</param>
-    /// <param name="limit">Número máximo de resultados (por defecto 10, máximo 50)</param>
-    [Authorize]
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new SearchClientesQuery(search, limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Obtiene los clientes más recientes del usuario.
-    /// Ideal para pre-cargar selectores con los elementos usados recientemente.
+    /// Obtiene los clientes más recientes del usuario.
     /// </summary>
-    [Authorize]
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetRecentClientesQuery(limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
-    }
-
-    [Authorize]
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        // 1. Creas un Query (objeto de la capa Application)
-        var query = new GetClienteByIdQuery(id);
-
-        // 2. Lo envías con Mediator
-        var result = await _sender.Send(query); // Devuelve Result<ClienteDto>
-
-        // 3. Dejas que el ApiBaseController lo traduzca
         return HandleResult(result);
     }
 
-    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetClienteByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateClienteRequest request)
     {
-        // 1. Mapeas el Request (DTO de API) a un Command (de Application)
+        // En el Create, a veces el UsuarioId viene en el request (si es admin creando para otro)
+        // o lo tomamos del token si es auto-creación.
+        // Aquí asumimos que si no viene, usamos el del token.
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateClienteCommand(
             request.Nombre,
-            request.UsuarioId
+            usuarioId
         );
 
-        // 2. Lo envías
-        var result = await _sender.Send(command); // Devuelve Result<ClienteDto>
+        var result = await _sender.Send(command);
 
-        // 3. Usas el handler de creación (devuelve 201 Created)
+        // Usamos HandleResultForCreation para devolver 201 Created y Location header
         return HandleResultForCreation(
             result,
-            nameof(GetById), // Nombre de la acción para 'GetById'
-            new { id = result.Value } // Parámetros de ruta
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClienteRequest request)
     {
@@ -151,27 +131,18 @@ public class ClientesController : AbsController
         };
 
         var result = await _sender.Send(command);
-        return HandleResult(result);
+        return HandleResult(result); // Retorna 200 con el dato actualizado
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteClienteCommand(id);
-
         var result = await _sender.Send(command);
-
-        return HandleResult(result);
+        return HandleResult(result); // Retorna 204 No Content si es éxito
     }
 }
 
-// Este es el DTO que recibe la API, NO la entidad de dominio
-public record CreateClienteRequest(
-    string Nombre,
-    Guid UsuarioId
-);
-
-public record UpdateClienteRequest(
-    string Nombre
-);
+// DTOs de Request
+public record CreateClienteRequest(string Nombre, Guid UsuarioId);
+public record UpdateClienteRequest(string Nombre);

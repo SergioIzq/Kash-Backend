@@ -1,10 +1,11 @@
 ﻿using AhorroLand.Application.Features.Ingresos.Commands;
 using AhorroLand.Application.Features.Ingresos.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -17,51 +18,35 @@ public class IngresosController : AbsController
     {
     }
 
-    [Authorize]
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-    {
-        var query = new GetIngresosPagedListQuery(page, pageSize);
-        var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
-    }
-
     /// <summary>
     /// Obtiene una lista paginada de ingresos con soporte para búsqueda y ordenamiento.
     /// </summary>
-    /// <param name="page">Número de página (por defecto: 1)</param>
-    /// <param name="pageSize">Tamaño de página (por defecto: 10)</param>
-    /// <param name="searchTerm">Término de búsqueda opcional (busca en: descripción, concepto, categoría, proveedor, persona, cuenta)</param>
-    /// <param name="sortColumn">Columna por la cual ordenar (Fecha, Importe, ConceptoNombre, CategoriaNombre, ProveedorNombre, PersonaNombre, CuentaNombre, FormaPagoNombre)</param>
-    /// <param name="sortOrder">Orden: 'asc' o 'desc' (por defecto: 'desc')</param>
-    [Authorize]
-    [HttpGet("paginated")]
-    public async Task<IActionResult> GetPaginated(
+    [HttpGet] // Estandarizado a la raíz (GET /api/ingresos)
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize", "searchTerm", "sortColumn", "sortOrder" })]
+    public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? searchTerm = null,
         [FromQuery] string? sortColumn = null,
         [FromQuery] string? sortOrder = null)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        // 1. Obtener ID del usuario de forma segura
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetIngresosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value // 👈 Asignación crítica para seguridad
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -70,10 +55,12 @@ public class IngresosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoRequest request)
     {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateIngresoCommand
         {
             Importe = request.Importe,
@@ -85,19 +72,19 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = request.UsuarioId
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
 
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
             result,
             nameof(GetById),
-        new { id = result.Value }
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngresoRequest request)
     {
@@ -113,14 +100,13 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = request.UsuarioId
+            UsuarioId = request.UsuarioId // Nota: Validar si permites cambiar de dueño en el handler
         };
 
         var result = await _sender.Send(command);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -130,6 +116,7 @@ public class IngresosController : AbsController
     }
 }
 
+// DTOs
 public record CreateIngresoRequest(
     decimal Importe,
     DateTime Fecha,

@@ -1,12 +1,13 @@
-﻿using AhorroLand.Application.Features.Categorias.Queries;
-using AhorroLand.Application.Features.Personas.Commands;
+﻿using AhorroLand.Application.Features.Personas.Commands;
 using AhorroLand.Application.Features.Personas.Queries;
 using AhorroLand.Application.Features.Personas.Queries.Recent;
+using AhorroLand.Application.Features.Personas.Queries.Search; // Asegúrate de tener este namespace
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -19,62 +20,73 @@ public class PersonasController : AbsController
     {
     }
 
+    /// <summary>
+    /// Obtiene lista paginada de personas del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetPersonasPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear query filtrando por usuario
+        var query = new GetPersonasPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID
+        };
+
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Búsqueda rápida para autocomplete (selectores asíncronos).
+    /// Búsqueda rápida para autocomplete.
     /// </summary>
-    [Authorize]
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new SearchPersonasQuery(search, limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Obtiene las personas más recientes del usuario.
+    /// Obtiene las personas más recientes.
     /// </summary>
-    [Authorize]
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetRecentPersonasQuery(limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕
+        return HandleResult(result);
     }
 
     [HttpGet("{id}")]
@@ -88,18 +100,22 @@ public class PersonasController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePersonaRequest request)
     {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreatePersonaCommand
         {
             Nombre = request.Nombre,
-            UsuarioId = request.UsuarioId
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
 
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
             result,
             nameof(GetById),
-            new { id = result.Value }
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
@@ -125,6 +141,7 @@ public class PersonasController : AbsController
     }
 }
 
+// DTOs
 public record CreatePersonaRequest(
     string Nombre,
     Guid UsuarioId

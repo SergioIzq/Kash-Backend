@@ -1,11 +1,11 @@
-﻿using AhorroLand.Application.Features.Clientes.Queries;
-using AhorroLand.Application.Features.Gastos.Commands;
+﻿using AhorroLand.Application.Features.Gastos.Commands;
 using AhorroLand.Application.Features.Gastos.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -21,39 +21,32 @@ public class GastosController : AbsController
     /// <summary>
     /// Obtiene una lista paginada de gastos con soporte para búsqueda y ordenamiento.
     /// </summary>
-    /// <param name="page">Número de página (por defecto: 1)</param>
-    /// <param name="pageSize">Tamaño de página (por defecto: 10)</param>
-    /// <param name="searchTerm">Término de búsqueda opcional (busca en: descripción, concepto, categoría, proveedor, persona, cuenta)</param>
-    /// <param name="sortColumn">Columna por la cual ordenar (Fecha, Importe, ConceptoNombre, CategoriaNombre, ProveedorNombre, PersonaNombre, CuentaNombre, FormaPagoNombre)</param>
-    /// <param name="sortOrder">Orden: 'asc' o 'desc' (por defecto: 'desc')</param>
-    [Authorize]
-    [HttpGet("paginated")]
-    public async Task<IActionResult> GetPaginated(
-        [FromQuery] int page = 1, 
+    [HttpGet] // Estandarizado a la raíz (GET /api/gastos)
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize", "searchTerm", "sortColumn", "sortOrder" })]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? searchTerm = null,
         [FromQuery] string? sortColumn = null,
         [FromQuery] string? sortOrder = null)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("userId")?.Value;
+        // 1. Obtener ID del usuario de forma segura
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetGastosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕 Usando HandleResult
+        return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -62,10 +55,12 @@ public class GastosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateGastoRequest request)
     {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateGastoCommand
         {
             Importe = request.Importe,
@@ -77,18 +72,26 @@ public class GastosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = request.UsuarioId
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
 
-        return HandleResultForCreation(result, nameof(GetById), new { id = result.Value });
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoRequest request)
     {
+        // Nota: En Updates, generalmente no permitimos cambiar el UsuarioId (seguridad),
+        // por lo que usamos el del request si viene, pero el Handler debería validar la propiedad.
+        // Opcionalmente podrías forzar: command.UsuarioId = GetCurrentUserId();
+
         var command = new UpdateGastoCommand
         {
             Id = id,
@@ -108,7 +111,6 @@ public class GastosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -118,6 +120,7 @@ public class GastosController : AbsController
     }
 }
 
+// DTOs
 public record CreateGastoRequest(
     decimal Importe,
     DateTime Fecha,

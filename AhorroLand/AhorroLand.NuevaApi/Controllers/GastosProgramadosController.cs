@@ -1,9 +1,11 @@
-using AhorroLand.Application.Features.GastosProgramados.Commands;
+﻿using AhorroLand.Application.Features.GastosProgramados.Commands;
 using AhorroLand.Application.Features.GastosProgramados.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -16,16 +18,28 @@ public class GastosProgramadosController : AbsController
     {
     }
 
-    [Authorize]
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetGastosProgramadosPagedListQuery(page, pageSize);
+        // 1. Seguridad: Obtener ID del usuario
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Query filtrada por usuario
+        var query = new GetGastosProgramadosPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // 👈 Asignación crítica
+        };
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -34,10 +48,18 @@ public class GastosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateGastoProgramadoRequest request)
     {
+        // 1. Obtener ID del usuario
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear comando con el ID del usuario inyectado
         var command = new CreateGastoProgramadoCommand
         {
             Importe = request.Importe,
@@ -50,19 +72,20 @@ public class GastosProgramadosController : AbsController
             CategoriaId = request.CategoriaId,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = usuarioId.Value // 👈 Seguridad
         };
 
         var result = await _sender.Send(command);
 
+        // 3. Respuesta segura 201 Created
         return HandleResultForCreation(
             result,
             nameof(GetById),
-            new { id = result.Value }
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoProgramadoRequest request)
     {
@@ -86,7 +109,6 @@ public class GastosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -96,6 +118,7 @@ public class GastosProgramadosController : AbsController
     }
 }
 
+// DTOs
 public record CreateGastoProgramadoRequest(
     decimal Importe,
     string Frecuencia,

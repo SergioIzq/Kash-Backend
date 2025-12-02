@@ -1,15 +1,16 @@
-using AhorroLand.Application.Features.Dashboard.Queries;
+ï»¿using AhorroLand.Application.Features.Dashboard.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Result y Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
 /// <summary>
-/// Controller para el dashboard con métricas y resumen del usuario.
+/// Controller para el dashboard con mÃ©tricas y resumen del usuario.
 /// </summary>
 [Authorize]
 [ApiController]
@@ -21,48 +22,39 @@ public class DashboardController : AbsController
     }
 
     /// <summary>
-    /// Obtiene el resumen completo del dashboard para el usuario autenticado con filtros opcionales.
+    /// Obtiene el resumen completo del dashboard.
+    /// Cacheado por 1 minuto para evitar sobrecarga en base de datos.
     /// </summary>
-    /// <param name="fechaInicio">Fecha de inicio del período (opcional, default: primer día del mes actual)</param>
-    /// <param name="fechaFin">Fecha de fin del período (opcional, default: último día del mes actual)</param>
-    /// <param name="cuentaId">Filtrar por cuenta específica (opcional)</param>
-    /// <param name="categoriaId">Filtrar por categoría específica (opcional)</param>
-    /// <returns>Resumen con balance, ingresos, gastos, top categorías, histórico, alertas y más.</returns>
-    /// <response code="200">Resumen obtenido correctamente.</response>
-    /// <response code="401">Usuario no autenticado.</response>
-    /// <response code="404">No se encontraron datos para el usuario.</response>
-    /// <response code="500">Error interno del servidor.</response>
     [HttpGet("resumen")]
+    [OutputCache(Duration = 60, VaryByQueryKeys = new[] { "fechaInicio", "fechaFin", "cuentaId", "categoriaId" })]
     [ProducesResponseType(typeof(DashboardResumenDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetResumen(
-           [FromQuery] DateTime? fechaInicio = null,
-    [FromQuery] DateTime? fechaFin = null,
-      [FromQuery] Guid? cuentaId = null,
-      [FromQuery] Guid? categoriaId = null)
+        [FromQuery] DateTime? fechaInicio = null,
+        [FromQuery] DateTime? fechaFin = null,
+        [FromQuery] Guid? cuentaId = null,
+        [FromQuery] Guid? categoriaId = null)
     {
-        // Obtener el UsuarioId del token JWT
-        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        // 1. Obtener Usuario (Helper base)
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(usuarioIdClaim) || !Guid.TryParse(usuarioIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Token inválido o usuario no identificado." });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Token invÃ¡lido o usuario no identificado.")));
         }
 
-        // Validar que fechaFin sea posterior a fechaInicio si ambas están presentes
+        // 2. ValidaciÃ³n de fechas (Regla de presentaciÃ³n/api)
+        // Usamos Result.Failure con Error.Validation para mantener el formato estÃ¡ndar
         if (fechaInicio.HasValue && fechaFin.HasValue && fechaFin < fechaInicio)
         {
-            return BadRequest(new { message = "La fecha de fin debe ser posterior a la fecha de inicio." });
+            return BadRequest(Result.Failure(Error.Validation("La fecha de fin debe ser posterior a la fecha de inicio.")));
         }
 
         var query = new GetDashboardResumenQuery(
-       usuarioId,
-       fechaInicio,
-       fechaFin,
-     cuentaId,
-        categoriaId);
+            usuarioId.Value,
+            fechaInicio,
+            fechaFin,
+            cuentaId,
+            categoriaId);
 
         var result = await _sender.Send(query);
 
@@ -70,37 +62,38 @@ public class DashboardController : AbsController
     }
 
     /// <summary>
-    /// Obtiene el histórico de los últimos N meses (sin filtros adicionales).
+    /// Obtiene el histÃ³rico de los Ãºltimos N meses.
     /// </summary>
-    /// <param name="meses">Número de meses a consultar (default: 6, max: 12)</param>
-    /// <response code="200">Histórico obtenido correctamente.</response>
     [HttpGet("historico")]
-    [ProducesResponseType(typeof(List<HistoricoMensualDto>), StatusCodes.Status200OK)]
+    [OutputCache(Duration = 60, VaryByQueryKeys = new[] { "meses" })]
     public async Task<IActionResult> GetHistorico([FromQuery] int meses = 6)
     {
-        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(usuarioIdClaim) || !Guid.TryParse(usuarioIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Token inválido o usuario no identificado." });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Token invÃ¡lido o usuario no identificado.")));
         }
 
-        // Validar límites
+        // ValidaciÃ³n de rango
         if (meses < 1 || meses > 12)
         {
-            return BadRequest(new { message = "El número de meses debe estar entre 1 y 12." });
+            return BadRequest(Result.Failure(Error.Validation("El nÃºmero de meses debe estar entre 1 y 12.")));
         }
 
-        var query = new GetDashboardResumenQuery(usuarioId);
+        // Reutilizamos la query principal (o podrÃ­as crear una especÃ­fica GetDashboardHistoryQuery para ser mÃ¡s eficiente)
+        var query = new GetDashboardResumenQuery(usuarioId.Value);
         var result = await _sender.Send(query);
 
-        if (result.IsSuccess)
+        if (result.IsFailure)
         {
-            // Filtrar solo el histórico de los N meses solicitados
-            var historico = result.Value.HistoricoUltimos6Meses.Take(meses).ToList();
-            return Ok(historico);
+            return HandleResult(result);
         }
 
-        return HandleResult(result);
+        // 3. Filtrado y transformaciÃ³n de la respuesta
+        // Envolvemos la lista en un Result.Success para mantener la consistencia del JSON
+        var historico = result.Value.HistoricoUltimos6Meses.Take(meses).ToList();
+
+        return HandleResult(Result.Success(historico));
     }
 }

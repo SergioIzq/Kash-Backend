@@ -2,10 +2,11 @@
 using AhorroLand.Application.Features.Categorias.Queries;
 using AhorroLand.Application.Features.Categorias.Queries.Recent;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -18,66 +19,75 @@ public class CategoriasController : AbsController
     {
     }
 
-    [Authorize]
+    /// <summary>
+    /// Obtiene lista paginada de categorías del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetCategoriasPagedListQuery(page, pageSize);
+        // 1. Obtenemos el ID del usuario del token
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Pasamos el ID a la query (IMPORTANTE: Filtrar por usuario)
+        var query = new GetCategoriasPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value
+        };
+
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕 Usando HandleResult
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Búsqueda rápida para autocomplete (selectores asíncronos).
+    /// Búsqueda rápida para autocomplete.
     /// </summary>
-    [Authorize]
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-        ?? User.FindFirst("sub")?.Value
-           ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new SearchCategoriasQuery(search, limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕 Usando HandleResult
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// 🚀 NUEVO: Obtiene las categorías más recientes del usuario.
+    /// Obtiene las categorías más recientes del usuario.
     /// </summary>
-    [Authorize]
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-          ?? User.FindFirst("sub")?.Value
-    ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new GetRecentCategoriasQuery(limit)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
-        return HandleResult(result); // 🆕 Usando HandleResult
+        return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -86,27 +96,29 @@ public class CategoriasController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoriaRequest request)
     {
+        // Asignación inteligente del UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateCategoriaCommand
         {
             Nombre = request.Nombre,
-            UsuarioId = request.UsuarioId,
+            UsuarioId = usuarioId,
             Descripcion = request.Descripcion
         };
 
         var result = await _sender.Send(command);
 
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
-     result,
-        nameof(GetById),
-new { id = result.Value }
-     );
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoriaRequest request)
     {
@@ -121,7 +133,6 @@ new { id = result.Value }
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -131,6 +142,7 @@ new { id = result.Value }
     }
 }
 
+// DTOs de Request
 public record CreateCategoriaRequest(
     string Nombre,
     Guid UsuarioId,

@@ -1,9 +1,11 @@
-using AhorroLand.Application.Features.TraspasosProgramados.Commands;
+﻿using AhorroLand.Application.Features.TraspasosProgramados.Commands;
 using AhorroLand.Application.Features.TraspasosProgramados.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -16,16 +18,31 @@ public class TraspasosProgramadosController : AbsController
     {
     }
 
-    [Authorize]
+    /// <summary>
+    /// Obtiene lista paginada de traspasos programados del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetTraspasosProgramadosPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear query filtrando por usuario
+        var query = new GetTraspasosProgramadosPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID
+        };
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -34,10 +51,17 @@ public class TraspasosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTraspasoProgramadoRequest request)
     {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
         var command = new CreateTraspasoProgramadoCommand
         {
             CuentaOrigenId = request.CuentaOrigenId,
@@ -45,20 +69,20 @@ public class TraspasosProgramadosController : AbsController
             Importe = request.Importe,
             FechaEjecucion = request.FechaEjecucion,
             Frecuencia = request.Frecuencia,
-            UsuarioId = request.UsuarioId,
+            UsuarioId = usuarioId.Value, // 👈 Seguridad: ID del token
             Descripcion = request.Descripcion
         };
 
         var result = await _sender.Send(command);
 
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
             result,
             nameof(GetById),
-            new { id = result.Value }
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTraspasoProgramadoRequest request)
     {
@@ -70,7 +94,9 @@ public class TraspasosProgramadosController : AbsController
             Importe = request.Importe,
             FechaEjecucion = request.FechaEjecucion,
             Frecuencia = request.Frecuencia,
-            UsuarioId = request.UsuarioId,
+            // Nota: El UsuarioId generalmente no cambia en un update, 
+            // pero si tu comando lo requiere para validación de propiedad:
+            UsuarioId = GetCurrentUserId() ?? Guid.Empty,
             HangfireJobId = request.HangfireJobId,
             Descripcion = request.Descripcion
         };
@@ -79,7 +105,6 @@ public class TraspasosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -89,13 +114,13 @@ public class TraspasosProgramadosController : AbsController
     }
 }
 
+// DTOs simplificados (sin UsuarioId, ya que se inyecta en el Controller)
 public record CreateTraspasoProgramadoRequest(
     Guid CuentaOrigenId,
     Guid CuentaDestinoId,
     decimal Importe,
     DateTime FechaEjecucion,
     string Frecuencia,
-    Guid UsuarioId,
     string? Descripcion
 );
 
@@ -105,7 +130,6 @@ public record UpdateTraspasoProgramadoRequest(
     decimal Importe,
     DateTime FechaEjecucion,
     string Frecuencia,
-    Guid UsuarioId,
     string HangfireJobId,
     string? Descripcion
 );

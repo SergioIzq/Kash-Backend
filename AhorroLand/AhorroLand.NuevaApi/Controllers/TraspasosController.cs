@@ -1,9 +1,11 @@
-using AhorroLand.Application.Features.Traspasos.Commands;
+﻿using AhorroLand.Application.Features.Traspasos.Commands;
 using AhorroLand.Application.Features.Traspasos.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -16,16 +18,31 @@ public class TraspasosController : AbsController
     {
     }
 
-    [Authorize]
+    /// <summary>
+    /// Obtiene lista paginada de traspasos del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetTraspasosPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear query filtrando por usuario
+        var query = new GetTraspasosPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID
+        };
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -34,29 +51,32 @@ public class TraspasosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTraspasoRequest request)
     {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
         var command = new CreateTraspasoCommand
         {
             CuentaOrigenId = request.CuentaOrigenId,
             CuentaDestinoId = request.CuentaDestinoId,
-            UsuarioId = request.UsuarioId,
+            UsuarioId = usuarioId, // 👈 Seguridad: Usar ID validado
             Importe = request.Importe,
             Fecha = request.Fecha,
             Descripcion = request.Descripcion
         };
 
         var result = await _sender.Send(command);
+
+        // Uso seguro de HandleResultForCreation
         return HandleResultForCreation(
             result,
             nameof(GetById),
-            new { id = result.Value }
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTraspasoRequest request)
     {
@@ -74,7 +94,6 @@ public class TraspasosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -84,6 +103,7 @@ public class TraspasosController : AbsController
     }
 }
 
+// DTOs
 public record CreateTraspasoRequest(
     Guid CuentaOrigenId,
     Guid CuentaDestinoId,

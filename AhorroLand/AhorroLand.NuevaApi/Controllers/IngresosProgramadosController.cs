@@ -1,9 +1,11 @@
-using AhorroLand.Application.Features.IngresosProgramados.Commands;
+﻿using AhorroLand.Application.Features.IngresosProgramados.Commands;
 using AhorroLand.Application.Features.IngresosProgramados.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -16,16 +18,28 @@ public class IngresosProgramadosController : AbsController
     {
     }
 
-    [Authorize]
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetIngresosProgramadosPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario de forma segura
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Query filtrada por usuario
+        var query = new GetIngresosProgramadosPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // 👈 Asignación crítica
+        };
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -34,10 +48,18 @@ public class IngresosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoProgramadoRequest request)
     {
+        // 1. Obtener ID del usuario
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear comando con UsuarioId inyectado
         var command = new CreateIngresoProgramadoCommand
         {
             Importe = request.Importe,
@@ -51,18 +73,19 @@ public class IngresosProgramadosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
+            UsuarioId = usuarioId.Value // 👈 Seguridad
         };
 
         var result = await _sender.Send(command);
 
+        // 3. Respuesta segura
         return HandleResultForCreation(
-           result,
-        nameof(GetById),
-    new { id = result.Value }
-          );
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngresoProgramadoRequest request)
     {
@@ -90,7 +113,6 @@ public class IngresosProgramadosController : AbsController
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -100,6 +122,7 @@ public class IngresosProgramadosController : AbsController
     }
 }
 
+// DTOs
 public record CreateIngresoProgramadoRequest(
     decimal Importe,
     string Frecuencia,
@@ -109,8 +132,8 @@ public record CreateIngresoProgramadoRequest(
     string ConceptoNombre,
     Guid CategoriaId,
     Guid ClienteId,
- string ClienteNombre,
-  Guid PersonaId,
+    string ClienteNombre,
+    Guid PersonaId,
     string PersonaNombre,
     Guid CuentaId,
     string CuentaNombre,
@@ -121,16 +144,16 @@ public record CreateIngresoProgramadoRequest(
 public record UpdateIngresoProgramadoRequest(
     decimal Importe,
     string Frecuencia,
-DateTime FechaEjecucion,
- string? Descripcion,
+    DateTime FechaEjecucion,
+    string? Descripcion,
     Guid ConceptoId,
     string ConceptoNombre,
     Guid CategoriaId,
     Guid ClienteId,
-string ClienteNombre,
-  Guid PersonaId,
+    string ClienteNombre,
+    Guid PersonaId,
     string PersonaNombre,
- Guid CuentaId,
+    Guid CuentaId,
     string CuentaNombre,
     Guid FormaPagoId,
     string FormaPagoNombre

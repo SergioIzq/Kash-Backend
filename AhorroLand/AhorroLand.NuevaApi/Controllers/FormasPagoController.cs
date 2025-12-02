@@ -1,12 +1,13 @@
-using AhorroLand.Application.Features.FormasPago.Commands;
+ï»¿using AhorroLand.Application.Features.FormasPago.Commands;
 using AhorroLand.Application.Features.FormasPago.Queries;
 using AhorroLand.Application.Features.FormasPago.Queries.Recent;
-using AhorroLand.Application.Features.FormasPago.Queries.Search;
+using AhorroLand.Application.Features.FormasPago.Queries.Search; // AsegÃºrate de tener este namespace
 using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -19,66 +20,75 @@ public class FormasPagoController : AbsController
     {
     }
 
-    [Authorize]
+    /// <summary>
+    /// Obtiene lista paginada de formas de pago del usuario autenticado.
+    /// </summary>
     [HttpGet]
+    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetFormasPagoPagedListQuery(page, pageSize);
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        // 2. Crear query filtrando por usuario
+        var query = new GetFormasPagoPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId.Value // ðŸ‘ˆ IMPORTANTE: Asignar el ID
+        };
+
         var result = await _sender.Send(query);
-   return HandleResult(result); // ??
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// ?? NUEVO: Búsqueda rápida para autocomplete (selectores asíncronos).
+    /// BÃºsqueda rÃ¡pida para autocomplete.
     /// </summary>
-    [Authorize]
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-  ?? User.FindFirst("sub")?.Value
- ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-     return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
         var query = new SearchFormasPagoQuery(search, limit)
-    {
- UsuarioId = usuarioId
+        {
+            UsuarioId = usuarioId.Value
         };
 
-  var result = await _sender.Send(query);
-        return HandleResult(result); // ??
+        var result = await _sender.Send(query);
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// ?? NUEVO: Obtiene las formas de pago más recientes del usuario.
+    /// Obtiene las formas de pago mÃ¡s recientes.
     /// </summary>
-    [Authorize]
     [HttpGet("recent")]
-public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
+    public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-     var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-   ?? User.FindFirst("sub")?.Value
-   ?? User.FindFirst("userId")?.Value;
+        var usuarioId = GetCurrentUserId();
 
-   if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        if (usuarioId is null)
         {
-        return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
-  }
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
 
-      var query = new GetRecentFormasPagoQuery(limit)
+        var query = new GetRecentFormasPagoQuery(limit)
         {
- UsuarioId = usuarioId
+            UsuarioId = usuarioId.Value
         };
 
-  var result = await _sender.Send(query);
-        return HandleResult(result); // ??
+        var result = await _sender.Send(query);
+        return HandleResult(result);
     }
 
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -87,40 +97,41 @@ public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateFormaPagoRequest request)
     {
- var command = new CreateFormaPagoCommand
+        // AsignaciÃ³n inteligente de UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+
+        var command = new CreateFormaPagoCommand
         {
-     Nombre = request.Nombre,
-       UsuarioId = request.UsuarioId
+            Nombre = request.Nombre,
+            UsuarioId = usuarioId
         };
 
- var result = await _sender.Send(command);
+        var result = await _sender.Send(command);
 
-    return HandleResultForCreation(
-  result,
- nameof(GetById),
-    new { id = result.Value }
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
         );
     }
 
-    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateFormaPagoRequest request)
     {
- var command = new UpdateFormaPagoCommand
+        var command = new UpdateFormaPagoCommand
         {
             Id = id,
-     Nombre = request.Nombre
+            Nombre = request.Nombre
         };
 
-    var result = await _sender.Send(command);
+        var result = await _sender.Send(command);
         return HandleResult(result);
     }
 
-    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -130,6 +141,7 @@ public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     }
 }
 
+// DTOs
 public record CreateFormaPagoRequest(
     string Nombre,
     Guid UsuarioId
