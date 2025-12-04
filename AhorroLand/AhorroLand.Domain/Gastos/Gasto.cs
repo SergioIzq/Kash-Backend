@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Gasto : AbsEntity<GastoId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Gasto() : base(new GastoId(Guid.Empty))
+    private Gasto() : base(GastoId.Create(Guid.Empty).Value)
     {
     }
 
@@ -70,7 +70,7 @@ FechaRegistro fecha,
         Descripcion? descripcion)
     {
         var gasto = new Gasto(
-            new GastoId(Guid.NewGuid()),
+            GastoId.Create(Guid.NewGuid()).Value,
             importe,
      fecha,
    conceptoId,

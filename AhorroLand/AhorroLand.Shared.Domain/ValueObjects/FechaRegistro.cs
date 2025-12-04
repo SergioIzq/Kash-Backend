@@ -6,6 +6,12 @@ public readonly record struct FechaRegistro
 {
     public DateTime Valor { get; }
 
+    [Obsolete("No usar directamente. Utiliza FechaRegistro.Create() para validación o FechaRegistro.CreateFromDatabase() desde infraestructura.", error: true)]
+    public FechaRegistro()
+    {
+        Valor = DateTime.MinValue;
+    }
+
     private FechaRegistro(DateTime valor)
     {
         Valor = valor;

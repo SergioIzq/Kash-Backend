@@ -10,7 +10,7 @@ namespace AhorroLand.Domain;
 [Table("gastos_programados")]
 public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
 {
-    private GastoProgramado() : base(new GastoProgramadoId(Guid.Empty))
+    private GastoProgramado() : base(GastoProgramadoId.Create(Guid.Empty).Value)
     {
     }
 
@@ -68,7 +68,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         Descripcion? descripcion = null)
     {
         var gasto = new GastoProgramado(
-            new GastoProgramadoId(Guid.NewGuid()),
+            GastoProgramadoId.Create(Guid.NewGuid()).Value,
             importe,
             fechaEjecucion,
             conceptoId,

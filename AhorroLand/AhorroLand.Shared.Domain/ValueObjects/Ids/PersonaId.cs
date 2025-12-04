@@ -7,6 +7,12 @@ public readonly record struct PersonaId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza PersonaId.Create() para validación o PersonaId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public PersonaId()
+    {
+        Value = Guid.Empty;
+    }
+
     private PersonaId(Guid value)
     {
         Value = value;

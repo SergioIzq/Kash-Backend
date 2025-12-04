@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Ingreso : AbsEntity<IngresoId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Ingreso() : base(new IngresoId(Guid.Empty))
+    private Ingreso() : base(IngresoId.Create(Guid.Empty).Value)
     {
     }
 
@@ -67,7 +67,7 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         Descripcion? descripcion)
     {
         var ingreso = new Ingreso(
-            new IngresoId(Guid.NewGuid()),
+            IngresoId.Create(Guid.NewGuid()).Value,
             importe,
             fecha,
             conceptoId,

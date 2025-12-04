@@ -9,6 +9,12 @@ public readonly record struct ConfirmationToken
 
     private const int TokenLength = 32;
 
+    [Obsolete("No usar directamente. Utiliza ConfirmationToken.Create() para validación, ConfirmationToken.GenerateNew() para generar, o ConfirmationToken.CreateFromDatabase() desde infraestructura.", error: true)]
+    public ConfirmationToken()
+    {
+        Value = string.Empty;
+    }
+
     private ConfirmationToken(string value)
     {
         Value = value;

@@ -7,7 +7,13 @@ public readonly record struct CategoriaId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
-    private CategoriaId(Guid value)
+    [Obsolete("No usar directamente. Utiliza CategoriaId.Create() para validación o CategoriaId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public CategoriaId()
+    {
+        Value = Guid.Empty;
+    }
+
+    public CategoriaId(Guid value)
     {
         Value = value;
     }
@@ -22,5 +28,5 @@ public readonly record struct CategoriaId : IGuidValueObject
         return Result.Success(new CategoriaId(value));
     }
 
-    public static CategoriaId CreateFromDatabase(Guid value) => new CategoriaId(value);
+    public static CategoriaId CreateFromDatabase(Guid value) => new(value);
 }

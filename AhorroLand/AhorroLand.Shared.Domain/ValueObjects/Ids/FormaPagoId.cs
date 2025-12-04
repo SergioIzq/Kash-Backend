@@ -7,6 +7,12 @@ public readonly record struct FormaPagoId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza FormaPagoId.Create() para validación o FormaPagoId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public FormaPagoId()
+    {
+        Value = Guid.Empty;
+    }
+
     private FormaPagoId(Guid value)
     {
         Value = value;

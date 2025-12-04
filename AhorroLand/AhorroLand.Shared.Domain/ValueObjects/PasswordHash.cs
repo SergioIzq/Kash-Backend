@@ -6,6 +6,12 @@ public readonly record struct PasswordHash
 {
     public string Value { get; }
 
+    [Obsolete("No usar directamente. Utiliza PasswordHash.Create() para validación o PasswordHash.CreateFromDatabase() desde infraestructura.", error: true)]
+    public PasswordHash()
+    {
+        Value = string.Empty;
+    }
+
     private PasswordHash(string value)
     {
         Value = value;

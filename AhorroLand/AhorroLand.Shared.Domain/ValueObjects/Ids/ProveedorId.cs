@@ -7,6 +7,12 @@ public readonly record struct ProveedorId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza ProveedorId.Create() para validación o ProveedorId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public ProveedorId()
+    {
+        Value = Guid.Empty;
+    }
+
     private ProveedorId(Guid value)
     {
         Value = value;

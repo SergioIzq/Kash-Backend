@@ -7,6 +7,12 @@ public readonly record struct ConceptoId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza ConceptoId.Create() para validación o ConceptoId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public ConceptoId()
+    {
+        Value = Guid.Empty;
+    }
+
     private ConceptoId(Guid value)
     {
         Value = value;

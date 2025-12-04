@@ -7,6 +7,12 @@ public readonly record struct Apellido
     public const int MaxLength = 150;
     public string Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza Apellido.Create() para validación o Apellido.CreateFromDatabase() desde infraestructura.", error: true)]
+    public Apellido()
+    {
+        Value = string.Empty;
+    }
+
     private Apellido(string value)
     {
         Value = value;
@@ -14,6 +20,10 @@ public readonly record struct Apellido
 
     public static Result<Apellido> Create(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Result.Failure<Apellido>(Error.Validation("El apellido es obligatorio."));
+        }
 
         var trimmedValue = value.Trim();
 

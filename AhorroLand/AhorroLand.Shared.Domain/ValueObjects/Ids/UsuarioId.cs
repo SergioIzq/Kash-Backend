@@ -7,10 +7,16 @@ public readonly record struct UsuarioId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza UsuarioId.Create() para validación o UsuarioId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public UsuarioId()
+    {
+        Value = Guid.Empty;
+    }
+
     // ✅ CONSTRUCTOR (Infraestructura):
     // Debe ser permisivo porque EF Core y los serializadores (JSON) 
     // a veces instancian esto con valores por defecto (Guid.Empty) temporalmente.
-    private UsuarioId(Guid value)
+    public UsuarioId(Guid value)
     {
         Value = value;
     }

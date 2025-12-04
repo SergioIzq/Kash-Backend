@@ -6,6 +6,12 @@ public readonly record struct FechaEjecucion
 {
     public DateTime Valor { get; }
 
+    [Obsolete("No usar directamente. Utiliza FechaEjecucion.Create() para validación o FechaEjecucion.CreateFromDatabase() desde infraestructura.", error: true)]
+    public FechaEjecucion()
+    {
+        Valor = DateTime.MinValue;
+    }
+
     private FechaEjecucion(DateTime valor)
     {
         Valor = valor;

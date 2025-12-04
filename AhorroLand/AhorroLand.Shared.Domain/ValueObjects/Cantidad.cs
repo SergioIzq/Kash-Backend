@@ -6,6 +6,12 @@ public readonly record struct Cantidad
 {
     public decimal Valor { get; }
 
+    [Obsolete("No usar directamente. Utiliza Cantidad.Create() para validación o Cantidad.CreateFromDatabase() desde infraestructura.", error: true)]
+    public Cantidad()
+    {
+        Valor = 0;
+    }
+
     private Cantidad(decimal valor)
     {
         Valor = valor;

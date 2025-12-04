@@ -7,6 +7,12 @@ public readonly record struct CuentaId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza CuentaId.Create() para validación o CuentaId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public CuentaId()
+    {
+        Value = Guid.Empty;
+    }
+
     private CuentaId(Guid value)
     {
         Value = value;

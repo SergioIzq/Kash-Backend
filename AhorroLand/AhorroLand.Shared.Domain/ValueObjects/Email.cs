@@ -10,6 +10,12 @@ public readonly record struct Email
 
     public string Value { get; }
 
+    [Obsolete("No usar directamente. Utiliza Email.Create() para validación o Email.CreateFromDatabase() desde infraestructura.", error: true)]
+    public Email()
+    {
+        Value = string.Empty;
+    }
+
     private Email(string value)
     {
         Value = value;

@@ -10,7 +10,7 @@ namespace AhorroLand.Domain;
 [Table("traspasos_programados")]
 public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
 {
-    private TraspasoProgramado() : base(new TraspasoProgramadoId(Guid.Empty))
+    private TraspasoProgramado() : base(TraspasoProgramadoId.Create(Guid.Empty).Value)
     {
 
     }
@@ -72,7 +72,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
             return Result.Failure<TraspasoProgramado>(Error.Validation("El importe debe ser mayor a cero."));
 
         var traspaso = new TraspasoProgramado(
-            new TraspasoProgramadoId(Guid.NewGuid()),
+            TraspasoProgramadoId.Create(Guid.NewGuid()).Value,
             cuentaOrigenId,
             cuentaDestinoId,
             importe,

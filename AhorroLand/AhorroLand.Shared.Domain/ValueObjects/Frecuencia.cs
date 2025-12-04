@@ -8,6 +8,12 @@ public readonly record struct Frecuencia
 
     private static readonly string[] AllowedFrequencies = new[] { "Diaria", "Semanal", "Mensual", "Anual" };
 
+    [Obsolete("No usar directamente. Utiliza Frecuencia.Create() para validación o Frecuencia.CreateFromDatabase() desde infraestructura.", error: true)]
+    public Frecuencia()
+    {
+        Value = string.Empty;
+    }
+
     private Frecuencia(string value)
     {
         Value = value;

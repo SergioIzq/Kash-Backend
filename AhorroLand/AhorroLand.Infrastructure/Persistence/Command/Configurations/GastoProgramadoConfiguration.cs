@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => new GastoProgramadoId(value)
+                value => GastoProgramadoId.Create(value).Value
             ); ;
 
             // ✅ Configurar conversión de Value Object Cantidad

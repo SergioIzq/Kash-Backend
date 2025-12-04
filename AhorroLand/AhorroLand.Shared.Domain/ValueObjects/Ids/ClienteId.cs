@@ -7,6 +7,12 @@ public readonly record struct ClienteId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
+    [Obsolete("No usar directamente. Utiliza ClienteId.Create() para validación o ClienteId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public ClienteId()
+    {
+        Value = Guid.Empty;
+    }
+
     private ClienteId(Guid value)
     {
         Value = value;

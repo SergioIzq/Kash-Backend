@@ -7,7 +7,13 @@ public readonly record struct TraspasoId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
-    public TraspasoId(Guid value)
+    [Obsolete("No usar directamente. Utiliza TraspasoId.Create() para validación o TraspasoId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public TraspasoId()
+    {
+        Value = Guid.Empty;
+    }
+
+    private TraspasoId(Guid value)
     {
         Value = value;
     }

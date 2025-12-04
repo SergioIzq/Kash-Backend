@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 [Table("traspasos")]
 public sealed class Traspaso : AbsEntity<TraspasoId>
 {
-    private Traspaso() : base(new TraspasoId(Guid.Empty))
+    private Traspaso() : base(TraspasoId.Create(Guid.Empty).Value)
     {
 
     }
@@ -55,7 +55,7 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
         }
 
         var traspaso = new Traspaso(
-            new TraspasoId(Guid.NewGuid()),
+            TraspasoId.Create(Guid.NewGuid()).Value,
             cuentaOrigen,
             cuentaDestino,
             importe,

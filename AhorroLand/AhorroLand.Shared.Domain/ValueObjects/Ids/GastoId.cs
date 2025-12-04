@@ -7,7 +7,13 @@ public readonly record struct GastoId : IGuidValueObject
 {
     public Guid Value { get; init; }
 
-    public GastoId(Guid value)
+    [Obsolete("No usar directamente. Utiliza GastoId.Create() para validación o GastoId.CreateFromDatabase() desde infraestructura.", error: true)]
+    public GastoId()
+    {
+        Value = Guid.Empty;
+    }
+
+    private GastoId(Guid value)
     {
         Value = value;
     }
