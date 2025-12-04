@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using AhorroLand.Shared.Domain.Abstractions.Results;
 
 namespace AhorroLand.Shared.Domain.ValueObjects;
 
@@ -9,21 +10,28 @@ public readonly record struct Email
 
     public string Value { get; }
 
-    public Email(string value)
+    private Email(string value)
+    {
+        Value = value;
+    }
+
+    public static Result<Email> Create(string value)
     {
         // 🔑 Regla de Negocio: No puede ser nulo o vacío
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("El correo electrónico no puede estar vacío.", nameof(value));
+            return Result.Failure<Email>(Error.Validation("El correo electrónico no puede estar vacío."));
         }
 
         // 🔑 Regla de Negocio: Validar formato del email
         if (!EmailRegex.IsMatch(value))
         {
-            throw new FormatException($"La dirección de correo '{value}' no tiene un formato válido.");
+            return Result.Failure<Email>(Error.Validation($"La dirección de correo '{value}' no tiene un formato válido."));
         }
 
         // 🔑 Regla de Negocio: Normalizar el correo a minúsculas
-        Value = value.ToLowerInvariant();
+        return Result.Success(new Email(value.ToLowerInvariant()));
     }
+
+    public static Email CreateFromDatabase(string value) => new Email(value.ToLowerInvariant());
 }

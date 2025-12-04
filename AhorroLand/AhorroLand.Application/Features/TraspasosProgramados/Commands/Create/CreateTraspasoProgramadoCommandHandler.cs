@@ -36,8 +36,8 @@ public sealed class CreateTraspasoProgramadoCommandHandler
         var validationTasks = new[]
         {
             // Validaciones obligatorias
-            _validator.ExistsAsync < Cuenta, CuentaId >(new CuentaId(command.CuentaOrigenId)),
-            _validator.ExistsAsync < Cuenta, CuentaId >(new CuentaId(command.CuentaDestinoId)),
+            _validator.ExistsAsync < Cuenta, CuentaId >(CuentaId.Create(command.CuentaOrigenId).Value),
+            _validator.ExistsAsync < Cuenta, CuentaId >(CuentaId.Create(command.CuentaDestinoId).Value),
         };
 
         // Espera a que todas las consultas terminen al mismo tiempo.
@@ -56,14 +56,14 @@ public sealed class CreateTraspasoProgramadoCommandHandler
         try
         {
             // Creación de VOs, que ahora son los que lanzan ArgumentException
-            var importe = new Cantidad(command.Importe);
-            var frecuencia = new Frecuencia(command.Frecuencia);
+            var importe = Cantidad.Create(command.Importe).Value;
+            var frecuencia = Frecuencia.Create(command.Frecuencia).Value;
             var descripcion = new Descripcion(command.Descripcion ?? string.Empty);
 
             // Creamos VOs de Identidad
-            var cuentaOrigenId = new CuentaId(command.CuentaOrigenId);
-            var cuentaDestinoId = new CuentaId(command.CuentaDestinoId);
-            var usuarioId = new UsuarioId(command.UsuarioId);
+            var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
+            var cuentaDestinoId = CuentaId.Create(command.CuentaDestinoId).Value;
+            var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
             // Uso del servicio de infraestructura para generar el JobId
             var hangfireJobId = _jobSchedulingService.GenerateJobId();

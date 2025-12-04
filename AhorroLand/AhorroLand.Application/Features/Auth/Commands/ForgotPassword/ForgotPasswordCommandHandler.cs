@@ -31,7 +31,7 @@ public sealed class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswor
     {
 
         // 1. Buscar usuario por correo
-        var emailVO = new Email(request.Email);
+        var emailVO = Email.Create(request.Email).Value;
         var usuario = await _usuarioReadRepository.GetByEmailAsync(emailVO, cancellationToken);
 
         // SEGURIDAD: Si el usuario no existe, no hacemos nada pero retornamos Success

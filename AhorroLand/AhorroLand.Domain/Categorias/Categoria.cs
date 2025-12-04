@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Categoria : AbsEntity<CategoriaId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Categoria() : base(new CategoriaId(Guid.Empty))
+    private Categoria() : base(CategoriaId.Create(Guid.Empty).Value)
     {
         // EF Core usará este constructor y luego establecerá las propiedades
     }
@@ -27,7 +27,7 @@ public sealed class Categoria : AbsEntity<CategoriaId>
 
     public static Categoria Create(Nombre nombre, UsuarioId usuarioId, Descripcion? descripcion = null)
     {
-        var categoria = new Categoria(new CategoriaId(Guid.NewGuid()), nombre, usuarioId, descripcion);
+        var categoria = new Categoria(CategoriaId.Create(Guid.NewGuid()).Value, nombre, usuarioId, descripcion);
 
         return categoria;
     }

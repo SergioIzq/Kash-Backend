@@ -29,8 +29,8 @@ public sealed class UpdateConceptoCommandHandler
     {
         // 1. Crear el Value Object 'Nombre' a partir del string del comando.
         // Esto automáticamente ejecuta las reglas de validación del nombre.
-        var nuevoNombreVO = new Nombre(command.Nombre);
-        var categoriaIdVO = new CategoriaId(command.CategoriaId);
+        var nuevoNombreVO = Nombre.Create(command.Nombre).Value;
+        var categoriaIdVO = CategoriaId.Create(command.CategoriaId).Value;
 
         entity.Update(
             nuevoNombreVO,

@@ -29,7 +29,7 @@ public sealed class UpdateProveedorCommandHandler
     {
         // 1. Crear el Value Object 'Nombre' a partir del string del comando.
         // Esto automáticamente ejecuta las reglas de validación del nombre.
-        var nuevoNombreVO = new Nombre(command.Nombre);
+        var nuevoNombreVO = Nombre.Create(command.Nombre).Value;
 
         entity.Update(
             nuevoNombreVO

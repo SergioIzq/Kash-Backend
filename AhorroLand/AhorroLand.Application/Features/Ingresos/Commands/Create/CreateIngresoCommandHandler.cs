@@ -30,12 +30,12 @@ public sealed class CreateIngresoCommandHandler
     {
         var existenceTasks = new List<Task<bool>>
         {
-            _validator.ExistsAsync<Concepto, ConceptoId>(new ConceptoId(command.ConceptoId)),
-            _validator.ExistsAsync<Categoria, CategoriaId>(new CategoriaId(command.CategoriaId)),
-            _validator.ExistsAsync < Cuenta, CuentaId >(new CuentaId(command.CuentaId)),
-            _validator.ExistsAsync < FormaPago, FormaPagoId >(new FormaPagoId(command.FormaPagoId)),
-            _validator.ExistsAsync < Cliente, ClienteId >(new ClienteId(command.ClienteId)),
-            _validator.ExistsAsync < Persona, PersonaId >(new PersonaId(command.PersonaId))
+            _validator.ExistsAsync<Concepto, ConceptoId>(ConceptoId.Create(command.ConceptoId).Value),
+            _validator.ExistsAsync<Categoria, CategoriaId>(CategoriaId.Create(command.CategoriaId).Value),
+            _validator.ExistsAsync < Cuenta, CuentaId >(CuentaId.Create(command.CuentaId).Value),
+            _validator.ExistsAsync < FormaPago, FormaPagoId >(FormaPagoId.Create(command.FormaPagoId).Value),
+            _validator.ExistsAsync < Cliente, ClienteId >(ClienteId.Create(command.ClienteId).Value),
+            _validator.ExistsAsync < Persona, PersonaId >(PersonaId.Create(command.PersonaId).Value)
         };
 
         var results = await Task.WhenAll(existenceTasks);
@@ -49,21 +49,21 @@ public sealed class CreateIngresoCommandHandler
         try
         {
             // VOs de Valor
-            var importeVO = new Cantidad(command.Importe);
+            var importeVO = Cantidad.Create(command.Importe).Value;
             var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
-            var fechaVO = new FechaRegistro(command.Fecha);
+            var fechaVO = FechaRegistro.Create(command.Fecha).Value;
 
             // VOs de Identidad y Nombre (Aplanados)
-            var conceptoId = new ConceptoId(command.ConceptoId);
-            var categoriaId = new CategoriaId(command.CategoriaId);
+            var conceptoId = ConceptoId.Create(command.ConceptoId).Value;
+            var categoriaId = CategoriaId.Create(command.CategoriaId).Value;
 
-            var clienteId = new ClienteId(command.ClienteId);
-            var personaId = new PersonaId(command.PersonaId);
+            var clienteId = ClienteId.Create(command.ClienteId).Value;
+            var personaId = PersonaId.Create(command.PersonaId).Value;
 
-            var cuentaId = new CuentaId(command.CuentaId);
-            var formaPagoId = new FormaPagoId(command.FormaPagoId);
+            var cuentaId = CuentaId.Create(command.CuentaId).Value;
+            var formaPagoId = FormaPagoId.Create(command.FormaPagoId).Value;
 
-            var usuarioId = new UsuarioId(command.UsuarioId);
+            var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
             // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO (Ingreso)
             var ingreso = Ingreso.Create(

@@ -22,10 +22,10 @@ namespace AhorroLand.Shared.Application.Mappings
 
             // Mapeo de Primitivo a VO (Para Entidades: string -> Nombre)
             config.ForType<string, Nombre>()
-                  .MapWith(src => new Nombre(src));
+                  .MapWith(src => Nombre.Create(src).Value);
 
             config.ForType<decimal, Cantidad>()
-                  .MapWith(src => new Cantidad(src));
+                  .MapWith(src => Cantidad.Create(src).Value);
         }
     }
 }

@@ -29,8 +29,8 @@ public sealed class ResetPasswordCommandHandler : ICommandHandler<ResetPasswordC
     public async Task<Result> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         // 1. Buscar usuario
-        var emailVO = new Email(request.Email);
-        var usuario = await _usuarioReadRepository.GetByEmailAsync(emailVO, cancellationToken);
+        var emailResult = Email.Create(request.Email);
+        var usuario = await _usuarioReadRepository.GetByEmailAsync(emailResult.Value, cancellationToken);
 
         if (usuario is null)
         {
@@ -39,14 +39,14 @@ public sealed class ResetPasswordCommandHandler : ICommandHandler<ResetPasswordC
 
         // 2. Hash de la nueva contraseña
         var hashedPassword = _passwordHasher.HashPassword(request.NewPassword);
-        var passwordHashVO = new PasswordHash(hashedPassword);
+        var passwordHashResult = PasswordHash.Create(hashedPassword);
 
         // 3. Lógica de Dominio: Cambiar contraseña
         // Este método en el dominio debe verificar:
         // - Que el token coincida
         // - Que el token no haya expirado
         // - Si es válido, actualiza la password y borra el token usado
-        var resultadoCambio = usuario.RestablecerContrasena(request.Token, passwordHashVO);
+        var resultadoCambio = usuario.RestablecerContrasena(request.Token, passwordHashResult.Value);
 
         if (resultadoCambio.IsFailure)
         {

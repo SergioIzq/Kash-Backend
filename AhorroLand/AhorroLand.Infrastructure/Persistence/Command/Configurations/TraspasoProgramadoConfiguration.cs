@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => new TraspasoProgramadoId(value)
+                value => TraspasoProgramadoId.Create(value).Value
             ); ;
 
             // ? Configurar conversión de Value Object Cantidad
@@ -25,7 +25,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
   .IsRequired()
     .HasConversion(
          importe => importe.Valor,
-      value => new Cantidad(value));
+      value => Cantidad.Create(value).Value);
 
     // ? Configurar conversión de Frecuencia
             builder.Property(e => e.Frecuencia)
@@ -34,7 +34,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
       .IsRequired()
        .HasConversion(
      frecuencia => frecuencia.Value,
-       value => new Frecuencia(value));
+       value => Frecuencia.Create(value).Value);
 
             // ? Configurar conversión de Value Objects de IDs
      builder.Property(e => e.CuentaOrigenId)
@@ -42,21 +42,21 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
     .IsRequired()
  .HasConversion(
            cuentaId => cuentaId.Value,
-            value => new CuentaId(value));
+            value => CuentaId.Create(value).Value);
 
     builder.Property(e => e.CuentaDestinoId)
           .HasColumnName("id_cuenta_destino")
        .IsRequired()
     .HasConversion(
          cuentaId => cuentaId.Value,
-    value => new CuentaId(value));
+    value => CuentaId.Create(value).Value);
 
        builder.Property(e => e.UsuarioId)
                 .HasColumnName("id_usuario")
       .IsRequired()
                 .HasConversion(
          usuarioId => usuarioId.Value,
-      value => new UsuarioId(value));
+      value => UsuarioId.Create(value).Value);
 
             // ? Configurar Descripcion nullable
        builder.Property(e => e.Descripcion)

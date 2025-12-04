@@ -29,26 +29,26 @@ public sealed class UpdateGastoCommandHandler
 
     protected override void ApplyChanges(Gasto entity, UpdateGastoCommand command)
     {
-        var importeVO = new Cantidad(command.Importe);
-        var fechaVO = new FechaRegistro(command.Fecha);
-        var conceptoIdVO = new ConceptoId(command.ConceptoId);
-        var categoriaIdVO = new CategoriaId(command.CategoriaId);
-        var proveedorIdVO = new ProveedorId(command.ProveedorId);
-        var personaIdVO = new PersonaId(command.PersonaId);
-        var cuentaIdVO = new CuentaId(command.CuentaId);
-        var formaPagoIdVO = new FormaPagoId(command.FormaPagoId);
-        var usuarioIdVO = new UsuarioId(command.UsuarioId);
+        var importeVO = Cantidad.Create(command.Importe).Value;
+        var fechaVO = FechaRegistro.Create(command.Fecha).Value;
+        var conceptoIdVO = ConceptoId.Create(command.ConceptoId).Value;
+        var categoriaIdVO = CategoriaId.Create(command.CategoriaId).Value;
+        var proveedorIdVO = ProveedorId.Create(command.ProveedorId).Value;
+        var personaIdVO = PersonaId.Create(command.PersonaId).Value;
+        var cuentaIdVO = CuentaId.Create(command.CuentaId).Value;
+        var formaPagoIdVO = FormaPagoId.Create(command.FormaPagoId).Value;
+        var usuarioIdVO = UsuarioId.Create(command.UsuarioId).Value;
         var descripcionVO = new Descripcion(command.Descripcion);
 
 
         var existenceTasks = new List<Task<bool>>
         {
-            _validator.ExistsAsync < Concepto, ConceptoId >(new ConceptoId(command.ConceptoId)),
-            _validator.ExistsAsync < Categoria, CategoriaId >(new CategoriaId(command.CategoriaId)),
-            _validator.ExistsAsync < Cuenta, CuentaId >(new CuentaId(command.CuentaId)),
-            _validator.ExistsAsync < FormaPago, FormaPagoId >(new FormaPagoId(command.FormaPagoId)),
-            _validator.ExistsAsync < Proveedor, ProveedorId >(new ProveedorId(command.ProveedorId)),
-            _validator.ExistsAsync < Persona, PersonaId >(new PersonaId(command.PersonaId))
+            _validator.ExistsAsync < Concepto, ConceptoId >(ConceptoId.Create(command.ConceptoId).Value),
+            _validator.ExistsAsync < Categoria, CategoriaId >(CategoriaId.Create(command.CategoriaId).Value),
+            _validator.ExistsAsync < Cuenta, CuentaId >(CuentaId.Create(command.CuentaId).Value),
+            _validator.ExistsAsync < FormaPago, FormaPagoId >(FormaPagoId.Create(command.FormaPagoId).Value),
+            _validator.ExistsAsync < Proveedor, ProveedorId >(ProveedorId.Create(command.ProveedorId).Value),
+            _validator.ExistsAsync < Persona, PersonaId >(PersonaId.Create(command.PersonaId).Value)
         };
 
         entity.Update(

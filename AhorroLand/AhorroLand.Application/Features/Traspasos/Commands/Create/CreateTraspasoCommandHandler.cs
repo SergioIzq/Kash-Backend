@@ -32,8 +32,8 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
         // 1. VALIDACIÓN EN PARALELO de existencia (SELECT 1)
         var validationTasks = new[]
         {
-            _validator.ExistsAsync<Cuenta,CuentaId>(new CuentaId(command.CuentaOrigenId)),
-            _validator.ExistsAsync<Cuenta, CuentaId>(new CuentaId(command.CuentaDestinoId)),
+            _validator.ExistsAsync<Cuenta,CuentaId>(CuentaId.Create(command.CuentaOrigenId).Value),
+            _validator.ExistsAsync<Cuenta, CuentaId>(CuentaId.Create(command.CuentaDestinoId).Value),
         };
 
         // Espera de forma asíncrona y eficiente
@@ -59,14 +59,14 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
         try
         {
             // Creamos VOs de valor
-            var importeVO = new Cantidad(command.Importe);
-            var fechaVO = new FechaRegistro(command.Fecha);
+            var importeVO = Cantidad.Create(command.Importe).Value;
+            var fechaVO = FechaRegistro.Create(command.Fecha).Value;
             var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
-            var usuarioIdVO = new UsuarioId(command.UsuarioId);
+            var usuarioIdVO = UsuarioId.Create(command.UsuarioId).Value;
 
             // Creamos VOs de identidad
-            var cuentaOrigenId = new CuentaId(command.CuentaOrigenId);
-            var cuentaDestinoId = new CuentaId(command.CuentaDestinoId);
+            var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
+            var cuentaDestinoId = CuentaId.Create(command.CuentaDestinoId).Value;
 
             // Creación de la Entidad (solo con VOs de identidad y valor)
             var traspaso = Traspaso.Create(cuentaOrigenId, cuentaDestinoId, importeVO, fechaVO, usuarioIdVO, descripcionVO);

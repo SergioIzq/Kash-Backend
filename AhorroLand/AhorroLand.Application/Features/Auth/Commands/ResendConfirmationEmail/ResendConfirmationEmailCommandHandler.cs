@@ -32,7 +32,7 @@ public sealed class ResendConfirmationEmailCommandHandler : ICommandHandler<Rese
     public async Task<Result> Handle(ResendConfirmationEmailCommand request, CancellationToken cancellationToken)
     {
         // 1. Buscar usuario
-        var emailVo = new Email(request.Correo);
+        var emailVo = Email.Create(request.Correo).Value;
         var user = await _usuarioReadRepository.GetByEmailAsync(emailVo, cancellationToken);
 
         // 2. Validaciones

@@ -7,21 +7,23 @@ public readonly record struct Apellido
     public const int MaxLength = 150;
     public string Value { get; init; }
 
-    public Apellido(string value)
+    private Apellido(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            Result.Failure<Apellido>(Error.Validation("El apellido es obligatorio."));
-        }
+        Value = value;
+    }
+
+    public static Result<Apellido> Create(string value)
+    {
 
         var trimmedValue = value.Trim();
 
         if (trimmedValue.Length > MaxLength)
         {
-            Result.Failure<Apellido>(Error.Validation($"El apellido no puede exceder los {MaxLength} caracteres."));
+            return Result.Failure<Apellido>(Error.Validation($"El apellido no puede exceder los {MaxLength} caracteres."));
         }
 
-        Value = trimmedValue;
+        return Result.Success(new Apellido(trimmedValue));
     }
+
     public static Apellido CreateFromDatabase(string value) => new Apellido(value);
 }

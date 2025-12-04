@@ -26,15 +26,15 @@ public sealed class CreateIngresoProgramadoCommandHandler
 
     protected override IngresoProgramado CreateEntity(CreateIngresoProgramadoCommand command)
     {
-        var importeVO = new Cantidad(command.Importe);
-        var frecuenciaVO = new Frecuencia(command.Frecuencia);
+        var importeVO = Cantidad.Create(command.Importe).Value;
+        var frecuenciaVO = Frecuencia.Create(command.Frecuencia).Value;
         var descripcionVO = new Descripcion(command.Descripcion);
-        var conceptoIdVO = new ConceptoId(command.ConceptoId);
-        var categoriaIdVO = new CategoriaId(command.CategoriaId);
-        var clienteIdVO = new ClienteId(command.ClienteId);
-        var personaIdVO = new PersonaId(command.PersonaId);
-        var cuentaIdVO = new CuentaId(command.CuentaId);
-        var formaPagoIdVO = new FormaPagoId(command.FormaPagoId);
+        var conceptoIdVO = ConceptoId.Create(command.ConceptoId).Value;
+        var categoriaIdVO = CategoriaId.Create(command.CategoriaId).Value;
+        var clienteIdVO = ClienteId.Create(command.ClienteId).Value;
+        var personaIdVO = PersonaId.Create(command.PersonaId).Value;
+        var cuentaIdVO = CuentaId.Create(command.CuentaId).Value;
+        var formaPagoIdVO = FormaPagoId.Create(command.FormaPagoId).Value;
 
         // Uso del servicio de infraestructura para generar el JobId
         var hangfireJobId = _jobSchedulingService.GenerateJobId();

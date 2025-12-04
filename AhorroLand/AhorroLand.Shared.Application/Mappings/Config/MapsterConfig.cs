@@ -33,7 +33,7 @@ public static class MapsterConfig
             .MapWith(src => src.Value);
 
         config.NewConfig<Guid, UsuarioId>()
-            .MapWith(src => new UsuarioId(src));
+            .MapWith(src => UsuarioId.Create(src).Value);
 
         // 3. Registrar la configuración como Singleton
         services.AddSingleton(TypeAdapterConfig.GlobalSettings);

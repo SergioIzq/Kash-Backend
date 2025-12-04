@@ -32,7 +32,7 @@ public sealed class CreateConceptoCommandHandler
         CreateConceptoCommand command, CancellationToken cancellationToken)
     {
         // 1. VALIDACIÓN ASÍNCRONA DE EXISTENCIA (SELECT 1)
-        var categoriaExists = await _validator.ExistsAsync<Categoria, CategoriaId>(new CategoriaId(command.CategoriaId));
+        var categoriaExists = await _validator.ExistsAsync<Categoria, CategoriaId>(CategoriaId.Create(command.CategoriaId).Value);
 
         if (!categoriaExists)
         {
@@ -44,11 +44,11 @@ public sealed class CreateConceptoCommandHandler
         // 2. CREACIÓN DE VALUE OBJECTS (VOs)
         try
         {
-            var nombreVO = new Nombre(command.Nombre);
-            var usuarioId = new UsuarioId(command.UsuarioId);
+            var nombreVO = Nombre.Create(command.Nombre).Value;
+            var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
             // Creamos el VO de Identidad para la referencia
-            var categoriaId = new CategoriaId(command.CategoriaId);
+            var categoriaId = CategoriaId.Create(command.CategoriaId).Value;
 
             // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO
             // ? NOTA: Concepto.Create debe aceptar CategoriaId en lugar de la entidad Categoria

@@ -31,8 +31,8 @@ public sealed class CreateClienteCommandHandler
     /// <returns>La nueva entidad Cliente creada.</returns>
     protected override Cliente CreateEntity(CreateClienteCommand command)
     {
-        var nombreVO = new Nombre(command.Nombre);
-        var usuarioIdVO = new UsuarioId(command.UsuarioId);
+        var nombreVO = Nombre.Create(command.Nombre).Value;
+        var usuarioIdVO = UsuarioId.Create(command.UsuarioId).Value;
 
         var newCliente = Cliente.Create(nombreVO, usuarioIdVO);
 

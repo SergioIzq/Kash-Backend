@@ -30,9 +30,9 @@ public sealed class CreateCategoriaCommandHandler
     /// <returns>La nueva entidad Categoria creada.</returns>
     protected override Categoria CreateEntity(CreateCategoriaCommand command)
     {
-        var nombreVO = new Nombre(command.Nombre);
+        var nombreVO = Nombre.Create(command.Nombre).Value;
         var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
-        var usuarioId = new UsuarioId(command.UsuarioId);
+        var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
         var newCategoria = Categoria.Create(
             nombreVO,

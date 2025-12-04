@@ -1,28 +1,34 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.Interfaces;
 
 namespace AhorroLand.Shared.Domain.ValueObjects.Ids;
 
-/// <summary>
-/// 🚀 OPTIMIZADO: Value Object para UsuarioId.
-/// </summary>
 public readonly record struct UsuarioId : IGuidValueObject
 {
-    // Constructor primario sin lógica
     public Guid Value { get; init; }
 
-    // Constructor secundario con validación
-    public UsuarioId(Guid value)
+    // ✅ CONSTRUCTOR (Infraestructura):
+    // Debe ser permisivo porque EF Core y los serializadores (JSON) 
+    // a veces instancian esto con valores por defecto (Guid.Empty) temporalmente.
+    private UsuarioId(Guid value)
     {
-        // 🚀 OPTIMIZACIÓN: Validación más rápida con comparación directa
-        if (value == Guid.Empty)
-            throw new ArgumentException("UsuarioId no puede ser Guid.Empty", nameof(value));
-
         Value = value;
     }
 
-    // 🚀 OPTIMIZACIÓN: Factory method estático para evitar boxing
-    public static UsuarioId Create(Guid value) => new(value);
+    // ✅ FACTORY METHOD (Dominio):
+    // Aquí es donde aplicas las reglas de negocio.
+    // Tu código de aplicación SIEMPRE debe usar UsuarioId.Create(...)
+    public static Result<UsuarioId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            return Result.Failure<UsuarioId>(Error.Validation("El ID del usuario no puede estar vacío."));
+        }
 
-    // Override ToString para logging eficiente
+        return Result.Success(new UsuarioId(value));
+    }
+
+    public static UsuarioId CreateFromDatabase(Guid value) => new UsuarioId(value);
+
     public override string ToString() => Value.ToString("D");
 }

@@ -284,8 +284,8 @@ namespace AhorroLand.Infrastructure.Persistence.Query
 
             var sql = BuildGetByIdQuery();
             var result = await connection.QueryFirstOrDefaultAsync<TReadModel>(
-   new CommandDefinition(sql, parameters, cancellationToken: cancellationToken)
-   );
+                       new CommandDefinition(sql, parameters, cancellationToken: cancellationToken)
+                       );
 
             // 3. Guardar en cache si existe
             if (result != null && _cache != null)
@@ -535,6 +535,15 @@ LIMIT @limit";
          new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
         }
 
+        public virtual async Task InvalidateCacheAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            if (_cache != null)
+            {
+                var cacheKey = $"{_tableName}:{id}";
+                await _cache.RemoveAsync(cacheKey, cancellationToken);
+            }
+        }
         #endregion
     }
+
 }

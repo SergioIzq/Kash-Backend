@@ -1,18 +1,26 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.Interfaces;
 
 namespace AhorroLand.Shared.Domain.ValueObjects.Ids;
 
 public readonly record struct CategoriaId : IGuidValueObject
 {
-    // Constructor primario sin lógica
     public Guid Value { get; init; }
 
-    // Constructor secundario con validación
-    public CategoriaId(Guid value)
+    private CategoriaId(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException(nameof(value));
-
         Value = value;
     }
+
+    public static Result<CategoriaId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            return Result.Failure<CategoriaId>(Error.Validation("El ID de la categoría no puede estar vacío."));
+        }
+
+        return Result.Success(new CategoriaId(value));
+    }
+
+    public static CategoriaId CreateFromDatabase(Guid value) => new CategoriaId(value);
 }

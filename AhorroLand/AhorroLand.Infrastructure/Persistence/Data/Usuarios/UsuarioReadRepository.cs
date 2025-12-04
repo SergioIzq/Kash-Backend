@@ -95,18 +95,18 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
     // Método helper limpio que convierte dynamic (BD) -> Dominio
     private Usuario MapRowToUsuario(dynamic row)
     {
-        var id = new UsuarioId(Guid.Parse(row.id.ToString()));
-        var email = new Email((string)row.correo);
-        var password = new PasswordHash((string)row.contrasena);
+        var id = UsuarioId.Create(Guid.Parse(row.id.ToString())).Value;
+        var email = Email.Create((string)row.correo).Value;
+        var password = PasswordHash.Create((string)row.contrasena).Value;
 
         // 🔧 CORRECCIÓN 1: Cast explícito a (ConfirmationToken?)null
         // C# necesita saber qué tipo de "null" es para el operador ternario.
         var tokenConf = row.token_confirmacion != null
-            ? new ConfirmationToken((string)row.token_confirmacion)
+            ? ConfirmationToken.Create((string)row.token_confirmacion).Value
             : (ConfirmationToken?)null;
 
         var tokenRecup = row.token_recuperacion != null
-            ? new ConfirmationToken((string)row.token_recuperacion)
+            ? ConfirmationToken.Create((string)row.token_recuperacion).Value
             : (ConfirmationToken?)null;
 
         DateTime? tokenExp = row.token_recuperacion_expiracion != null

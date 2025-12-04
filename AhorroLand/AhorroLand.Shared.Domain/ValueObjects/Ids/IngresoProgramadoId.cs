@@ -1,18 +1,26 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.Interfaces;
 
 namespace AhorroLand.Shared.Domain.ValueObjects.Ids;
 
 public readonly record struct IngresoProgramadoId : IGuidValueObject
 {
-    // Constructor primario sin lógica
     public Guid Value { get; init; }
 
-    // Constructor secundario con validación
     public IngresoProgramadoId(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException(nameof(value));
-
         Value = value;
     }
+
+    public static Result<IngresoProgramadoId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            return Result.Failure<IngresoProgramadoId>(Error.Validation("El ID del ingreso programado no puede estar vacío."));
+        }
+
+        return Result.Success(new IngresoProgramadoId(value));
+    }
+
+    public static IngresoProgramadoId CreateFromDatabase(Guid value) => new IngresoProgramadoId(value);
 }

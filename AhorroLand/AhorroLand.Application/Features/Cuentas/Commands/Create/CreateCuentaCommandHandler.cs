@@ -21,9 +21,9 @@ public sealed class CreateCuentaCommandHandler : AbsCreateCommandHandler<Cuenta,
 
     protected override Cuenta CreateEntity(CreateCuentaCommand command)
     {
-        var nombreVO = new Nombre(command.Nombre);
-        var saldoVO = new Cantidad(command.Saldo);
-        var usuarioId = new UsuarioId(command.UsuarioId);
+        var nombreVO = Nombre.Create(command.Nombre).Value;
+        var saldoVO = Cantidad.Create(command.Saldo).Value;
+        var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
         var newCuenta = Cuenta.Create(nombreVO, saldoVO, usuarioId);
         return newCuenta;

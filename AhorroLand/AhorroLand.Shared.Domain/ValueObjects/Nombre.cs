@@ -1,17 +1,32 @@
-﻿namespace AhorroLand.Shared.Domain.ValueObjects;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+
+namespace AhorroLand.Shared.Domain.ValueObjects;
 
 public readonly record struct Nombre
 {
-    // Constructor primario sin lógica
+    public const int MaxLength = 50;
     public string Value { get; init; }
 
-    // Constructor secundario con validación
-    public Nombre(string value)
+    private Nombre(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length > 50)
-            throw new Exception(value);
+        Value = value;
+    }
 
-        this.Value = value;
+    public static Result<Nombre> Create(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Result.Failure<Nombre>(Error.Validation("El nombre es obligatorio."));
+        }
+
+        var trimmedValue = value.Trim();
+
+        if (trimmedValue.Length > MaxLength)
+        {
+            return Result.Failure<Nombre>(Error.Validation($"El nombre no puede exceder los {MaxLength} caracteres."));
+        }
+
+        return Result.Success(new Nombre(trimmedValue));
     }
 
     public static Nombre CreateFromDatabase(string value) => new Nombre(value);

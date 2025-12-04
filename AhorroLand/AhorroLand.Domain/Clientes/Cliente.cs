@@ -8,7 +8,7 @@ namespace AhorroLand.Domain;
 [Table("clientes")]
 public sealed class Cliente : AbsEntity<ClienteId>
 {
-    public Cliente() : base(new ClienteId(Guid.Empty))
+    public Cliente() : base(ClienteId.Create(Guid.Empty).Value)
     {
 
     }
@@ -24,7 +24,7 @@ public sealed class Cliente : AbsEntity<ClienteId>
 
     public static Cliente Create(Nombre nombre, UsuarioId usuarioId)
     {
-        var cliente = new Cliente(new ClienteId(Guid.NewGuid()), nombre, usuarioId);
+        var cliente = new Cliente(ClienteId.Create(Guid.NewGuid()).Value, nombre, usuarioId);
 
         return cliente;
     }

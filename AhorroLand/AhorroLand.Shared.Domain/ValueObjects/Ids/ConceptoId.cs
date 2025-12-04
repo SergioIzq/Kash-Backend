@@ -1,18 +1,26 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.Interfaces;
 
 namespace AhorroLand.Shared.Domain.ValueObjects.Ids;
 
 public readonly record struct ConceptoId : IGuidValueObject
 {
-    // Constructor primario sin lógica
     public Guid Value { get; init; }
 
-    // Constructor secundario con validación
-    public ConceptoId(Guid value)
+    private ConceptoId(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException(nameof(value));
-
         Value = value;
     }
+
+    public static Result<ConceptoId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            return Result.Failure<ConceptoId>(Error.Validation("El ID del concepto no puede estar vacío."));
+        }
+
+        return Result.Success(new ConceptoId(value));
+    }
+
+    public static ConceptoId CreateFromDatabase(Guid value) => new ConceptoId(value);
 }

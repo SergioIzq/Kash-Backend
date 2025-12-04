@@ -4,7 +4,7 @@ using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId> 
+public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     where T : AbsEntity<TId>
     where TId : IGuidValueObject
 {
@@ -22,11 +22,15 @@ public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     /// </summary>
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        if (id == Guid.Empty)
+        {
+            return null;
+        }
+
         var idValueObject = (TId)Activator.CreateInstance(typeof(TId), id)!;
 
         return await _context.Set<T>()
-            .AsTracking()
-            .FirstOrDefaultAsync(e => e.Id.Equals(idValueObject), cancellationToken);
+                         .FindAsync([idValueObject], cancellationToken);
     }
 
     public virtual void Add(T entity)

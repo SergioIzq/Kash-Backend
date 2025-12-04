@@ -36,12 +36,12 @@ public sealed class CreateGastoProgramadoCommandHandler
         var validationTasks = new[]
         {
             // Validaciones obligatorias
-            _validator.ExistsAsync<Concepto, ConceptoId>(new ConceptoId(command.ConceptoId)),
-            _validator.ExistsAsync<Cuenta, CuentaId>(new CuentaId(command.CuentaId)),
-            _validator.ExistsAsync < FormaPago, FormaPagoId >(new FormaPagoId(command.FormaPagoId)),
+            _validator.ExistsAsync<Concepto, ConceptoId>(ConceptoId.Create(command.ConceptoId).Value),
+            _validator.ExistsAsync<Cuenta, CuentaId>(CuentaId.Create(command.CuentaId).Value),
+            _validator.ExistsAsync < FormaPago, FormaPagoId >(FormaPagoId.Create(command.FormaPagoId).Value),
             // Validaciones opcionales/contextuales
-            _validator.ExistsAsync < Proveedor, ProveedorId >(new ProveedorId(command.ProveedorId)),
-            _validator.ExistsAsync < Persona, PersonaId >(new PersonaId(command.PersonaId)),
+            _validator.ExistsAsync < Proveedor, ProveedorId >(ProveedorId.Create(command.ProveedorId).Value),
+            _validator.ExistsAsync < Persona, PersonaId >(PersonaId.Create(command.PersonaId).Value),
         };
 
         // Espera a que todas las consultas terminen al mismo tiempo.
@@ -60,17 +60,17 @@ public sealed class CreateGastoProgramadoCommandHandler
         try
         {
             // Creación de VOs, que ahora son los que lanzan ArgumentException
-            var importe = new Cantidad(command.Importe);
-            var frecuencia = new Frecuencia(command.Frecuencia);
+            var importe = Cantidad.Create(command.Importe).Value;
+            var frecuencia = Frecuencia.Create(command.Frecuencia).Value;
             var descripcion = new Descripcion(command.Descripcion ?? string.Empty);
 
             // Creamos VOs de Identidad
-            var conceptoId = new ConceptoId(command.ConceptoId);
-            var cuentaId = new CuentaId(command.CuentaId);
-            var formaPagoId = new FormaPagoId(command.FormaPagoId);
-            var proveedorId = new ProveedorId(command.ProveedorId);
-            var categoriaId = new CategoriaId(command.CategoriaId);
-            var personaId = new PersonaId(command.PersonaId);
+            var conceptoId = ConceptoId.Create(command.ConceptoId).Value;
+            var cuentaId = CuentaId.Create(command.CuentaId).Value;
+            var formaPagoId = FormaPagoId.Create(command.FormaPagoId).Value;
+            var proveedorId = ProveedorId.Create(command.ProveedorId).Value;
+            var categoriaId = CategoriaId.Create(command.CategoriaId).Value;
+            var personaId = PersonaId.Create(command.PersonaId).Value;
 
             // Uso del servicio de infraestructura para generar el JobId
             var hangfireJobId = _jobSchedulingService.GenerateJobId();

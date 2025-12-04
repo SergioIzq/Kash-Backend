@@ -11,14 +11,14 @@ namespace AhorroLand.Infrastructure.TypesHandlers
             SqlMapper.AddTypeHandler(new GuidBinaryTypeHandler());
 
             // ? Registrar handlers para Value Objects específicos
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<UsuarioId>(g => new UsuarioId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ClienteId>(g => new ClienteId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<CategoriaId>(g => new CategoriaId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ConceptoId>(g => new ConceptoId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<CuentaId>(g => new CuentaId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<FormaPagoId>(g => new FormaPagoId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<PersonaId>(g => new PersonaId(g)));
-            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ProveedorId>(g => new ProveedorId(g)));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<UsuarioId>(g => UsuarioId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ClienteId>(g => ClienteId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<CategoriaId>(g => CategoriaId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ConceptoId>(g => ConceptoId.Create(g).Value ));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<CuentaId>(g => CuentaId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<FormaPagoId>(g => FormaPagoId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<PersonaId>(g => PersonaId.Create(g).Value));
+            SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ProveedorId>(g => ProveedorId.Create(g).Value));
         }
     }
 }

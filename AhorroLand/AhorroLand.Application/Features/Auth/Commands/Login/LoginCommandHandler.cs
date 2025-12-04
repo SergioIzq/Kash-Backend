@@ -1,4 +1,3 @@
-using AhorroLand.Application.Features.GastosProgramados.Commands.Execute;
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging;
 using AhorroLand.Shared.Application.Interfaces;
@@ -31,7 +30,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, LoginRes
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var emailVO = new Email(request.Correo);
+        var emailVO = Email.Create(request.Correo).Value;
         var usuario = await _usuarioReadRepository.GetByEmailAsync(emailVO, cancellationToken);
 
         if (usuario is null)

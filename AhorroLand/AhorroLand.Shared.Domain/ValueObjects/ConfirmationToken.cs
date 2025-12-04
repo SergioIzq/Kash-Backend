@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using AhorroLand.Shared.Domain.Abstractions.Results;
 
 namespace AhorroLand.Shared.Domain.ValueObjects;
 
@@ -8,15 +9,20 @@ public readonly record struct ConfirmationToken
 
     private const int TokenLength = 32;
 
-    public ConfirmationToken(string value)
+    private ConfirmationToken(string value)
+    {
+        Value = value;
+    }
+
+    public static Result<ConfirmationToken> Create(string value)
     {
         // 🔑 Regla de Negocio: El token debe tener la longitud esperada.
         if (string.IsNullOrWhiteSpace(value) || value.Length != TokenLength)
         {
-            throw new ArgumentException($"El token debe tener exactamente {TokenLength} caracteres.", nameof(value));
+            return Result.Failure<ConfirmationToken>(Error.Validation($"El token debe tener exactamente {TokenLength} caracteres."));
         }
 
-        Value = value;
+        return Result.Success(new ConfirmationToken(value));
     }
 
     /// <summary>
@@ -46,6 +52,8 @@ public readonly record struct ConfirmationToken
 
         return new ConfirmationToken(token);
     }
+
+    public static ConfirmationToken CreateFromDatabase(string value) => new ConfirmationToken(value);
 
     /// <summary>
     /// Compara el Token actual con una cadena de texto cruda.

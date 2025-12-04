@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Concepto : AbsEntity<ConceptoId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Concepto() : base(new ConceptoId(Guid.Empty))
+    private Concepto() : base(ConceptoId.Create(Guid.Empty).Value)
     {
     }
 
@@ -27,7 +27,7 @@ public sealed class Concepto : AbsEntity<ConceptoId>
 
     public static Concepto Create(Nombre nombre, CategoriaId categoriaId, UsuarioId usuarioId)
     {
-        var concepto = new Concepto(new ConceptoId(Guid.NewGuid()), nombre, categoriaId, usuarioId);
+        var concepto = new Concepto(ConceptoId.Create(Guid.NewGuid()).Value, nombre, categoriaId, usuarioId);
 
         return concepto;
     }

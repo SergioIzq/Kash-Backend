@@ -11,7 +11,7 @@ namespace AhorroLand.Domain;
 public sealed class Usuario : AbsEntity<UsuarioId>
 {
 
-    private Usuario() : base(new UsuarioId(Guid.Empty))
+    private Usuario() : base(UsuarioId.Create(Guid.Empty).Value)
     {
 
     }
@@ -51,6 +51,8 @@ public sealed class Usuario : AbsEntity<UsuarioId>
     /// </summary>
     public static Usuario Create(
         Email correo,
+        Nombre nombre,
+        Apellido apellidos,
         PasswordHash contrasenaHash)
     {
         // 1. Generar elementos iniciales de seguridad
@@ -58,15 +60,28 @@ public sealed class Usuario : AbsEntity<UsuarioId>
 
         // 2. Crear la entidad
         var usuario = new Usuario(
-            new UsuarioId(Guid.NewGuid()),
+            UsuarioId.Create(Guid.NewGuid()).Value,
             correo,
             contrasenaHash,
             tokenVO,
-            activo: false
+            activo: false,
+            null,
+            null,
+            nombre,
+            apellidos
         );
 
         return usuario;
     }
+
+    public void Update(
+    Nombre nombre,
+    Apellido apellidos)
+    {
+        Nombre = nombre;
+        Apellidos = apellidos;
+    }
+
 
     /// <summary>
     /// Activa la cuenta del usuario si el token coincide.
@@ -113,7 +128,7 @@ public sealed class Usuario : AbsEntity<UsuarioId>
         // 1. Validar que exista un token activo en la entidad
         if (TokenRecuperacion is null || TokenRecuperacionExpiracion is null)
         {
-            return Result.Failure(AuthErrors.TokenExpired);
+            return Result.Failure(AuthErrors.InvalidResetToken);
         }
 
         // 2. Validar que el token coincida

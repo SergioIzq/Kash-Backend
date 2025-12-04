@@ -1,4 +1,4 @@
-using AhorroLand.Domain;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging;
 using AhorroLand.Shared.Application.Abstractions.Services;
 using AhorroLand.Shared.Application.Dtos;
@@ -36,41 +36,62 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
     {
 
         // 1. Validar que el correo no exista
-        var emailVO = new Email(request.Correo);
-        var existingUser = await _usuarioReadRepository.GetByEmailAsync(emailVO, cancellationToken);
+        var emailResult = Email.Create(request.Correo);
+        var existingUser = await _usuarioReadRepository.GetByEmailAsync(emailResult.Value, cancellationToken);
 
         if (existingUser != null)
         {
             return Result.Failure(AuthErrors.InvalidCredentials);
         }
 
-        // 2. Hash de la contrase�a
+        // 2. Hash de la contraseña
         var hashedPassword = _passwordHasher.HashPassword(request.Contrasena);
-        var passwordHashVO = new PasswordHash(hashedPassword);
+        var passwordHashResult = PasswordHash.Create(hashedPassword);
 
-        // 3. Crear el usuario usando el m�todo Factory del dominio
-        var newUsuario = Usuario.Create(emailVO, passwordHashVO);
+        var nombreResult = Nombre.Create(request.Nombre);
+        var apellidosResult = Apellido.Create(request.Apellidos);
+
+        // 3. Crear el usuario usando el método Factory del dominio
+        var newUsuario = Usuario.Create(emailResult.Value, nombreResult.Value, apellidosResult.Value, passwordHashResult.Value);
 
         // 4. Guardar en el repositorio
         await _usuarioWriteRepository.CreateAsync(newUsuario, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 5. Encolar email de confirmaci�n (no bloqueante)
+        // 5. Encolar email de confirmación (no bloqueante)
         var baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:4200";
         var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={newUsuario.TokenConfirmacion!.Value.Value}";
+        var nombrePila = newUsuario.Nombre!.Value; // Accedemos al string dentro del VO
 
         var emailBody = $@"
-                        <html>
-                                  <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
-                           <h1>Gracias por registrarte en AhorroLand</h1>
-                            <p>Estamos felices de tenerte aqu�. Por favor accede al siguiente enlace para verificar y activar tu cuenta:</p>
-                             <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
-                       </body>
-                           </html>";
+        <html>
+            <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333; line-height: 1.6;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;'>
+                    
+                    <h1 style='color: #2196F3; text-align: center;'>¡Hola, {nombrePila}!</h1>
+                    
+                    <p>Gracias por registrarte en <strong>AhorroLand</strong>. Estamos felices de tenerte aquí.</p>
+                    
+                    <p>Para comenzar a gestionar tus finanzas, por favor confirma que este es tu correo electrónico haciendo clic en el botón de abajo:</p>
+                    
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{confirmUrl}' target='_blank' 
+                           style='background-color: #2196F3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>
+                           Confirmar mi cuenta
+                        </a>
+                    </div>
+                    
+                    <p style='font-size: 14px; color: #777;'>
+                        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:<br>
+                        <a href='{confirmUrl}' style='color: #1a73e8;'>{confirmUrl}</a>
+                    </p>
+                </div>
+            </body>
+        </html>";
 
         var emailMessage = new EmailMessage(
             newUsuario.Correo.Value,
-            "Bienvenido a AhorroLand",
+            "Bienvenido a AhorroLand - Confirma tu correo",
             emailBody
         );
 

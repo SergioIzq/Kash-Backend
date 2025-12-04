@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => new UsuarioId(value)
+                value => UsuarioId.Create(value).Value
             ); ;
 
             builder.Property(e => e.Correo)
@@ -25,7 +25,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
          .IsRequired()
      .HasConversion(
            email => email.Value,
-         value => new Email(value));
+         value => Email.Create(value).Value);
 
             // ? Configurar PasswordHash como Value Object
             builder.Property(e => e.ContrasenaHash)
@@ -34,7 +34,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         .IsRequired()
                    .HasConversion(
               password => password.Value,
-                      value => new PasswordHash(value));
+                      value => PasswordHash.Create(value).Value);
 
             // ? Configurar TokenConfirmacion como Value Object nullable
             builder.Property(e => e.TokenConfirmacion)
@@ -44,7 +44,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
           .IsRequired(false)
             .HasConversion(
             token => token.HasValue ? token.Value.Value : null,
-           value => string.IsNullOrEmpty(value) ? null : new ConfirmationToken(value));
+           value => string.IsNullOrEmpty(value) ? null : ConfirmationToken.Create(value).Value);
 
             builder.Property(e => e.TokenRecuperacion)
                 .HasColumnName("token_recuperacion")
@@ -53,7 +53,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .IsRequired(false)
                 .HasConversion(
                 token => token.HasValue ? token.Value.Value : null,
-                value => string.IsNullOrEmpty(value) ? null : new ConfirmationToken(value));
+                value => string.IsNullOrEmpty(value) ? null : ConfirmationToken.Create(value).Value);
 
             builder.Property(e => e.TokenRecuperacionExpiracion)
     .HasColumnName("token_recuperacion_expiracion")
@@ -78,16 +78,16 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                     .IsRequired(false)
                     .HasConversion(
                     token => token.HasValue ? token.Value.Value : null,
-                    value => string.IsNullOrEmpty(value) ? null : new Nombre(value));
+                    value => string.IsNullOrEmpty(value) ? null : Nombre.Create(value).Value);
 
             builder.Property(e => e.Apellidos)
-                    .HasColumnName("apellido")
+                    .HasColumnName("apellidos")
                     .HasColumnType("varchar")
                     .HasMaxLength(100)
                     .IsRequired(false)
                     .HasConversion(
                     token => token.HasValue ? token.Value.Value : null,
-                    value => string.IsNullOrEmpty(value) ? null : new Apellido(value));
+                    value => string.IsNullOrEmpty(value) ? null : Apellido.Create(value).Value);
 
             // ? Índice único en el correo
             builder.HasIndex(e => e.Correo)

@@ -1,4 +1,6 @@
-﻿namespace AhorroLand.Shared.Domain.ValueObjects;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+
+namespace AhorroLand.Shared.Domain.ValueObjects;
 
 public readonly record struct Frecuencia
 {
@@ -6,12 +8,20 @@ public readonly record struct Frecuencia
 
     private static readonly string[] AllowedFrequencies = new[] { "Diaria", "Semanal", "Mensual", "Anual" };
 
-    public Frecuencia(string value)
+    private Frecuencia(string value)
+    {
+        Value = value;
+    }
+
+    public static Result<Frecuencia> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) || !AllowedFrequencies.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
-            throw new ArgumentException($"La frecuencia '{value}' no es válida. Debe ser una de: {string.Join(", ", AllowedFrequencies)}.");
+            return Result.Failure<Frecuencia>(Error.Validation($"La frecuencia '{value}' no es válida. Debe ser una de: {string.Join(", ", AllowedFrequencies)}."));
         }
-        Value = value;
+
+        return Result.Success(new Frecuencia(value));
     }
+
+    public static Frecuencia CreateFromDatabase(string value) => new Frecuencia(value);
 }

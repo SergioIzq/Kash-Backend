@@ -25,7 +25,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
        .IsRequired()
      .HasConversion(
           importe => importe.Valor,
-          value => new Cantidad(value));
+          value => Cantidad.Create(value).Value);
 
             // ✅ Configurar conversión de Value Objects de IDs
             builder.Property(e => e.CuentaId)
@@ -33,7 +33,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
    .IsRequired()
          .HasConversion(
         cuentaId => cuentaId.Value,
-           value => new CuentaId(value));
+           value => CuentaId.Create(value).Value);
 
             // ✅ Estos NO son nullable en la entidad, son structs requeridos
             builder.Property(e => e.ProveedorId)
@@ -41,35 +41,35 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
            .IsRequired()
              .HasConversion(
           proveedorId => proveedorId.Value,
-                  value => new ProveedorId(value));
+                  value => ProveedorId.Create(value).Value);
 
             builder.Property(e => e.PersonaId)
                .HasColumnName("id_persona")
                         .IsRequired()
                    .HasConversion(
                personaId => personaId.Value,
-                  value => new PersonaId(value));
+                  value => PersonaId.Create(value).Value);
 
             builder.Property(e => e.FormaPagoId)
                 .HasColumnName("id_forma_pago")
        .IsRequired()
         .HasConversion(
            formaPagoId => formaPagoId.Value,
-        value => new FormaPagoId(value));
+        value => FormaPagoId.Create(value).Value);
 
             builder.Property(e => e.UsuarioId)
        .HasColumnName("id_usuario")
          .IsRequired()
          .HasConversion(
          usuarioId => usuarioId.Value,
-       value => new UsuarioId(value));
+       value => UsuarioId.Create(value).Value);
 
             builder.Property(e => e.ConceptoId)
              .HasColumnName("id_concepto")
           .IsRequired()
                       .HasConversion(
                 conceptoId => conceptoId.Value,
-                 value => new ConceptoId(value));
+                 value => ConceptoId.Create(value).Value);
 
             // ✅ FIX CRÍTICO: Configurar Frecuencia como Value Object
             builder.Property(e => e.Frecuencia)
@@ -78,7 +78,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             .IsRequired()
          .HasConversion(
                     frecuencia => frecuencia.Value,
-                 value => new Frecuencia(value));
+                 value => Frecuencia.Create(value).Value);
 
             // ✅ Configurar Descripcion nullable
             builder.Property(e => e.Descripcion)

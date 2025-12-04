@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Cuenta : AbsEntity<CuentaId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Cuenta() : base(new CuentaId(Guid.Empty))
+    private Cuenta() : base(CuentaId.Create(Guid.Empty).Value)
     {
     }
 
@@ -26,7 +26,7 @@ public sealed class Cuenta : AbsEntity<CuentaId>
 
     public static Cuenta Create(Nombre nombre, Cantidad saldo, UsuarioId usuarioId)
     {
-        var cuenta = new Cuenta(new CuentaId(Guid.NewGuid()), nombre, saldo, usuarioId);
+        var cuenta = new Cuenta(CuentaId.Create(Guid.NewGuid()).Value, nombre, saldo, usuarioId);
 
         return cuenta;
     }

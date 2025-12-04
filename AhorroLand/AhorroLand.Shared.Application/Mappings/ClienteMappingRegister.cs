@@ -36,8 +36,8 @@ namespace AhorroLand.Shared.Application.Mappings
             var usuarioIdProperty = typeof(Cliente).GetProperty(nameof(Cliente.UsuarioId));
 
             idProperty?.SetValue(cliente, dto.Id);
-            nombreProperty?.SetValue(cliente, new Nombre(dto.Nombre ?? string.Empty));
-            usuarioIdProperty?.SetValue(cliente, new UsuarioId(dto.UsuarioId));
+            nombreProperty?.SetValue(cliente, Nombre.Create(dto.Nombre ?? string.Empty).Value);
+            usuarioIdProperty?.SetValue(cliente, UsuarioId.Create(dto.UsuarioId).Value);
 
             return cliente;
         }

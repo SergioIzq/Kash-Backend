@@ -4,6 +4,7 @@ using AhorroLand.Application.Features.Auth.Commands.Login;
 using AhorroLand.Application.Features.Auth.Commands.Register;
 using AhorroLand.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using AhorroLand.Application.Features.Auth.Commands.ResetPassword;
+using AhorroLand.Application.Features.Auth.Commands.UpdateUserProfile;
 using AhorroLand.Application.Features.Auth.Queries;
 using AhorroLand.NuevaApi.Controllers.Base; // ✅ Usamos tu controlador base
 using AhorroLand.NuevaApi.Extensions; // Para cookies si las usas como extensiones
@@ -174,4 +175,34 @@ public class AuthController : AbsController // ✅ Heredamos de AbsController
         var result = await _sender.Send(command);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Actualiza los datos del perfil del usuario (Nombre, Apellido).
+    /// </summary>
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId == null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+        }
+
+        var command = new UpdateUserProfileCommand(
+            userId.Value,
+            request.Nombre,
+            request.Apellidos
+        );
+
+        var result = await _sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    public record UpdateProfileRequest(
+        string Nombre,
+        string? Apellidos
+    );
 }

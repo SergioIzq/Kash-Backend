@@ -1,18 +1,26 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.Interfaces;
 
 namespace AhorroLand.Shared.Domain.ValueObjects.Ids;
 
 public readonly record struct PersonaId : IGuidValueObject
 {
-    // Constructor primario sin lógica
     public Guid Value { get; init; }
 
-    // Constructor secundario con validación
-    public PersonaId(Guid value)
+    private PersonaId(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException(nameof(value));
-
         Value = value;
     }
+
+    public static Result<PersonaId> Create(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            return Result.Failure<PersonaId>(Error.Validation("El ID de la persona no puede estar vacío."));
+        }
+
+        return Result.Success(new PersonaId(value));
+    }
+
+    public static PersonaId CreateFromDatabase(Guid value) => new PersonaId(value);
 }
