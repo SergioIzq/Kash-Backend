@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Proveedor : AbsEntity<ProveedorId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Proveedor() : base(ProveedorId.Create(Guid.Empty).Value)
+    private Proveedor() : base(ProveedorId.Create(Guid.NewGuid()).Value)
     {
     }
 

@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => TraspasoId.Create(value).Value
+                value => TraspasoId.CreateFromDatabase(value)
             ); ;
 
             builder.Property(e => e.Importe)
@@ -24,28 +24,28 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
   .IsRequired()
     .HasConversion(
          importe => importe.Valor,
-      value => Cantidad.Create(value).Value);
+      value => Cantidad.CreateFromDatabase(value));
 
             builder.Property(e => e.CuentaOrigenId)
         .HasColumnName("id_cuenta_origen")
            .IsRequired()
         .HasConversion(
                   cuentaId => cuentaId.Value,
-                   value => CuentaId.Create(value).Value);
+                   value => CuentaId.CreateFromDatabase(value));
 
             builder.Property(e => e.CuentaDestinoId)
                   .HasColumnName("id_cuenta_destino")
                .IsRequired()
             .HasConversion(
                  cuentaId => cuentaId.Value,
-            value => CuentaId.Create(value).Value);
+            value => CuentaId.CreateFromDatabase(value));
 
             builder.Property(e => e.UsuarioId)
                      .HasColumnName("id_usuario")
            .IsRequired()
                      .HasConversion(
               usuarioId => usuarioId.Value,
-           value => UsuarioId.Create(value).Value);
+           value => UsuarioId.CreateFromDatabase(value));
 
             builder.Property(e => e.FechaCreacion)
             .HasColumnName("fecha_creacion")

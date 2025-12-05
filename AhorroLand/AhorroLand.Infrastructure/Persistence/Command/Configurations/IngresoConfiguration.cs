@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => IngresoId.Create(value).Value
+                value => IngresoId.CreateFromDatabase(value)
             ); ;
 
             // --- VALUE OBJECTS (Importe, Fecha, Descripción) ---
@@ -24,12 +24,12 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                    .HasColumnName("importe")
                    .HasColumnType("decimal(18,2)")
                    .IsRequired()
-                   .HasConversion(i => i.Valor, v => Cantidad.Create(v).Value);
+                   .HasConversion(i => i.Valor, v => Cantidad.CreateFromDatabase(v));
 
             builder.Property(e => e.Fecha)
                    .HasColumnName("fecha")
                    .IsRequired()
-                   .HasConversion(f => f.Valor, v => FechaRegistro.Create(v).Value);
+                   .HasConversion(f => f.Valor, v => FechaRegistro.CreateFromDatabase(v));
 
             builder.Property(e => e.Descripcion)
                    .HasColumnName("descripcion")

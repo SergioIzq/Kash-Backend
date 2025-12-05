@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => CategoriaId.Create(value).Value
+                value => CategoriaId.CreateFromDatabase(value)
             );
 
             // Configurar conversiones de Value Objects
@@ -26,7 +26,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .IsRequired()
                 .HasConversion(
                     nombre => nombre.Value,
-                    value => Nombre.Create(value).Value);
+                    value => Nombre.CreateFromDatabase(value));
 
             // ? RESTAURADO: Mapeo de Descripcion como Value Object nullable
             builder.Property(e => e.Descripcion)
@@ -43,7 +43,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,
-                    value => UsuarioId.Create(value).Value);
+                    value => UsuarioId.CreateFromDatabase(value));
 
             builder.Property(e => e.FechaCreacion)
                 .HasColumnName("fecha_creacion")

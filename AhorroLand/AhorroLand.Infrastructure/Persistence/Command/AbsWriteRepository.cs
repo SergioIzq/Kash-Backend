@@ -3,6 +3,7 @@ using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     where T : AbsEntity<TId>
@@ -22,15 +23,18 @@ public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     /// </summary>
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (id == Guid.Empty)
-        {
-            return null;
-        }
+        if (id == Guid.Empty) return null;
 
-        var idValueObject = (TId)Activator.CreateInstance(typeof(TId), id)!;
+        // 🔥 CORRECCIÓN: Usamos Activator con BindingFlags para encontrar constructores PRIVADOS
+        var idValueObject = (TId)Activator.CreateInstance(
+            typeof(TId),
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, // Busca privados y públicos
+            null,
+            [id],
+            null)!;
 
         return await _context.Set<T>()
-                         .FindAsync([idValueObject], cancellationToken);
+            .FindAsync([idValueObject], cancellationToken);
     }
 
     public virtual void Add(T entity)

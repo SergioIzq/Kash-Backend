@@ -1,50 +1,51 @@
-﻿using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Infrastructure.Persistence.Query;
+using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Interfaces;
 using Dapper;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
 using System.Reflection;
 
 namespace AhorroLand.Infrastructure.DataAccess;
 
 public class DapperDomainValidator : IDomainValidator
 {
-    private readonly IDbConnection _dbConnection;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public DapperDomainValidator(IDbConnection dbConnection)
+    // ✅ CAMBIO 1: Inyectamos el Factory, no la conexión directa
+    public DapperDomainValidator(IDbConnectionFactory connectionFactory)
     {
-        _dbConnection = dbConnection;
+        _connectionFactory = connectionFactory;
     }
 
-    // ✅ CAMBIO 1: Ajustar la firma para aceptar <TEntity, TId>
     public async Task<bool> ExistsAsync<TEntity, TId>(TId id)
         where TEntity : AbsEntity<TId>
         where TId : IGuidValueObject
     {
-        // 1. Asegurar conexión
-        if (_dbConnection.State != ConnectionState.Open)
-        {
-            _dbConnection.Open();
-        }
+        // ✅ CAMBIO 2: Creamos la conexión bajo demanda (Pattern Factory)
+        using var connection = _connectionFactory.CreateConnection();
 
-        // 2. Obtener tabla
+        // Dapper abre la conexión automáticamente si está cerrada, 
+        // pero con Factory a veces es buena práctica ser explícito o dejar que Execute lo haga.
+        // connection.Open(); 
+
+        // 1. Obtener tabla
         var tableName = GetTableName<TEntity>();
 
-        // 3. ✅ CAMBIO 2: Obtener el valor primitivo real para la DB
-        // Si TId es 'ClienteId', necesitamos el Guid de adentro.
-        // Si TId es 'Guid', usamos el valor directo.
-        var realIdValue = ExtractPrimitiveValue(id);
+        // ✅ CAMBIO 3 (Optimización): 
+        // Como TId implementa IGuidValueObject, no necesitamos Reflection lento.
+        // Accedemos directamente a la propiedad definida en la interfaz.
+        var realIdValue = id.Value;
 
-        // 4. Query (Nota: asume que la columna PK se llama 'id')
+        // 2. Query optimizada (SELECT 1 es más rápido que COUNT(*))
         var sql = $"SELECT 1 FROM {tableName} WHERE id = @Id LIMIT 1";
 
-        // 5. Ejecutar usando el valor primitivo
-        var result = await _dbConnection.ExecuteScalarAsync<int?>(sql, new { Id = realIdValue });
+        // 3. Ejecutar
+        var result = await connection.ExecuteScalarAsync<int?>(sql, new { Id = realIdValue });
 
         return result.HasValue;
     }
 
-    // --- Métodos Privados Auxiliares ---
+    // --- Métodos Privados ---
 
     private static string GetTableName<TEntity>()
     {
@@ -55,34 +56,7 @@ public class DapperDomainValidator : IDomainValidator
         {
             return tableAttr.Name;
         }
+        // Fallback: pluralización simple si no hay atributo [Table]
         return type.Name.ToLower() + "s";
-    }
-
-    /// <summary>
-    /// Extrae el valor primitivo si 'id' es un Value Object (tiene propiedad 'Value').
-    /// Si es un tipo simple (Guid, int, string), lo devuelve tal cual.
-    /// </summary>
-    private static object ExtractPrimitiveValue<TId>(TId id)
-    {
-        if (id == null) return DBNull.Value;
-
-        var type = typeof(TId);
-
-        // Si es un tipo primitivo, string o Guid, devolverlo directamente
-        if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type == typeof(decimal))
-        {
-            return id;
-        }
-
-        // Si es un Value Object (ej. ClienteId), buscamos la propiedad "Value"
-        var valueProp = type.GetProperty("Value");
-        if (valueProp != null)
-        {
-            var value = valueProp.GetValue(id);
-            return value ?? DBNull.Value;
-        }
-
-        // Si no tiene propiedad Value, intentamos devolver el objeto (quizás tiene un TypeHandler registrado)
-        return id;
     }
 }
