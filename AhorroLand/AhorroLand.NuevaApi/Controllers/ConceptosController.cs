@@ -38,7 +38,7 @@ public class ConceptosController : AbsController
         // 2. Crear query filtrando por usuario
         var query = new GetConceptosPagedListQuery(page, pageSize)
         {
-            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(query);
@@ -101,13 +101,13 @@ public class ConceptosController : AbsController
     public async Task<IActionResult> Create([FromBody] CreateConceptoRequest request)
     {
         // Asignación inteligente de UsuarioId (Token o Request)
-        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
+        var usuarioId = GetCurrentUserId();
 
         var command = new CreateConceptoCommand
         {
             Nombre = request.Nombre,
             CategoriaId = request.CategoriaId,
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId!.Value
         };
 
         var result = await _sender.Send(command);

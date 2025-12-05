@@ -29,14 +29,14 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                     value => Nombre.CreateFromDatabase(value));
 
             builder.Property(e => e.CategoriaId)
-                .HasColumnName("categoria_id")
+                .HasColumnName("id_categoria")
                 .IsRequired()
                 .HasConversion(
                     categoriaId => categoriaId.Value,
                     value => CategoriaId.CreateFromDatabase(value));
 
             builder.Property(e => e.UsuarioId)
-                .HasColumnName("usuario_id") // ?? FIX: Nombre consistente
+                .HasColumnName("id_usuario") // ?? FIX: Nombre consistente
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,
