@@ -34,7 +34,8 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
             correo as Correo,
             nombre as Nombre,
             apellidos as Apellidos,
-            fecha_creacion as FechaCreacion
+            fecha_creacion as FechaCreacion,
+            avatar as Avatar
           FROM usuarios 
           WHERE id = @id";
     }
@@ -52,7 +53,8 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
                 token_confirmacion, 
                 activo, 
                 token_recuperacion, 
-                token_recuperacion_expiracion
+                token_recuperacion_expiracion,
+                avatar
             FROM usuarios
             WHERE correo = @Correo
             LIMIT 1";

@@ -324,6 +324,8 @@ kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<st
         app.UseCors("ProductionPolicy");
     }
 
+    app.UseStaticFiles();
+
     // 🍪 Aplicar política de cookies
     app.UseCookiePolicy();
 
