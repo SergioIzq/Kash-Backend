@@ -13,6 +13,7 @@
     <EmbeddedResource Remove="Servicies\**" />
     <None Remove="Persistence\Migrations\**" />
     <None Remove="Servicies\**" />
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +21,8 @@
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Hangfire.Core" Version="1.8.22" />
     <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />

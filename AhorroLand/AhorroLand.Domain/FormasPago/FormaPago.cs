@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class FormaPago : AbsEntity<FormaPagoId>
 {
     // Constructor privado sin parámetros para EF Core
-    private FormaPago() : base(FormaPagoId.Create(Guid.Empty).Value)
+    private FormaPago() : base(FormaPagoId.Create(Guid.NewGuid()).Value)
     {
     }
 

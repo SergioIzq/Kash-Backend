@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => CuentaId.Create(value).Value
+                value => CuentaId.CreateFromDatabase(value)
             ); ;
 
             // ?? FIX CRÍTICO: Configurar conversiones de Value Objects
@@ -26,7 +26,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .IsRequired()
                 .HasConversion(
                     nombre => nombre.Value,
-                    value => Nombre.Create(value).Value);
+                    value => Nombre.CreateFromDatabase(value));
 
             builder.Property(e => e.Saldo)
                 .HasColumnName("saldo")
@@ -34,14 +34,14 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 .IsRequired()
                 .HasConversion(
                     saldo => saldo.Valor,
-                    value => Cantidad.Create(value).Value);
+                    value => Cantidad.CreateFromDatabase(value));
 
             builder.Property(e => e.UsuarioId)
                 .HasColumnName("usuario_id") // ?? FIX: Nombre consistente
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,
-                    value => UsuarioId.Create(value).Value);
+                    value => UsuarioId.CreateFromDatabase(value));
 
             builder.Property(e => e.FechaCreacion)
                 .HasColumnName("fecha_creacion")

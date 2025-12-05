@@ -10,7 +10,7 @@ namespace AhorroLand.Domain;
 [Table("ingresos_programados")]
 public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
 {
-    private IngresoProgramado() : base(IngresoProgramadoId.Create(Guid.Empty).Value)
+    private IngresoProgramado() : base(IngresoProgramadoId.Create(Guid.NewGuid()).Value)
     {
     }
     private IngresoProgramado(

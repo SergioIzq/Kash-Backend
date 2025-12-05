@@ -70,3 +70,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 temp/
+
+
+# --- Archivos estáticos generados por usuario ---
+**/wwwroot/avatars/*
+**/wwwroot/uploads/*
+
+# Mantenemos el archivo .gitkeep para que la carpeta exista (opcional pero recomendado)
+!**/wwwroot/avatars/.gitkeep

@@ -10,11 +10,12 @@ namespace AhorroLand.Domain;
 [Table("usuarios")]
 public sealed class Usuario : AbsEntity<UsuarioId>
 {
-
-    private Usuario() : base(UsuarioId.Create(Guid.Empty).Value)
+    // Constructor privado para EF Core - usa el constructor directo sin validación
+    private Usuario() : base(UsuarioId.Create(Guid.NewGuid()).Value)
     {
 
     }
+    
     private Usuario(
         UsuarioId id,
         Email correo,
@@ -45,6 +46,8 @@ public sealed class Usuario : AbsEntity<UsuarioId>
     public ConfirmationToken? TokenRecuperacion { get; private set; }
     public DateTime? TokenRecuperacionExpiracion { get; private set; }
     public bool Activo { get; private set; }
+    public AvatarUrl? Avatar { get; private set; }
+
 
     /// <summary>
     /// Crea un nuevo Usuario. El HASHING DEBE OCURRIR FUERA del Dominio.
@@ -58,7 +61,7 @@ public sealed class Usuario : AbsEntity<UsuarioId>
         // 1. Generar elementos iniciales de seguridad
         var tokenVO = ConfirmationToken.GenerateNew();
 
-        // 2. Crear la entidad
+        // 2. Crear la entidad - usa el constructor directo en lugar de Create
         var usuario = new Usuario(
             UsuarioId.Create(Guid.NewGuid()).Value,
             correo,
@@ -80,6 +83,12 @@ public sealed class Usuario : AbsEntity<UsuarioId>
     {
         Nombre = nombre;
         Apellidos = apellidos;
+    }
+
+    public void UpdateAvatar(
+        AvatarUrl avatar)
+    {
+        Avatar = avatar;
     }
 
 

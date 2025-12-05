@@ -8,7 +8,7 @@ namespace AhorroLand.Domain;
 [Table("clientes")]
 public sealed class Cliente : AbsEntity<ClienteId>
 {
-    public Cliente() : base(ClienteId.Create(Guid.Empty).Value)
+    public Cliente() : base(ClienteId.Create(Guid.NewGuid()).Value)
     {
 
     }

@@ -5,6 +5,7 @@ using AhorroLand.Application.Features.Auth.Commands.Register;
 using AhorroLand.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using AhorroLand.Application.Features.Auth.Commands.ResetPassword;
 using AhorroLand.Application.Features.Auth.Commands.UpdateUserProfile;
+using AhorroLand.Application.Features.Auth.Commands.UploadAvatar;
 using AhorroLand.Application.Features.Auth.Queries;
 using AhorroLand.NuevaApi.Controllers.Base; // ✅ Usamos tu controlador base
 using AhorroLand.NuevaApi.Extensions; // Para cookies si las usas como extensiones
@@ -12,6 +13,7 @@ using AhorroLand.Shared.Domain.Abstractions.Results; // Para Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -90,8 +92,8 @@ public class AuthController : AbsController // ✅ Heredamos de AbsController
     /// Cierra la sesión del usuario.
     /// </summary>
     [HttpPost("logout")]
-    [Authorize] // O AllowAnonymous si quieres permitir logout sin token válido (limpieza)
-    public async Task<IActionResult> Logout()
+    [Authorize]
+    public IActionResult Logout()
     {
         // 1. Limpiar cookies del lado del cliente
         // Opción A: DeleteCookie("authToken");
@@ -103,7 +105,7 @@ public class AuthController : AbsController // ✅ Heredamos de AbsController
         // Si no tienes comando de Logout, solo retorna Ok.
         // var result = await _sender.Send(new LogoutCommand()); 
 
-        return Ok(Result.Success("Sesión cerrada correctamente"));
+        return HandleResult(Result.Success("Sesión cerrada correctamente"));
     }
 
     /// <summary>
@@ -201,8 +203,67 @@ public class AuthController : AbsController // ✅ Heredamos de AbsController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Sube o actualiza la foto de perfil del usuario.
+    /// Acepta archivos de imagen (jpg, png, webp) hasta 5MB.
+    /// </summary>
+    /// <param name="file">El archivo de imagen enviado como multipart/form-data.</param>
+    [HttpPost("avatar")]
+    [Authorize]
+    public async Task<IActionResult> UploadAvatar([FromForm] UploadAvatarRequest request)
+    {
+        // 1. Obtener usuario autenticado
+        var userId = GetCurrentUserId();
+        if (userId is null) return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+
+        var file = request.File; // Sacamos el archivo del DTO
+
+        // 2. Validaciones rápidas de entrada (Fail Fast)
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(Result.Failure(Error.Validation("No se ha proporcionado ningún archivo.")));
+        }
+
+        // Validación de tipo MIME (Solo imágenes)
+        if (!file.ContentType.StartsWith("image/"))
+        {
+            return BadRequest(Result.Failure(Error.Validation("El archivo debe ser una imagen válida (JPG, PNG, WEBP).")));
+        }
+
+        // Validación de tamaño (Ejemplo: Máximo 5MB)
+        const long maxFileSize = 5 * 1024 * 1024;
+        if (file.Length > maxFileSize)
+        {
+            return BadRequest(Result.Failure(Error.Validation("La imagen no puede exceder los 5MB.")));
+        }
+
+        // 3. Preparar el comando
+        // Usamos 'using' para asegurar que el stream se cierre correctamente al terminar
+        using var stream = file.OpenReadStream();
+
+        var command = new UploadAvatarCommand(
+            userId.Value,
+            stream,
+            file.FileName,
+            file.ContentType
+        );
+
+        // 4. Enviar al Handler (que guardará en disco y actualizará la BD)
+        var result = await _sender.Send(command);
+
+        // 5. Retornar resultado
+        // Si es exitoso, devolverá la URL del avatar en 'result.Value'
+        return HandleResult(result);
+    }
+
     public record UpdateProfileRequest(
         string Nombre,
         string? Apellidos
     );
+
+    public record UploadAvatarRequest
+    {
+        // El nombre "file" aquí es lo que buscará el frontend en el FormData
+        public required IFormFile File { get; set; }
+    }
 }

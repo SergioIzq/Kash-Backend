@@ -16,7 +16,7 @@ public readonly record struct UsuarioId : IGuidValueObject
     // ✅ CONSTRUCTOR (Infraestructura):
     // Debe ser permisivo porque EF Core y los serializadores (JSON) 
     // a veces instancian esto con valores por defecto (Guid.Empty) temporalmente.
-    public UsuarioId(Guid value)
+    private UsuarioId(Guid value)
     {
         Value = value;
     }

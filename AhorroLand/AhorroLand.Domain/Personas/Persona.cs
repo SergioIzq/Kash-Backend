@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Persona : AbsEntity<PersonaId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Persona() : base(PersonaId.Create(Guid.Empty).Value)
+    private Persona() : base(PersonaId.Create(Guid.NewGuid()).Value)
     {
     }
 

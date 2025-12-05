@@ -20,11 +20,6 @@ public readonly record struct Apellido
 
     public static Result<Apellido> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Result.Failure<Apellido>(Error.Validation("El apellido es obligatorio."));
-        }
-
         var trimmedValue = value.Trim();
 
         if (trimmedValue.Length > MaxLength)

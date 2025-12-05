@@ -9,7 +9,7 @@ namespace AhorroLand.Domain;
 public sealed class Gasto : AbsEntity<GastoId>
 {
     // Constructor privado sin parámetros para EF Core
-    private Gasto() : base(GastoId.Create(Guid.Empty).Value)
+    private Gasto() : base(GastoId.Create(Guid.NewGuid()).Value)
     {
     }
 

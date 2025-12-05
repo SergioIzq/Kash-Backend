@@ -7,6 +7,7 @@ public record UsuarioDto
     public string Correo { get; init; } = string.Empty;
     public string Nombre { get; init; } = string.Empty;
     public string? Apellidos { get; init; } = string.Empty;
+    public string? Avatar { get; init; } = string.Empty;
     public DateTime FechaCreacion { get; init; }
 
     // Estas quedarán null automáticamente si el SQL no las trae

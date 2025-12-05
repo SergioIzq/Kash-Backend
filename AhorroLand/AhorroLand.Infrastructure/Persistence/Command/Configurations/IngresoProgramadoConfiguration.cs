@@ -15,7 +15,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
-                value => IngresoProgramadoId.Create(value).Value
+                value => IngresoProgramadoId.CreateFromDatabase(value)
             ); ;
 
             // ? Configurar conversión de Value Object Cantidad
@@ -25,7 +25,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
         .IsRequired()
         .HasConversion(
                importe => importe.Valor,
-              value => Cantidad.Create(value).Value);
+              value => Cantidad.CreateFromDatabase(value));
 
             builder.Property(e => e.Descripcion)
                 .HasColumnName("descripcion")
@@ -42,42 +42,42 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
        .IsRequired()
        .HasConversion(
             cuentaId => cuentaId.Value,
-          value => CuentaId.Create(value).Value);
+          value => CuentaId.CreateFromDatabase(value));
 
             builder.Property(e => e.FormaPagoId)
 .HasColumnName("id_forma_pago")
 .IsRequired()
 .HasConversion(
 formaPagoId => formaPagoId.Value,
-value => FormaPagoId.Create(value).Value);
+value => FormaPagoId.CreateFromDatabase(value));
 
             builder.Property(e => e.PersonaId)
 .HasColumnName("id_persona")
 .IsRequired()
 .HasConversion(
 personaId => personaId.Value,
-value => PersonaId.Create(value).Value);
+value => PersonaId.CreateFromDatabase(value));
 
             builder.Property(e => e.ConceptoId)
 .HasColumnName("id_concepto")
 .IsRequired()
 .HasConversion(
 conceptoId => conceptoId.Value,
-value => ConceptoId.Create(value).Value);
+value => ConceptoId.CreateFromDatabase(value));
 
             builder.Property(e => e.ClienteId)
        .HasColumnName("id_cliente")
        .IsRequired()
     .HasConversion(
     clienteId => clienteId.Value,
-            value => ClienteId.Create(value).Value);
+            value => ClienteId.CreateFromDatabase(value));
 
             builder.Property(e => e.UsuarioId)
        .HasColumnName("id_usuario")
           .IsRequired()
      .HasConversion(
     usuarioId => usuarioId.Value,
-       value => UsuarioId.Create(value).Value);
+       value => UsuarioId.CreateFromDatabase(value));
 
             // ? Configurar Frecuencia
             builder.Property(e => e.Frecuencia)
@@ -86,7 +86,7 @@ value => ConceptoId.Create(value).Value);
             .IsRequired()
      .HasConversion(
       frecuencia => frecuencia.Value,
-           value => Frecuencia.Create(value).Value);
+           value => Frecuencia.CreateFromDatabase(value));
 
             // ? Configurar FechaEjecucion
             builder.Property(e => e.FechaEjecucion)
