@@ -9,6 +9,7 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
 using Mapster;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using AhorroLand.Shared.Application.Interfaces;
 
 public sealed class CreateIngresoCommandHandler
     : AbsCreateCommandHandler<Ingreso, IngresoId, CreateIngresoCommand>
@@ -19,8 +20,9 @@ public sealed class CreateIngresoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Ingreso, IngresoId> writeRepository,
         ICacheService cacheService,
-        IDomainValidator validator)
-    : base(unitOfWork, writeRepository, cacheService)
+        IDomainValidator validator,
+        IUserContext userContext)
+    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
     }

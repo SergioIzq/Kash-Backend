@@ -8,6 +8,7 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
 using Mapster;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using AhorroLand.Shared.Application.Interfaces;
 
 namespace AhorroLand.Application.Features.GastosProgramados.Commands;
 
@@ -22,8 +23,9 @@ public sealed class CreateGastoProgramadoCommandHandler
         IWriteRepository<GastoProgramado, GastoProgramadoId> writeRepository,
         ICacheService cacheService,
         IDomainValidator validator,
-        IJobSchedulingService jobSchedulingService)
-    : base(unitOfWork, writeRepository, cacheService)
+        IJobSchedulingService jobSchedulingService,
+        IUserContext userContext)
+    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
         _jobSchedulingService = jobSchedulingService;

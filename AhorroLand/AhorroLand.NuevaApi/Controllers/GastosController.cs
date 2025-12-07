@@ -22,7 +22,6 @@ public class GastosController : AbsController
     /// Obtiene una lista paginada de gastos con soporte para búsqueda y ordenamiento.
     /// </summary>
     [HttpGet] // Estandarizado a la raíz (GET /api/gastos)
-    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize", "searchTerm", "sortColumn", "sortOrder" })]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,

@@ -2,6 +2,7 @@
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
@@ -17,8 +18,9 @@ public sealed class CreateGastoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Gasto, GastoId> writeRepository,
         ICacheService cacheService,
-        IDomainValidator validator)
-    : base(unitOfWork, writeRepository, cacheService)
+        IDomainValidator validator,
+        IUserContext userContext)
+    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
     }

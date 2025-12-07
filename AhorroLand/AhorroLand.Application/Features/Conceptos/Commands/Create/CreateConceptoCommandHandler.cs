@@ -8,6 +8,7 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
 using Mapster;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using AhorroLand.Shared.Application.Interfaces;
 
 namespace AhorroLand.Application.Features.Conceptos.Commands;
 
@@ -21,8 +22,9 @@ public sealed class CreateConceptoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Concepto, ConceptoId> writeRepository,
         ICacheService cacheService,
-        IDomainValidator validator) // Recibimos el validador
-    : base(unitOfWork, writeRepository, cacheService)
+        IDomainValidator validator,
+        IUserContext userContext)
+    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
     }

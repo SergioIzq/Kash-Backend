@@ -1,4 +1,5 @@
 ﻿using AhorroLand.Shared.Application.Abstractions.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
@@ -18,8 +19,9 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     protected AbsUpdateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity, TId> writeRepository,
-        ICacheService cacheService)
-        : base(unitOfWork, writeRepository, cacheService)
+        ICacheService cacheService,
+     IUserContext userContext)
+        : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 
@@ -31,32 +33,32 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
         // 1. Obtener la entidad (Tracking activado para Update)
         var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
 
-        if (entity is null)
+    if (entity is null)
         {
-            return Result.Failure<TDto>(Error.NotFound($"{typeof(TEntity).Name} con ID '{command.Id}' no encontrada."));
+      return Result.Failure<TDto>(Error.NotFound($"{typeof(TEntity).Name} con ID '{command.Id}' no encontrada."));
         }
 
-        // 2. Aplicar lógica de dominio (Value Objects)
-        // Aquí capturamos errores de validación de negocio (ej. "Nombre vacío", "Precio negativo")
-        try
+     // 2. Aplicar lógica de dominio (Value Objects)
+      // Aquí capturamos errores de validación de negocio (ej. "Nombre vacío", "Precio negativo")
+      try
         {
-            ApplyChanges(entity, command);
+    ApplyChanges(entity, command);
         }
         catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
         {
             // Transformamos la excepción del Value Object en un Result.Failure limpio
-            return Result.Failure<TDto>(
-                Error.Validation(ex.Message)
+   return Result.Failure<TDto>(
+              Error.Validation(ex.Message)
             );
-        }
+ }
 
-        // 3. Persistencia
+    // 3. Persistencia (incluye invalidación de caché con versionado)
         // Si hay error de BD (ej. Nombre duplicado), UpdateAsync dejará que suba al Middleware Global (que devuelve 409)
         var result = await UpdateAsync(entity, cancellationToken);
 
         if (result.IsFailure)
         {
-            return Result.Failure<TDto>(result.Error);
+   return Result.Failure<TDto>(result.Error);
         }
 
         // 4. Mapeo y Retorno

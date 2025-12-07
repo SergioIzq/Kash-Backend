@@ -13,6 +13,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
     /// ✅ OPTIMIZADO: Usa paginación a nivel de base de datos para evitar cargar toda la tabla en memoria.
     /// 🔧 FIX: Usa GetPagedReadModelsAsync para evitar problemas de mapeo con Value Objects.
     /// 🚀 CACHE: Implementa cache con Redis para requests repetidos (~5ms en lugar de 370ms).
+    /// 🔥 Sistema de versionado para invalidación automática de listas.
     /// </summary>
     public abstract class GetPagedListQueryHandler<TEntity, TId, TDto, TQuery>
         : AbsQueryHandler<TEntity, TId>, IRequestHandler<TQuery, Result<PagedList<TDto>>>
@@ -47,8 +48,26 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
 
         public virtual async Task<Result<PagedList<TDto>>> Handle(TQuery query, CancellationToken cancellationToken)
         {
-            // 1. 🔥 CACHE: Intentar obtener del cache (reduce 370ms a ~5ms)
-            string cacheKey = $"{typeof(TEntity).Name}:paged:{query.UsuarioId}:{query.Page}:{query.PageSize}";
+            // 🔥 1. Obtener versión actual de la lista (se invalida cuando hay CUD)
+            string versionKey = $"list_version:{typeof(TEntity).Name}:{query.UsuarioId}";
+            string? listVersion = await _cacheService.GetAsync<string>(versionKey);
+
+            // Si no existe versión, crear una nueva
+            if (string.IsNullOrEmpty(listVersion))
+            {
+                listVersion = Guid.NewGuid().ToString();
+                // 🔥 IMPORTANTE: TTL corto para evitar problemas de sincronización
+                await _cacheService.SetAsync(
+                    versionKey,
+                    listVersion,
+                    slidingExpiration: TimeSpan.FromMinutes(5),
+                    absoluteExpiration: TimeSpan.FromMinutes(10));
+            }
+
+            // 2. Construir clave de caché que incluye la versión
+            string cacheKey = $"{typeof(TEntity).Name}:paged:{query.UsuarioId}:{listVersion}:{query.Page}:{query.PageSize}";
+
+            // 3. Intentar obtener de caché
             var cachedResult = await _cacheService.GetAsync<PagedList<TDto>>(cacheKey);
 
             if (cachedResult != null)
@@ -56,29 +75,27 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
                 return Result.Success(cachedResult); // ⚡ ~5ms desde cache
             }
 
-            // 2. Intentar obtener filtros personalizados del handler concreto
+            // 4. Intentar obtener filtros personalizados del handler concreto
             var customFiltered = await ApplyFiltersAsync(query, cancellationToken);
 
             if (customFiltered != null)
             {
-                // Cachear resultado filtrado
+                // Cachear resultado filtrado con TTL corto
                 await _cacheService.SetAsync(
                     cacheKey,
                     customFiltered,
-                    slidingExpiration: TimeSpan.FromMinutes(5));
+                    slidingExpiration: TimeSpan.FromMinutes(2),
+                    absoluteExpiration: TimeSpan.FromMinutes(5));
 
                 return Result.Success(customFiltered);
             }
 
-            // 3. 🔥 OPTIMIZACIÓN: Usar paginación a nivel de base de datos
-            // 🔧 FIX: Usar GetPagedReadModelsAsync que devuelve DTOs directamente desde SQL
-            // Esto evita el mapeo problemático de Value Objects (Nombre, UsuarioId, etc.)
+            // 5. 🔥 OPTIMIZACIÓN: Usar paginación a nivel de base de datos
             PagedList<TDto> pagedDtos;
 
             if (query.UsuarioId.HasValue)
             {
                 // 🚀 USA ÍNDICES: Filtrar por usuario (reduce 370ms a ~50ms)
-                // Pasar null, null, null para searchTerm, sortColumn, sortOrder por compatibilidad
                 pagedDtos = await _dtoRepository.GetPagedReadModelsByUserAsync(
                     query.UsuarioId.Value,
                     query.Page,
@@ -97,14 +114,12 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
                     cancellationToken);
             }
 
-            // 4. 🔥 CACHE: Guardar en cache para futuros requests
+            // 6. 🔥 CACHE: Guardar en cache con TTL reducido para mejor consistencia
             await _cacheService.SetAsync(
                 cacheKey,
                 pagedDtos,
-                slidingExpiration: TimeSpan.FromMinutes(5));
-
-            // 5. 🚀 Ya tenemos DTOs listos, no necesitamos mapear nada más
-            // Los DTOs vienen directamente optimizados desde la query SQL con propiedades simples
+                slidingExpiration: TimeSpan.FromMinutes(2),
+                absoluteExpiration: TimeSpan.FromMinutes(5));
 
             return Result.Success(pagedDtos);
         }

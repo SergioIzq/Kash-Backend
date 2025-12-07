@@ -22,7 +22,6 @@ public class TraspasosController : AbsController
     /// Obtiene lista paginada de traspasos del usuario autenticado.
     /// </summary>
     [HttpGet]
-    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize" })]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         // 1. Obtener ID del usuario (Seguridad)

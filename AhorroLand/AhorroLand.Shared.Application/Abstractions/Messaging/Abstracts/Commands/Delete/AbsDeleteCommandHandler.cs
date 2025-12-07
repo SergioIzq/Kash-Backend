@@ -1,4 +1,5 @@
 ﻿using AhorroLand.Shared.Application.Abstractions.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
@@ -17,17 +18,17 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
     public abstract class DeleteCommandHandler<TEntity, TId, TCommand>
         : AbsCommandHandler<TEntity, TId>, IRequestHandler<TCommand, Result>
         where TEntity : AbsEntity<TId>
-    where TCommand : AbsDeleteCommand<TEntity, TId>
+        where TCommand : AbsDeleteCommand<TEntity, TId>
         where TId : IGuidValueObject
-
     {
         public DeleteCommandHandler(
              IUnitOfWork unitOfWork,
       IWriteRepository<TEntity, TId> writeRepository,
-            ICacheService cacheService)
- : base(unitOfWork, writeRepository, cacheService)
+            ICacheService cacheService,
+            IUserContext userContext)
+        : base(unitOfWork, writeRepository, cacheService, userContext)
         {
-        }
+     }
 
         public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
         {
@@ -41,7 +42,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
                     return Result.Failure(Error.NotFound($"Entidad {typeof(TEntity).Name} con ID '{command.Id}' no encontrada para eliminación."));
                 }
 
-                // Persistencia: Eliminar, SaveChanges y Cache Invalidation
+                // Persistencia: Eliminar, SaveChanges y Cache Invalidation (incluye versionado)
                 var result = await DeleteAsync(entity, cancellationToken);
 
                 return result;
@@ -58,10 +59,13 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
         /// en lugar de usar un stub. Útil cuando se necesita disparar eventos de dominio.
         /// Por defecto, crea un stub optimizado sin acceso a BD.
         /// </summary>
-        protected virtual async Task<TEntity?> LoadEntityForDeletionAsync(Guid id, CancellationToken cancellationToken)
+        protected virtual Task<TEntity?> LoadEntityForDeletionAsync(Guid id, CancellationToken cancellationToken)
         {
-            // Por defecto: crear stub sin cargar de BD (comportamiento optimizado original)
-            return CreateEntityStub(id);
+            // 2. Creamos el stub sincrónicamente
+            var entityStub = CreateEntityStub(id);
+
+            // 3. Devolvemos el objeto envuelto en una Task completada
+            return Task.FromResult<TEntity?>(entityStub);
         }
 
         /// <summary>
