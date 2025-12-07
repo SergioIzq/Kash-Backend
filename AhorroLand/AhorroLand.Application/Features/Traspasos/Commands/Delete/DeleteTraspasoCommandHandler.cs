@@ -1,6 +1,7 @@
 ﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
@@ -13,8 +14,10 @@ public sealed class DeleteTraspasoCommandHandler
     public DeleteTraspasoCommandHandler(
         IUnitOfWork unitOfWork,
   IWriteRepository<Traspaso, TraspasoId> writeRepository,
-        ICacheService cacheService)
-      : base(unitOfWork, writeRepository, cacheService)
+        ICacheService cacheService,
+        IUserContext userContext
+        )
+      : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 }

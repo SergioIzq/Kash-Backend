@@ -96,32 +96,32 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
             builder.HasOne(e => e.Concepto)
                 .WithMany()
                 .HasForeignKey(e => e.ConceptoId) // <--- CAMBIO: Usa la propiedad tipada
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Proveedor)
                 .WithMany()
                 .HasForeignKey(e => e.ProveedorId) // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Persona)
                 .WithMany()
                 .HasForeignKey(e => e.PersonaId)   // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Cuenta)
                 .WithMany()
                 .HasForeignKey(e => e.CuentaId)    // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.FormaPago)
                 .WithMany()
                 .HasForeignKey(e => e.FormaPagoId) // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Usuario)
                 .WithMany()
                 .HasForeignKey(e => e.UsuarioId)   // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Índices críticos para rendimiento
             builder.HasIndex(e => new { e.UsuarioId, e.Fecha })

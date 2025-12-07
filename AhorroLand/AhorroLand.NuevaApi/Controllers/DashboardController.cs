@@ -26,7 +26,6 @@ public class DashboardController : AbsController
     /// Cacheado por 1 minuto para evitar sobrecarga en base de datos.
     /// </summary>
     [HttpGet("resumen")]
-    [OutputCache(Duration = 60, VaryByQueryKeys = new[] { "fechaInicio", "fechaFin", "cuentaId", "categoriaId" })]
     [ProducesResponseType(typeof(DashboardResumenDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetResumen(
         [FromQuery] DateTime? fechaInicio = null,
@@ -65,7 +64,6 @@ public class DashboardController : AbsController
     /// Obtiene el histórico de los últimos N meses.
     /// </summary>
     [HttpGet("historico")]
-    [OutputCache(Duration = 60, VaryByQueryKeys = new[] { "meses" })]
     public async Task<IActionResult> GetHistorico([FromQuery] int meses = 6)
     {
         var usuarioId = GetCurrentUserId();

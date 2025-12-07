@@ -1,4 +1,5 @@
 ﻿using AhorroLand.Shared.Application.Abstractions.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
@@ -20,8 +21,9 @@ public abstract class AbsCreateCommandHandler<TEntity, TId, TCommand>
     protected AbsCreateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity, TId> writeRepository,
-        ICacheService cacheService)
-        : base(unitOfWork, writeRepository, cacheService)
+        ICacheService cacheService,
+        IUserContext userContext)
+        : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 
@@ -47,7 +49,7 @@ public abstract class AbsCreateCommandHandler<TEntity, TId, TCommand>
             );
         }
 
-        // 2. Persistencia: Usar el método base
+        // 2. Persistencia: Usar el método base (incluye invalidación de caché con versionado)
         // Si hay error de BD (Unique Constraint), el Middleware devuelve 409 Conflict
         var result = await CreateAsync(entity, cancellationToken);
 

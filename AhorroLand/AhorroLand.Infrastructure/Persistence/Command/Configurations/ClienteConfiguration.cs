@@ -32,7 +32,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                     value => Nombre.CreateFromDatabase(value));         // DB -> Value Object
 
             builder.Property(e => e.UsuarioId)
-                .HasColumnName("usuario_id") // ✅ Nombre consistente
+                .HasColumnName("id_usuario") // ✅ Nombre consistente
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,        // Value Object -> DB

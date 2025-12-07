@@ -2,6 +2,7 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
@@ -19,9 +20,9 @@ public sealed class UpdateConceptoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Concepto, ConceptoId> writeRepository,
         ICacheService cacheService,
-        IReadRepositoryWithDto<Concepto, ConceptoDto, ConceptoId> readOnlyRepository
+        IUserContext userContext
         )
-        : base(unitOfWork, writeRepository, cacheService)
+        : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 

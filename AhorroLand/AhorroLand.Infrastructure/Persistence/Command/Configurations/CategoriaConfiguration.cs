@@ -39,7 +39,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                     value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
             builder.Property(e => e.IdUsuario)
-                .HasColumnName("usuario_id")
+                .HasColumnName("id_usuario")
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,

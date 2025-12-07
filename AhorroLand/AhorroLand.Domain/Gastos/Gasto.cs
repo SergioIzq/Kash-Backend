@@ -1,4 +1,5 @@
-﻿using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Domain.Gastos.Eventos;
+using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,13 +16,13 @@ public sealed class Gasto : AbsEntity<GastoId>
 
     private Gasto(
      GastoId id,
-     Cantidad importe,
-      FechaRegistro fecha,
+   Cantidad importe,
+FechaRegistro fecha,
         ConceptoId conceptoId,
      ProveedorId proveedorId,
     PersonaId personaId,
     CuentaId cuentaId,
-        FormaPagoId formaPagoId,
+ FormaPagoId formaPagoId,
         UsuarioId usuarioId,
   Descripcion? descripcion) : base(id)
     {
@@ -60,26 +61,29 @@ public sealed class Gasto : AbsEntity<GastoId>
     // El método Factory (Create) sigue siendo PURO.
     public static Gasto Create(
         Cantidad importe,
-FechaRegistro fecha,
-   ConceptoId conceptoId,
-        ProveedorId proveedorId,
-        PersonaId personaId,
-  CuentaId cuentaId,
+        FechaRegistro fecha,
+     ConceptoId conceptoId,
+    ProveedorId proveedorId,
+                PersonaId personaId,
+          CuentaId cuentaId,
         FormaPagoId formaPagoId,
       UsuarioId usuarioId,
         Descripcion? descripcion)
     {
         var gasto = new Gasto(
-            GastoId.Create(Guid.NewGuid()).Value,
-            importe,
-     fecha,
-   conceptoId,
-     proveedorId,
-            personaId,
-   cuentaId,
-    formaPagoId,
-   usuarioId,
-            descripcion);
+    GastoId.Create(Guid.NewGuid()).Value,
+        importe,
+        fecha,
+      conceptoId,
+      proveedorId,
+    personaId,
+  cuentaId,
+       formaPagoId,
+           usuarioId,
+      descripcion);
+
+        // 🔥 Lanzar evento de dominio cuando se crea un gasto
+        gasto.AddDomainEvent(new GastoCreadoEvent(gasto.Id, cuentaId, importe));
 
         return gasto;
     }
@@ -88,13 +92,17 @@ FechaRegistro fecha,
     Cantidad importe,
         FechaRegistro fecha,
     ConceptoId conceptoId,
-        ProveedorId proveedorId,
-    PersonaId personaId,
-        CuentaId cuentaId,
+  ProveedorId proveedorId,
+  PersonaId personaId,
+      CuentaId cuentaId,
     FormaPagoId formaPagoId,
         UsuarioId usuarioId,
-        Descripcion? descripcion)
+ Descripcion? descripcion)
     {
+        // 🔥 Guardar valores anteriores para el evento
+        var cuentaIdAnterior = CuentaId;
+        var importeAnterior = Importe;
+
         Importe = importe;
         Fecha = fecha;
         ConceptoId = conceptoId;
@@ -104,5 +112,25 @@ FechaRegistro fecha,
         FormaPagoId = formaPagoId;
         UsuarioId = usuarioId;
         Descripcion = descripcion;
+
+        // 🔥 Lanzar evento solo si cambió la cuenta o el importe
+        if (!cuentaIdAnterior.Equals(cuentaId) || !importeAnterior.Equals(importe))
+        {
+            AddDomainEvent(new GastoActualizadoEvent(
+                 Id,
+              cuentaIdAnterior,
+               importeAnterior,
+        cuentaId,
+         importe));
+        }
+    }
+
+    /// <summary>
+    /// Marca el gasto como eliminado y lanza el evento de dominio.
+    /// </summary>
+    public void MarkAsDeleted()
+    {
+        // 🔥 Lanzar evento de dominio cuando se elimina un gasto
+        AddDomainEvent(new GastoEliminadoEvent(Id, CuentaId, Importe));
     }
 }

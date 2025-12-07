@@ -2,7 +2,6 @@
 
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging;
-using AhorroLand.Shared.Application.Abstractions.Servicies; // Para ICacheService
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.ValueObjects;
@@ -11,17 +10,15 @@ public sealed class UpdateUserProfileCommandHandler : ICommandHandler<UpdateUser
 {
     private readonly IUsuarioWriteRepository _usuarioRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ICacheService _cacheService; // 1. Agregado campo
 
     // 2. Inyección en constructor
     public UpdateUserProfileCommandHandler(
         IUsuarioWriteRepository usuarioRepository,
-        IUnitOfWork unitOfWork,
-        ICacheService cacheService)
+        IUnitOfWork unitOfWork
+        )
     {
         _usuarioRepository = usuarioRepository;
         _unitOfWork = unitOfWork;
-        _cacheService = cacheService;
     }
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)

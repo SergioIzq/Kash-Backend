@@ -2,7 +2,8 @@
 
 namespace AhorroLand.Shared.Domain.Abstractions;
 
-public abstract class AbsEntity<TId> where TId : IGuidValueObject
+public abstract class AbsEntity<TId> : IHasDomainEvents
+    where TId : IGuidValueObject
 {
     // 🔥 OPTIMIZACIÓN: Usar List con capacidad inicial para evitar resizes
     private List<IDomainEvent>? _domainEvents;

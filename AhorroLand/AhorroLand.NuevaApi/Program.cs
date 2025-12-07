@@ -3,8 +3,10 @@ using AhorroLand.Infrastructure;
 using AhorroLand.Infrastructure.Configuration;
 using AhorroLand.Infrastructure.TypesHandlers;
 using AhorroLand.Middleware;
+using AhorroLand.NuevaApi;
 using AhorroLand.Shared.Application;
 using Dapper;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -79,16 +81,6 @@ try
            .AllowAnyHeader()
        .AllowCredentials(); // ✅ IMPORTANTE: Necesario para cookies
         });
-    });
-
-    // 🔥 OPTIMIZACIÓN 2: Output Caching para respuestas repetidas
-    builder.Services.AddOutputCache(options =>
-    {
-        options.AddBasePolicy(builder => builder.Expire(TimeSpan.FromSeconds(30)));
-
-        options.AddPolicy("ReadEndpoints", builder =>
-          builder.Expire(TimeSpan.FromMinutes(5))
-           .SetVaryByQuery("page", "pageSize"));
     });
 
     builder.Services.AddControllers()
@@ -217,6 +209,39 @@ kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<st
     builder.Services.AddSharedApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
+    // 🔥 Configurar Hangfire para trabajos programados
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("ConnectionString is not configured");
+
+    builder.Services.AddHangfire(config =>
+        {
+            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+              .UseSimpleAssemblyNameTypeSerializer()
+      .UseRecommendedSerializerSettings()
+           .UseStorage(
+             new Hangfire.MySql.MySqlStorage(
+              connectionString,
+                 new Hangfire.MySql.MySqlStorageOptions
+               {
+                   QueuePollInterval = TimeSpan.FromSeconds(15),
+                   JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                   CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                   PrepareSchemaIfNecessary = true,
+                   DashboardJobListLimit = 50000,
+                   TransactionTimeout = TimeSpan.FromMinutes(1),
+                   TablesPrefix = "hangfire",
+                   TransactionIsolationLevel = System.Transactions.IsolationLevel.ReadCommitted
+               }));
+        });
+
+    // Agregar el servidor de Hangfire
+    builder.Services.AddHangfireServer(options =>
+      {
+          options.WorkerCount = Environment.ProcessorCount * 2;
+          options.ServerName = $"AhorroLand-{Environment.MachineName}";
+          options.Queues = new[] { "default", "critical", "low" };
+      });
+
     // 🔥 OPTIMIZACIÓN 5: Object Pooling para reducir GC pressure
     builder.Services.AddSingleton<Microsoft.Extensions.ObjectPool.ObjectPoolProvider,
         Microsoft.Extensions.ObjectPool.DefaultObjectPoolProvider>();
@@ -226,22 +251,22 @@ kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<st
     if (!string.IsNullOrEmpty(redisConnection))
     {
         builder.Services.AddStackExchangeRedisCache(options =>
-          {
-              options.Configuration = redisConnection;
-              options.InstanceName = "AhorroLand:";
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "AhorroLand:";
 
-              options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
-              {
-                  EndPoints = { redisConnection },
-                  AbortOnConnectFail = false,
-                  ConnectTimeout = 5000,
-                  SyncTimeout = 5000,
-                  AsyncTimeout = 5000,
-                  KeepAlive = 60,
-                  ConnectRetry = 3,
-                  DefaultDatabase = 0,
-              };
-          });
+            options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+            {
+                EndPoints = { redisConnection },
+                AbortOnConnectFail = false,
+                ConnectTimeout = 5000,
+                SyncTimeout = 5000,
+                AsyncTimeout = 5000,
+                KeepAlive = 60,
+                ConnectRetry = 3,
+                DefaultDatabase = 0,
+            };
+        });
     }
     else
     {
@@ -329,10 +354,16 @@ kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<st
     // 🍪 Aplicar política de cookies
     app.UseCookiePolicy();
 
-    // 🔥 OPTIMIZACIÓN 8: Output Caching middleware
-    app.UseOutputCache();
-
     app.UseResponseCompression();
+
+    // 🔥 Hangfire Dashboard (solo en desarrollo)
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = new[] { new HangfireAuthorizationFilter() }
+        });
+    }
 
     if (app.Environment.IsDevelopment())
     {

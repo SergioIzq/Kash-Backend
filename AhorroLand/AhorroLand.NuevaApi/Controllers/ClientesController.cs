@@ -25,7 +25,6 @@ public class ClientesController : AbsController
     /// Cacheada por 30s.
     /// </summary>
     [HttpGet]
-    [OutputCache(Duration = 30, VaryByQueryKeys = new[] { "page", "pageSize", "searchTerm" })] // Agregué searchTerm por si acaso
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base

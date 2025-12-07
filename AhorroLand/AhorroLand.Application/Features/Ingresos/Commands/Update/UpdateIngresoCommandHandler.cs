@@ -2,6 +2,7 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
@@ -21,9 +22,10 @@ public sealed class UpdateIngresoCommandHandler
         IWriteRepository<Ingreso, IngresoId> writeRepository,
         ICacheService cacheService,
         IReadRepositoryWithDto<Ingreso, IngresoDto, IngresoId> readOnlyRepository,
-        IDomainValidator validator
+        IDomainValidator validator,
+        IUserContext userContext
         )
-        : base(unitOfWork, writeRepository, cacheService)
+        : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
     }

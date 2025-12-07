@@ -58,10 +58,10 @@ public class DistributedCacheService : ICacheService
             options.AbsoluteExpirationRelativeToNow = absoluteExpiration.Value;
         }
 
-        // Valor por defecto: 1 hora de sliding expiration
+        // Valor por defecto: 5 minutos de sliding expiration (reducido de 1 hora)
         if (!slidingExpiration.HasValue && !absoluteExpiration.HasValue)
         {
-            options.SlidingExpiration = TimeSpan.FromHours(1);
+            options.SlidingExpiration = TimeSpan.FromMinutes(5);
         }
 
         var jsonValue = JsonSerializer.Serialize(value);
@@ -83,5 +83,17 @@ public class DistributedCacheService : ICacheService
     {
         var value = await _cache.GetStringAsync(key);
         return !string.IsNullOrEmpty(value);
+    }
+
+    /// <summary>
+    /// ?? NUEVO: Invalida por patrón (no soportado en IDistributedCache estándar).
+    /// Esta implementación no hace nada porque IDistributedCache no soporta pattern matching.
+    /// Usa RedisCacheService si necesitas esta funcionalidad.
+    /// </summary>
+    public Task InvalidateByPatternAsync(string pattern)
+    {
+        // IDistributedCache estándar no soporta invalidación por patrón
+        // Si usas MemoryCache, no necesitas esto de todas formas
+        return Task.CompletedTask;
     }
 }

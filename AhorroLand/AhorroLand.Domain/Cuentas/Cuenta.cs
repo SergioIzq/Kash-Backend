@@ -46,12 +46,6 @@ public sealed class Cuenta : AbsEntity<CuentaId>
     /// </summary>
     public void Retirar(Cantidad cantidad)
     {
-        if (Saldo.Valor < cantidad.Valor)
-        {
-            throw new InvalidOperationException(
-                $"Saldo insuficiente en la cuenta {Nombre.Value} para retirar {cantidad.Valor}. Saldo actual: {Saldo.Valor}");
-        }
-
         Saldo = Saldo.Restar(cantidad);
     }
 }

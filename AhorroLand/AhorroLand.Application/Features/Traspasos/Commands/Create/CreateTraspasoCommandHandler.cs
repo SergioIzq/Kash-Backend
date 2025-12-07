@@ -9,6 +9,7 @@ using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
 using Mapster;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using AhorroLand.Shared.Application.Interfaces;
 
 namespace AhorroLand.Application.Features.Traspasos.Commands;
 
@@ -20,8 +21,9 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
     IUnitOfWork unitOfWork,
     IWriteRepository<Traspaso, TraspasoId> writeRepository,
     ICacheService cacheService,
-    IDomainValidator validator)
-    : base(unitOfWork, writeRepository, cacheService)
+    IDomainValidator validator,
+    IUserContext userContext)
+    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _validator = validator;
     }
