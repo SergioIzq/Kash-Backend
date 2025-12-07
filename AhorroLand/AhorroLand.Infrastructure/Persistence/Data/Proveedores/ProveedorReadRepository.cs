@@ -102,7 +102,7 @@ using var connection = _dbConnectionFactory.CreateConnection();
     SELECT 1 
     FROM proveedores 
       WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
-         ) as Exists";
+         ) as ItemExists";
 
      var exists = await connection.ExecuteScalarAsync<bool>(
        new CommandDefinition(sql,

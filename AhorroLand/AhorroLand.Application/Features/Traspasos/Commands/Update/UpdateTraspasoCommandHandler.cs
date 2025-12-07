@@ -5,6 +5,7 @@ using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
+using AhorroLand.Shared.Domain.ValueObjects;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
 
 namespace AhorroLand.Application.Features.Traspasos.Commands;
@@ -19,17 +20,26 @@ public sealed class UpdateTraspasoCommandHandler
         IReadRepositoryWithDto<Traspaso, TraspasoDto, TraspasoId> readOnlyRepository,
         IUserContext userContext
         )
-        : base(unitOfWork, writeRepository, cacheService, userContext)
+   : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 
     protected override void ApplyChanges(Traspaso entity, UpdateTraspasoCommand command)
     {
-        // Nota: Traspaso tiene propiedades readonly, por lo que esta operación
-        // podría requerir recrear la entidad o usar reflexión.
-        // Por ahora, este handler existe para completitud de la API pero
-        // la entidad de dominio debería implementar un método Update si se requiere.
-        throw new NotSupportedException("La actualización de traspasos no está soportada por el modelo de dominio actual.");
+        // Crear Value Objects desde el command
+        var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
+        var cuentaDestinoId = CuentaId.Create(command.CuentaDestinoId).Value;
+        var importe = Cantidad.Create(command.Importe).Value;
+        var fecha = FechaRegistro.Create(command.Fecha).Value;
+        var descripcion = new Descripcion(command.Descripcion);
+
+        // 🔥 Llamar al método Update de la entidad que dispara el evento
+        entity.Update(
+      cuentaOrigenId,
+        cuentaDestinoId,
+          importe,
+            fecha,
+         descripcion);
     }
 }
 

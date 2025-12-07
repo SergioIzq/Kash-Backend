@@ -44,13 +44,13 @@ ILogger? logger = null)
         _writeRepository = writeRepository;
         _cacheService = cacheService;
         _userContext = userContext;
-     _logger = logger;
+        _logger = logger;
     }
 
     // --- Métodos CUD (Create, Update, Delete) ---
 
     /// <summary>
-  /// Añade la entidad al repositorio y persiste los cambios.
+    /// Añade la entidad al repositorio y persiste los cambios.
     /// </summary>
     /// <param name="entity">La entidad a crear.</param>
     /// <param name="cancellationToken">Token para monitorear peticiones de cancelación.</param>
@@ -59,7 +59,7 @@ ILogger? logger = null)
     {
         _writeRepository.Add(entity);
 
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 🔥 Invalidar caché con sistema de versionado
         await InvalidateCacheAsync(entity.Id.Value);
@@ -75,10 +75,10 @@ ILogger? logger = null)
     /// <returns>Un Result de éxito si la actualización fue exitosa, o Error.UpdateFailure si falla.</returns>
     public async Task<Result<Guid>> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-      _writeRepository.Update(entity);
+        _writeRepository.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    // 🔥 Invalidar caché con sistema de versionado
+        // 🔥 Invalidar caché con sistema de versionado
         await InvalidateCacheAsync(entity.Id.Value);
 
         return Result.Success(entity.Id.Value);
@@ -108,26 +108,26 @@ ILogger? logger = null)
     protected async Task InvalidateCacheAsync(Guid id)
     {
         var entityName = typeof(TEntity).Name;
- 
+
         // 1. Invalidar caché individual de la entidad
         var individualKey = $"{entityName}:{id}";
         await _cacheService.RemoveAsync(individualKey);
-   
+
         _logger?.LogInformation("🗑️ Caché individual invalidado: {CacheKey}", individualKey);
-        
-   // 2. 🔥 Invalidar versión de lista del usuario
-      // Esto fuerza a que todas las queries de lista/paginación se recalculen
+
+        // 2. 🔥 Invalidar versión de lista del usuario
+        // Esto fuerza a que todas las queries de lista/paginación se recalculen
         if (_userContext.UserId.HasValue)
-  {
+        {
             var versionKey = $"list_version:{entityName}:{_userContext.UserId}";
             await _cacheService.RemoveAsync(versionKey);
-      
-            _logger?.LogInformation("🗑️ Versión de lista invalidada: {VersionKey} para usuario {UserId}", 
+
+            _logger?.LogInformation("🗑️ Versión de lista invalidada: {VersionKey} para usuario {UserId}",
          versionKey, _userContext.UserId);
         }
         else
         {
- _logger?.LogWarning("⚠️ No se pudo invalidar caché de lista porque UserId es null");
+            _logger?.LogWarning("⚠️ No se pudo invalidar caché de lista porque UserId es null");
         }
     }
 }

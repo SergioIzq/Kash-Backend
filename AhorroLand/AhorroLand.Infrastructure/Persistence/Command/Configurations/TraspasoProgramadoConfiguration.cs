@@ -67,7 +67,16 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
               descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
            value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
-  // ? FechaEjecucion
+            builder.Property(e => e.Descripcion)
+    .HasColumnName("descripcion")
+    .HasColumnType("varchar")
+    .HasMaxLength(200)
+    .IsRequired(false)
+    .HasConversion(
+        descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
+        value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
+
+            // ? FechaEjecucion
             builder.Property(e => e.FechaEjecucion)
       .HasColumnName("fecha_ejecucion")
         .IsRequired();

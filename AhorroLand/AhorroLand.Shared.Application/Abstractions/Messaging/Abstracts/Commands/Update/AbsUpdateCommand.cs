@@ -7,10 +7,12 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
 
 /// <summary>
 /// Comando base genérico para operaciones de Actualización.
+/// 🔥 MODIFICADO: Ahora devuelve Result<Guid> en lugar de Result<TDto>.
 /// </summary>
 /// <typeparam name="TEntity">La Entidad de Dominio que se va a actualizar.</typeparam>
-/// <typeparam name="TDto">El DTO de respuesta que se espera.</typeparam>
-public abstract record AbsUpdateCommand<TEntity, TId, TDto> : IRequest<Result<TDto>>
+/// <typeparam name="TId">El tipo del ID de la entidad.</typeparam>
+/// <typeparam name="TDto">El DTO (solo usado para mantener compatibilidad, no se devuelve).</typeparam>
+public abstract record AbsUpdateCommand<TEntity, TId, TDto> : IRequest<Result<Guid>>
     where TEntity : AbsEntity<TId>
     where TId : IGuidValueObject
 {
