@@ -510,7 +510,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
 
         /// <summary>
         /// 🚀 NUEVO: Obtiene los elementos más recientes de un usuario.
-        /// Ultra-rápido: usa índice en (usuario_id, fecha_creacion).
+        /// Ultra-rápido: usa índice en (id_usuario, fecha_creacion).
         /// </summary>
         public virtual async Task<IEnumerable<TReadModel>> GetRecentAsync(
                 Guid usuarioId,

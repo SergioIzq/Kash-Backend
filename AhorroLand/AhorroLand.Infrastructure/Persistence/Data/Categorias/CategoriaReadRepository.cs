@@ -16,7 +16,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
 
         /// <summary>
         /// 🔥 Query específico para Categoría con todas sus columnas incluyendo Descripcion.
-        /// IMPORTANTE: La tabla categorias usa usuario_id (sin prefijo id_)
+        /// IMPORTANTE: La tabla categorias usa id_usuario (sin prefijo id_)
         /// </summary>
         protected override string BuildGetByIdQuery()
         {
@@ -25,7 +25,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
      id as Id,
         nombre as Nombre,
    descripcion as Descripcion,
-          usuario_id as UsuarioId,
+          id_usuario as UsuarioId,
        fecha_creacion as FechaCreacion
    FROM categorias 
    WHERE id = @id";
@@ -41,7 +41,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
      id as Id,
       nombre as Nombre,
       descripcion as Descripcion,
-     usuario_id as UsuarioId,
+     id_usuario as UsuarioId,
        fecha_creacion as FechaCreacion
      FROM categorias";
         }
@@ -56,11 +56,11 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
 
         /// <summary>
         /// 🔥 Columna WHERE para filtrar por usuario.
-        /// IMPORTANTE: Usa usuario_id (sin prefijo id_)
+        /// IMPORTANTE: Usa id_usuario (sin prefijo id_)
         /// </summary>
         protected override string GetUserIdColumn()
         {
-            return "usuario_id";
+            return "id_usuario";
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
         SELECT EXISTS(
       SELECT 1 
    FROM categorias 
-     WHERE nombre = @Nombre AND usuario_id = @UsuarioId
+     WHERE nombre = @Nombre AND id_usuario = @UsuarioId
    ) as Exists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -122,7 +122,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
    SELECT EXISTS(
     SELECT 1 
     FROM categorias 
-      WHERE nombre = @Nombre AND usuario_id = @UsuarioId AND id != @ExcludeId
+      WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
       ) as Exists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(

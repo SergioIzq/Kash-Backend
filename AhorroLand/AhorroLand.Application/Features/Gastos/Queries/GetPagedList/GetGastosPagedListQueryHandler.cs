@@ -24,7 +24,7 @@ public sealed class GetGastosPagedListQueryHandler
 
     /// <summary>
     /// 🚀 OPTIMIZADO: Usa método específico del repositorio con búsqueda y ordenamiento.
-    /// Aprovecha el índice (usuario_id, fecha_creacion) reduciendo de 400ms a ~50ms.
+    /// Aprovecha el índice (id_usuario, fecha_creacion) reduciendo de 400ms a ~50ms.
     /// Junto con el cache, las requests repetidas bajan a ~5ms.
     /// </summary>
     protected override async Task<PagedList<GastoDto>> ApplyFiltersAsync(
