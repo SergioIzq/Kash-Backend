@@ -1,353 +1,269 @@
-using AppG.BBDD.Requests;
-using AppG.Entidades.BBDD;
-using AppG.Exceptions;
-using Microsoft.AspNetCore.Identity;
+Ôªøusing AhorroLand.Application.Features.Auth.Commands.ConfirmEmail;
+using AhorroLand.Application.Features.Auth.Commands.ForgotPassword;
+using AhorroLand.Application.Features.Auth.Commands.Login;
+using AhorroLand.Application.Features.Auth.Commands.Register;
+using AhorroLand.Application.Features.Auth.Commands.ResendConfirmationEmail;
+using AhorroLand.Application.Features.Auth.Commands.ResetPassword;
+using AhorroLand.Application.Features.Auth.Commands.UpdateUserProfile;
+using AhorroLand.Application.Features.Auth.Commands.UploadAvatar;
+using AhorroLand.Application.Features.Auth.Queries;
+using AhorroLand.NuevaApi.Controllers.Base; // ‚úÖ Usamos tu controlador base
+using AhorroLand.NuevaApi.Extensions; // Para cookies si las usas como extensiones
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Result
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using NHibernate;
-using NHibernate.Linq;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mail;
-using System.Security.Claims;
-using System.Text;
+using Org.BouncyCastle.Asn1.Ocsp;
 
-[Route("api/auth")]
+namespace AhorroLand.NuevaApi.Controllers;
+
 [ApiController]
-public class AuthController : ControllerBase
+[Route("api/auth")]
+public class AuthController : AbsController // ‚úÖ Heredamos de AbsController
 {
-    private readonly ISessionFactory _sessionFactory;
-    private readonly IConfiguration _configuration;
-    private readonly EmailService _emailService;
+    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(ISessionFactory sessionFactory, IConfiguration configuration, EmailService emailService)
+    // Pasamos el Sender al padre
+    public AuthController(ISender sender, IWebHostEnvironment environment)
+        : base(sender)
     {
-        _sessionFactory = sessionFactory;
-        _configuration = configuration;
-        _emailService = emailService;
+        _environment = environment;
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] Usuario usuario)
-    {
-        IList<string> errorMessages = new List<string>();
-
-        using (var session = _sessionFactory.OpenSession())
-        {
-            var user = await session.Query<Usuario>()
-                .SingleOrDefaultAsync(u => u.Correo == usuario.Correo);
-
-            if (user == null)
-            {
-                errorMessages.Add($"El correo '{usuario.Correo}' no est· registrado.");
-            }
-            else if (!VerifyPassword(usuario.Contrasena, user.Contrasena))
-            {
-                errorMessages.Add($"ContraseÒa incorrecta.");
-            }
-
-            if (!user!.Activo)
-            {
-                throw new UnauthorizedAccessException("Error en login.");
-            }
-
-            if (errorMessages.Count > 0)
-            {
-                throw new CustomUnauthorizedAccessException(errorMessages);
-            }
-
-            var token = GenerateJwtToken(user!);
-            return Ok(new { token });
-        }
-    }
-
+    /// <summary>
+    /// Registra un nuevo usuario en el sistema.
+    /// </summary>
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] Usuario usuario)
+    [AllowAnonymous]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        IList<string> errorMessages = new List<string>();
+        var result = await _sender.Send(command);
 
-        using (var session = _sessionFactory.OpenSession())
+        // Usamos HandleResult para devolver la estructura estandarizada
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Inicia sesi√≥n y devuelve un token JWT.
+    /// </summary>
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginCommand command,
+        [FromQuery] bool useCookie = false)
+    {
+        var result = await _sender.Send(command);
+
+        if (result.IsFailure)
         {
-            // Verificar si el usuario ya existe
-            var existingUser = session.Query<Usuario>()
-                .SingleOrDefault(u => u.Correo == usuario.Correo);
-
-            if (existingUser != null)
-            {
-                errorMessages.Add($"El correo '{usuario.Correo}' ya est· registrado.");
-
-                throw new ValidationException(errorMessages);
-            }
-
-            // Hash de la contraseÒa
-            var hasher = new PasswordHasher<Usuario>();
-            var hashedPassword = hasher.HashPassword(usuario, usuario.Contrasena);
-            usuario.Contrasena = hashedPassword;
-            usuario.TokenConfirmacion = Guid.NewGuid().ToString();
-            usuario.Activo = false;
-            // Guardar el nuevo usuario
-            using (var transaction = session.BeginTransaction())
-            {
-                session.Save(usuario);
-                await transaction.CommitAsync();
-            }
-            try
-            {
-                var baseUrl = "https://ahorroland.sergioizq.es";
-#if DEBUG
-                baseUrl = "http://localhost:4200";
-#endif
-                var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={usuario.TokenConfirmacion}";
-
-                await _emailService.SendEmailAsync(
-                    usuario.Correo,
-                    "Bienvenido a Ahorroland",
-                    $@"
-                    <html>
-                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
-                        <h1>Gracias por registrarte en Ahorroland</h1>
-                        <p>Estamos felices de tenerte aquÌ. Por favor accede al siguiente enlace para verificar y activar su cuenta:</p>
-                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
-                      </body>
-                    </html>
-                    "
-                    );
-            }
-            catch (SmtpException)
-            {
-                throw new SmtpException("Ha ocurrido un error al enviar correo");
-            }
-
-            return Ok(new { mensaje = "Usuario creado correctamente." });
+            // El padre se encarga de mapear el error (401, 400, etc.)
+            return HandleResult(result);
         }
-    }
 
-    private string GenerateJwtToken(Usuario usuario)
-    {
-        var expirationTime = DateTime.UtcNow.AddMinutes(720);
-        var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds();
-
-        var claims = new[]
+        // L√≥gica espec√≠fica de Cookies (Solo si es √©xito)
+        if (useCookie)
         {
-        new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+            var loginResponse = result.Value;
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("F7o/dfNfO5AqZbHkLXM6z5Zm8DZpX0m6v7KD0tJr0uI="));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            // Opci√≥n A: Usar m√©todo helper del AbsController (si lo agregaste)
+            // SetCookie("authToken", loginResponse.Token, ...);
 
-        var token = new JwtSecurityToken(
-            issuer: "GastosApp",
-            audience: "GastosApp",
-            claims: claims,
-            expires: expirationTime,
-            signingCredentials: creds);
+            // Opci√≥n B: Usar tu extensi√≥n actual
+            Response.SetAuthCookie(
+                loginResponse.Token,
+                loginResponse.ExpiresAt,
+                _environment.IsDevelopment()
+            );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            // Devolvemos √©xito pero sin el token en el body (por seguridad de cookie)
+            // Creamos un Result modificado solo para la vista
+            return Ok(Result.Success(new
+            {
+                expiresAt = loginResponse.ExpiresAt,
+                usandoCookie = true
+            }));
+        }
+
+        // Modo cl√°sico: Token en el body
+        return HandleResult(result);
     }
 
-    private bool VerifyPassword(string password, string storedHash)
+    /// <summary>
+    /// Cierra la sesi√≥n del usuario.
+    /// </summary>
+    [HttpPost("logout")]
+    [Authorize]
+    public IActionResult Logout()
     {
-        var hasher = new PasswordHasher<Usuario>();
-        var result = hasher.VerifyHashedPassword(null!, storedHash, password);
-        return result == PasswordVerificationResult.Success;
+        // 1. Limpiar cookies del lado del cliente
+        // Opci√≥n A: DeleteCookie("authToken");
+        // Opci√≥n B: Extensi√≥n
+        Response.ClearAuthCookies();
+
+        // 2. Llamar al backend por si hay l√≥gica de invalidaci√≥n de Refresh Tokens (blacklist)
+        // Aunque el comando sea void, es buena pr√°ctica pasar por el handler.
+        // Si no tienes comando de Logout, solo retorna Ok.
+        // var result = await _sender.Send(new LogoutCommand()); 
+
+        return HandleResult(Result.Success("Sesi√≥n cerrada correctamente"));
     }
 
+    /// <summary>
+    /// Confirma el correo electr√≥nico del usuario.
+    /// </summary>
     [HttpGet("confirmar-correo")]
-    public IActionResult ConfirmarCorreo([FromQuery] string token)
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmarCorreo([FromQuery] string token)
     {
-        IList<string> errorMessages = new List<string>();
-        using (var session = _sessionFactory.OpenSession())
-        using (var transaction = session.BeginTransaction())
-        {
-            var usuario = session.Query<Usuario>().SingleOrDefault(u => u.TokenConfirmacion == token);
-            if (usuario == null)
-            {
-                errorMessages.Add("Enlace inv·lido o expirado, si ya ha confirmado su correo inicie sesiÛn.");
-                throw new CustomUnauthorizedAccessException(errorMessages);
-            }
+        var command = new ConfirmEmailCommand(token);
+        var result = await _sender.Send(command);
 
-            usuario.Activo = true;
-            usuario.TokenConfirmacion = null; // Limpia el token
-            session.Update(usuario);
-            transaction.Commit();
-
-            return Ok(new { mensaje = "Correo confirmado correctamente." });
-        }
+        return HandleResult(result);
     }
 
-
-    [HttpPost("confirmar-nueva-pwd")]
-    public IActionResult ConfirmarNuevaPwd([FromBody] PasswordRequest request)
+    [HttpPost("resend-confirmation")]
+    [AllowAnonymous] // Usualmente se permite reenviar sin estar logueado si olvidaste confirmar
+    public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationEmailCommand request)
     {
-        IList<string> errorMessages = new List<string>();
-        using (var session = _sessionFactory.OpenSession())
-        using (var transaction = session.BeginTransaction())
-        {
-            var usuario = session.Query<Usuario>().SingleOrDefault(u => u.TokenConfirmacion == request.Token);
-            if (usuario == null)
-            {
-                errorMessages.Add("Enlace inv·lido o expirado. Pida otro.");
-                throw new CustomUnauthorizedAccessException(errorMessages);
-            }
-            var hasher = new PasswordHasher<Usuario>();
-            var hashedPassword = hasher.HashPassword(usuario, request.Password);
-            usuario.Contrasena = hashedPassword;
-
-            usuario.TokenConfirmacion = null;
-            session.Update(usuario);
-            transaction.Commit();
-
-            return Ok(new { mensaje = "ContraseÒa restablecida correctamente." });
-        }
+        var result = await _sender.Send(request);
+        return HandleResult(result);
     }
 
-    [HttpPost("reenviar-correo")]
-    public async Task<IActionResult> ReenviarCorreoConfirmacion([FromBody] CorreoRequest correo)
+    /// <summary>
+    /// Obtiene informaci√≥n completa del usuario desde la base de datos.
+    /// </summary>
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetCurrentUser()
     {
-        IList<string> errorMessages = new List<string>();
+        // 1. Obtenemos el ID del claim (Token)
+        var userId = GetCurrentUserId();
 
-        using (var session = _sessionFactory.OpenSession())
+        if (userId == null)
         {
-            // Verificar si el usuario ya existe
-            var existingUser = session.Query<Usuario>()
-                .SingleOrDefault(u => u.Correo == correo.Correo);
-
-            if (existingUser == null)
-            {
-                errorMessages.Add($"El correo '{correo}' no est· registrado.");
-
-                throw new ValidationException(errorMessages);
-            }
-
-            if (existingUser.Activo)
-            {
-                errorMessages.Add($"Ya ha confirmado su correo, inicie sesiÛn.");
-
-                throw new ValidationException(errorMessages);
-            }
-
-            existingUser.TokenConfirmacion = Guid.NewGuid().ToString();
-
-            // Guardar el nuevo usuario
-            using (var transaction = session.BeginTransaction())
-            {
-                session.Save(existingUser);
-                await transaction.CommitAsync();
-            }
-            try
-            {
-                var baseUrl = "https://ahorroland.sergioizq.es";
-#if DEBUG
-                baseUrl = "http://localhost:4200";
-#endif
-                var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={existingUser.TokenConfirmacion}";
-
-                await _emailService.SendEmailAsync(
-                    existingUser.Correo,
-                    "ReenvÌo email confirmaciÛn - Ahorroland",
-                    $@"
-                    <html>
-                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
-                        <h1>ReenvÌo email confirmaciÛn</h1>
-                        <p>Hemos recibido una solicitud para generar un nuevo enlace de activaciÛn para esta cuenta.</p>
-                        <p>Por favor, pulsa en el siguiente enlace para activar su cuenta:</p>
-                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
-                        <p>Si no solicitaste este cambio, ignora este correo.</p>
-                      </body>
-                    </html>
-                    "
-                );
-
-            }
-            catch (SmtpException)
-            {
-                throw new SmtpException("Ha ocurrido un error al enviar correo");
-            }
-
-            return Ok(new { mensaje = "Email enviado correctamente." });
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
         }
+
+        // 2. Lanzamos la Query para buscar los datos reales en BD
+        var query = new GetUserProfileQuery(userId.Value);
+        var result = await _sender.Send(query);
+
+        // 3. Devolvemos el resultado (que ahora incluye nombre, apellido, etc.)
+        return HandleResult(result);
     }
 
-    [HttpPost("email-recuperar-password")]
-    public async Task<IActionResult> EnviarEmailRecuperarPassword([FromBody] CorreoRequest correo)
+    /// <summary>
+    /// Solicita recuperaci√≥n de contrase√±a.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
     {
-        IList<string> errorMessages = new List<string>();
+        var result = await _sender.Send(command);
 
-        using (var session = _sessionFactory.OpenSession())
-        {
-            // Verificar si el usuario ya existe
-            var existingUser = session.Query<Usuario>()
-                .SingleOrDefault(u => u.Correo == correo.Correo);
-
-            if (existingUser == null)
-            {
-                errorMessages.Add($"El correo '{correo}' no est· registrado.");
-
-                throw new ValidationException(errorMessages);
-            }
-
-            existingUser.TokenConfirmacion = Guid.NewGuid().ToString();
-
-            // Guardar el nuevo usuario
-            using (var transaction = session.BeginTransaction())
-            {
-                session.Save(existingUser);
-                await transaction.CommitAsync();
-            }
-            try
-            {
-                var baseUrl = "https://ahorroland.sergioizq.es";
-#if DEBUG
-                baseUrl = "http://localhost:4200";
-#endif
-                var confirmUrl = $"{baseUrl}/auth/confirmar-nueva-pwd?token={existingUser.TokenConfirmacion}";
-
-                await _emailService.SendEmailAsync(
-                    existingUser.Correo,
-                    "RecuperaciÛn de contraseÒa - Ahorroland",
-                    $@"
-                    <html>
-                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
-                        <h1>RecuperaciÛn de contraseÒa</h1>
-                        <p>Hemos recibido una solicitud para restablecer la contraseÒa de tu cuenta.</p>
-                        <p>Por favor, pulsa en el siguiente enlace para crear una nueva contraseÒa:</p>
-                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Restablecer mi contraseÒa</a></p>
-                        <p>Si no solicitaste este cambio, ignora este correo.</p>
-                      </body>
-                    </html>
-                    "
-                );
-
-            }
-            catch (SmtpException)
-            {
-                throw new SmtpException("Ha ocurrido un error al enviar correo");
-            }
-
-            return Ok(new { mensaje = "Email enviado correctamente." });
-        }
+        // Nota: HandleResult devolver√° el error si el correo no existe Y tu Handler devuelve Failure.
+        // Si por seguridad tu Handler devuelve Success aunque el correo no exista (para no enumerar),
+        // HandleResult devolver√° 200 OK, lo cual es correcto.
+        return HandleResult(result);
     }
 
-    [HttpPost("contactoForm")]
-    public async Task<IActionResult> EnviarCorreoContacto([FromBody] ContactoFormRequest contactoFormRequest)
+    /// <summary>
+    /// Restablece la contrase√±a.
+    /// </summary>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
     {
-        IList<string> errorMessages = new List<string>();
-
-        using (var session = _sessionFactory.OpenSession())
-        {
-            try
-            {
-                await _emailService.SendEmailAsync("ahorroland@sergioizq.es", "Contacto", "Correo enviado por " + contactoFormRequest.Email + " con nombre " + contactoFormRequest.Nombre + " y con mensaje: " + contactoFormRequest.Mensaje);
-
-            }
-            catch (SmtpException)
-            {
-                throw new SmtpException("Ha ocurrido un error al enviar correo");
-                throw new SmtpException("Ha ocurrido un error al enviar correo");
-            }
-
-            return Ok(new { mensaje = "Email enviado correctamente." });
-        }
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 
+    /// <summary>
+    /// Actualiza los datos del perfil del usuario (Nombre, Apellido).
+    /// </summary>
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId == null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+        }
+
+        var command = new UpdateUserProfileCommand(
+            userId.Value,
+            request.Nombre,
+            request.Apellidos
+        );
+
+        var result = await _sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Sube o actualiza la foto de perfil del usuario.
+    /// Acepta archivos de imagen (jpg, png, webp) hasta 5MB.
+    /// </summary>
+    /// <param name="file">El archivo de imagen enviado como multipart/form-data.</param>
+    [HttpPost("avatar")]
+    [Authorize]
+    public async Task<IActionResult> UploadAvatar([FromForm] UploadAvatarRequest request)
+    {
+        // 1. Obtener usuario autenticado
+        var userId = GetCurrentUserId();
+        if (userId is null) return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+
+        var file = request.File; // Sacamos el archivo del DTO
+
+        // 2. Validaciones r√°pidas de entrada (Fail Fast)
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(Result.Failure(Error.Validation("No se ha proporcionado ning√∫n archivo.")));
+        }
+
+        // Validaci√≥n de tipo MIME (Solo im√°genes)
+        if (!file.ContentType.StartsWith("image/"))
+        {
+            return BadRequest(Result.Failure(Error.Validation("El archivo debe ser una imagen v√°lida (JPG, PNG, WEBP).")));
+        }
+
+        // Validaci√≥n de tama√±o (Ejemplo: M√°ximo 5MB)
+        const long maxFileSize = 5 * 1024 * 1024;
+        if (file.Length > maxFileSize)
+        {
+            return BadRequest(Result.Failure(Error.Validation("La imagen no puede exceder los 5MB.")));
+        }
+
+        // 3. Preparar el comando
+        // Usamos 'using' para asegurar que el stream se cierre correctamente al terminar
+        using var stream = file.OpenReadStream();
+
+        var command = new UploadAvatarCommand(
+            userId.Value,
+            stream,
+            file.FileName,
+            file.ContentType
+        );
+
+        // 4. Enviar al Handler (que guardar√° en disco y actualizar√° la BD)
+        var result = await _sender.Send(command);
+
+        // 5. Retornar resultado
+        // Si es exitoso, devolver√° la URL del avatar en 'result.Value'
+        return HandleResult(result);
+    }
+
+    public record UpdateProfileRequest(
+        string Nombre,
+        string? Apellidos
+    );
+
+    public record UploadAvatarRequest
+    {
+        // El nombre "file" aqu√≠ es lo que buscar√° el frontend en el FormData
+        public required IFormFile File { get; set; }
+    }
 }

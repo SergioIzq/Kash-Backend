@@ -1,70 +1,134 @@
-﻿using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.TraspasosProgramados.Commands;
+using AhorroLand.Application.Features.TraspasosProgramados.Queries;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/traspasos-programados")]
+public class TraspasosProgramadosController : AbsController
 {
-    [ApiController]
-    [Route("api/traspasoProgramado")]
-    [Authorize]
-    public class TraspasosProgramadosController : BaseController<TraspasoProgramado>
+    public TraspasosProgramadosController(ISender sender) : base(sender)
     {
-        private readonly ITraspasoProgramadoServicio _traspasoProgramadoService;
+    }
 
-        public TraspasosProgramadosController(ITraspasoProgramadoServicio traspasoProgramadoService) : base(traspasoProgramadoService)
+    /// <summary>
+    /// Obtiene lista paginada de traspasos programados del usuario autenticado.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _traspasoProgramadoService = traspasoProgramadoService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        // 2. Crear query filtrando por usuario
+        var query = new GetTraspasosProgramadosPagedListQuery(page, pageSize)
         {
-            var result = await _traspasoProgramadoService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetTraspasoProgramadoByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateTraspasoProgramadoRequest request)
+    {
+        // Asignación inteligente de UsuarioId
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpPost]
-        public override async Task<IActionResult> Create([FromBody] TraspasoProgramado entity)
+        var command = new CreateTraspasoProgramadoCommand
         {
+            CuentaOrigenId = request.CuentaOrigenId,
+            CuentaDestinoId = request.CuentaDestinoId,
+            Importe = request.Importe,
+            FechaEjecucion = request.FechaEjecucion,
+            Frecuencia = request.Frecuencia,
+            UsuarioId = usuarioId.Value, // 👈 Seguridad: ID del token
+            Descripcion = request.Descripcion
+        };
 
-            var createdEntity = await _traspasoProgramadoService.CreateAsync(entity);
-            var message = $"Traspaso programado creado correctamente";
+        var result = await _sender.Send(command);
 
-            var response = new ResponseOne<TraspasoProgramado>(createdEntity, message);
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-            return Ok(response);
-        }
-
-        [HttpPut("{id}")]
-        public override async Task<IActionResult> Update(int id, [FromBody] TraspasoProgramado entity)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTraspasoProgramadoRequest request)
+    {
+        var command = new UpdateTraspasoProgramadoCommand
         {
+            Id = id,
+            CuentaOrigenId = request.CuentaOrigenId,
+            CuentaDestinoId = request.CuentaDestinoId,
+            Importe = request.Importe,
+            FechaEjecucion = request.FechaEjecucion,
+            Frecuencia = request.Frecuencia,
+            // Nota: El UsuarioId generalmente no cambia en un update, 
+            // pero si tu comando lo requiere para validación de propiedad:
+            UsuarioId = GetCurrentUserId() ?? Guid.Empty,
+            HangfireJobId = request.HangfireJobId,
+            Descripcion = request.Descripcion
+        };
 
-            await _traspasoProgramadoService.UpdateAsync(id, entity);
-            return Ok(new { message = $"Traspaso programado con ID {id} actualizado correctamente" });
-        }
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
 
-        [HttpGet("getNewTraspaso/{idUsuario}")]
-        public async Task<IActionResult> GetNewTraspaso(int idUsuario)
-        {
-            var newTraspaso = await _traspasoProgramadoService.GetNewTraspasoAsync(idUsuario);
-
-            return Ok(newTraspaso);
-        }
-
-        [HttpGet("getById/{id}")]
-        public async Task<IActionResult> GetGastoById(int id)
-        {
-            var gastoById = await _traspasoProgramadoService.GetTraspasoByIdAsync(id);
-
-            return Ok(gastoById);
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteTraspasoProgramadoCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs simplificados (sin UsuarioId, ya que se inyecta en el Controller)
+public record CreateTraspasoProgramadoRequest(
+    Guid CuentaOrigenId,
+    Guid CuentaDestinoId,
+    decimal Importe,
+    DateTime FechaEjecucion,
+    string Frecuencia,
+    string? Descripcion
+);
+
+public record UpdateTraspasoProgramadoRequest(
+    Guid CuentaOrigenId,
+    Guid CuentaDestinoId,
+    decimal Importe,
+    DateTime FechaEjecucion,
+    string Frecuencia,
+    string HangfireJobId,
+    string? Descripcion
+);

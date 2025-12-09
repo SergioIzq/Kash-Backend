@@ -1,69 +1,154 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+Ôªøusing AhorroLand.Application.Features.Categorias.Commands;
+using AhorroLand.Application.Features.Categorias.Queries;
+using AhorroLand.Application.Features.Categorias.Queries.Recent;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/categorias")]
+public class CategoriasController : AbsController
 {
-    [ApiController]
-    [Route("api/categoria")]
-    [Authorize]
-    public class CategoriaController : BaseController<Categoria>
+    public CategoriasController(ISender sender) : base(sender)
     {
-        private readonly ICategoriaServicio _categoriaService;
+    }
 
-        public CategoriaController(ICategoriaServicio categoriaService) : base(categoriaService)
+    /// <summary>
+    /// Obtiene lista paginada de categor√≠as del usuario autenticado.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // 1. Obtenemos el ID del usuario del token
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _categoriaService = categoriaService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        // 2. Pasamos el ID a la query (IMPORTANTE: Filtrar por usuario)
+        var query = new GetCategoriasPagedListQuery(page, pageSize)
         {
-            var result = await _categoriaService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                // Se devuelve el error directamente, pero el middleware se encargar· de manejarlo
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// B√∫squeda r√°pida para autocomplete.
+    /// </summary>
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCategorias/{idUsuario}")]
-        public async Task<IActionResult> GetCategorias(int idUsuario)
+        var query = new SearchCategoriasQuery(search, limit)
         {
-            var result = await _categoriaService.GetAllAsync(idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                // Se devuelve el error directamente, pero el middleware se encargar· de manejarlo
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Obtiene las categor√≠as m√°s recientes del usuario.
+    /// </summary>
+    [HttpGet("recent")]
+    public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        public override async Task<IActionResult> Create([FromBody] Categoria entity)
+        var query = new GetRecentCategoriasQuery(limit)
         {
-            // Se lanza la excepciÛn al middleware en lugar de manejarla aquÌ
-            var createdEntity = await _categoriaService.CreateAsync(entity);
+            UsuarioId = usuarioId.Value
+        };
 
-            var message = $"{typeof(Categoria).Name} creado correctamente";
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            var response = new ResponseOne<Categoria>(createdEntity, message);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetCategoriaByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(response);
-        }
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCategoriaRequest request)
+    {
+        // Asignaci√≥n inteligente del UsuarioId
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
 
-        public override async Task<IActionResult> Update(int id, [FromBody] Categoria entity)
+        var command = new CreateCategoriaCommand
         {
-            // Se lanza la excepciÛn al middleware en lugar de manejarla aquÌ
-            await _categoriaService.UpdateAsync(id, entity);
+            Nombre = request.Nombre,
+            UsuarioId = usuarioId,
+            Descripcion = request.Descripcion
+        };
 
-            return Ok(new { message = $"{typeof(Categoria).Name} actualizado correctamente" });
-        }
+        var result = await _sender.Send(command);
+
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoriaRequest request)
+    {
+        var command = new UpdateCategoriaCommand
+        {
+            Id = id,
+            Nombre = request.Nombre,
+            Descripcion = request.Descripcion
+        };
+
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteCategoriaCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs de Request
+public record CreateCategoriaRequest(
+    string Nombre,
+    Guid UsuarioId,
+    string? Descripcion
+);
+
+public record UpdateCategoriaRequest(
+    string Nombre,
+    string? Descripcion
+);

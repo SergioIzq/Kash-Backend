@@ -1,71 +1,146 @@
-﻿using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.GastosProgramados.Commands;
+using AhorroLand.Application.Features.GastosProgramados.Queries;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/gastos-programados")]
+public class GastosProgramadosController : AbsController
 {
-    [ApiController]
-    [Route("api/gastoProgramado")]
-    [Authorize]
-    public class GastosProgramadosController : BaseController<GastoProgramado>
+    public GastosProgramadosController(ISender sender) : base(sender)
     {
-        private readonly IGastoProgramadoServicio _gastoProgramadoService;
+    }
 
-        public GastosProgramadosController(IGastoProgramadoServicio gastoProgramadoService) : base(gastoProgramadoService)
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // 1. Seguridad: Obtener ID del usuario
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _gastoProgramadoService = gastoProgramadoService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        // 2. Query filtrada por usuario
+        var query = new GetGastosProgramadosPagedListQuery(page, pageSize)
         {
-            var result = await _gastoProgramadoService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value // 👈 Asignación crítica
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetGastoProgramadoByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateGastoProgramadoRequest request)
+    {
+        // 1. Obtener ID del usuario
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-
-        [HttpPost]
-        public override async Task<IActionResult> Create([FromBody] GastoProgramado entity)
+        // 2. Crear comando con el ID del usuario inyectado
+        var command = new CreateGastoProgramadoCommand
         {
+            Importe = request.Importe,
+            Frecuencia = request.Frecuencia,
+            FechaEjecucion = request.FechaEjecucion,
+            Descripcion = request.Descripcion,
+            ConceptoId = request.ConceptoId,
+            ConceptoNombre = request.ConceptoNombre,
+            ProveedorId = request.ProveedorId,
+            CategoriaId = request.CategoriaId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId,
+        };
 
-            var createdEntity = await _gastoProgramadoService.CreateAsync(entity);
-            var message = $"Gasto programado creado correctamente";
+        var result = await _sender.Send(command);
 
-            var response = new ResponseOne<GastoProgramado>(createdEntity, message);
+        // 3. Respuesta segura 201 Created
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-            return Ok(response);
-        }
-
-        [HttpPut("{id}")]
-        public override async Task<IActionResult> Update(int id, [FromBody] GastoProgramado entity)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoProgramadoRequest request)
+    {
+        var command = new UpdateGastoProgramadoCommand
         {
+            Id = id,
+            Importe = request.Importe,
+            Frecuencia = request.Frecuencia,
+            FechaEjecucion = request.FechaEjecucion,
+            Descripcion = request.Descripcion,
+            ConceptoId = request.ConceptoId,
+            ConceptoNombre = request.ConceptoNombre,
+            ProveedorId = request.ProveedorId,
+            CategoriaId = request.CategoriaId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId
+        };
 
-            await _gastoProgramadoService.UpdateAsync(id, entity);
-            return Ok(new { message = $"Gasto programado con ID {id} actualizado correctamente" });
-        }
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
 
-        [HttpGet("getNewGasto/{idUsuario}")]
-        public async Task<IActionResult> GetNewGasto(int idUsuario)
-        {
-            var newGasto = await _gastoProgramadoService.GetNewGastoAsync(idUsuario);
-
-            return Ok(newGasto);
-        }
-
-        [HttpGet("getById/{id}")]
-        public async Task<IActionResult> GetGastoById(int id)
-        {
-            var gastoById = await _gastoProgramadoService.GetGastoByIdAsync(id);
-
-            return Ok(gastoById);
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteGastoProgramadoCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs
+public record CreateGastoProgramadoRequest(
+    decimal Importe,
+    string Frecuencia,
+    DateTime? FechaEjecucion,
+    string? Descripcion,
+    Guid ConceptoId,
+    string ConceptoNombre,
+    Guid ProveedorId,
+    Guid CategoriaId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId
+);
+
+public record UpdateGastoProgramadoRequest(
+    decimal Importe,
+    string Frecuencia,
+    DateTime? FechaEjecucion,
+    string? Descripcion,
+    Guid ConceptoId,
+    string ConceptoNombre,
+    Guid ProveedorId,
+    Guid CategoriaId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId
+);

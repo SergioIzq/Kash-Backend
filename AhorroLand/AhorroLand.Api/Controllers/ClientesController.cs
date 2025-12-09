@@ -1,69 +1,147 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.Clientes.Commands;
+using AhorroLand.Application.Features.Clientes.Queries;
+using AhorroLand.Application.Features.Clientes.Queries.Recent;
+using AhorroLand.Application.Features.Clientes.Queries.Search;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
+namespace AhorroLand.NuevaApi.Controllers;
 
-namespace AppG.Controllers
+[Authorize]
+[ApiController]
+[Route("api/clientes")]
+public class ClientesController : AbsController
 {
-    [ApiController]
-    [Route("api/cliente")]
-    [Authorize]
-    public class ClienteController : BaseController<Cliente>
+    public ClientesController(ISender sender) : base(sender)
     {
-        private readonly IClienteServicio _clienteService;
+    }
 
-        public ClienteController(IClienteServicio clienteService) : base(clienteService)
+    /// <summary>
+    /// Obtiene lista paginada de clientes del usuario autenticado.
+    /// Cacheada por 30s.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _clienteService = clienteService;
+            // Retornamos un 401 usando el formato estandarizado
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getClientes/{idUsuario}")]
-        public async Task<IActionResult> GetClientes(int idUsuario)
+        var query = new GetClientesPagedListQuery(page, pageSize)
         {
-            var result = await _clienteService.GetAllAsync(idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Búsqueda rápida para autocomplete (selectores asíncronos).
+    /// </summary>
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        var query = new SearchClientesQuery(search, limit)
         {
-            var result = await _clienteService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Obtiene los clientes más recientes del usuario.
+    /// </summary>
+    [HttpGet("recent")]
+    public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        public override async Task<IActionResult> Create([FromBody] Cliente entity)
+        var query = new GetRecentClientesQuery(limit)
         {
-            var createdEntity = await _clienteService.CreateAsync(entity);
+            UsuarioId = usuarioId.Value
+        };
 
-            var message = $"{typeof(Cliente).Name} creado correctamente";
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            var response = new ResponseOne<Cliente>(createdEntity, message);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetClienteByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(response);
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateClienteRequest request)
+    {
+        // En el Create, a veces el UsuarioId viene en el request (si es admin creando para otro)
+        // o lo tomamos del token si es auto-creación.
+        // Aquí asumimos que si no viene, usamos el del token.
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
 
-        }
+        var command = new CreateClienteCommand(
+            request.Nombre,
+            usuarioId
+        );
 
-        public override async Task<IActionResult> Update(int id, [FromBody] Cliente entity)
+        var result = await _sender.Send(command);
+
+        // Usamos HandleResultForCreation para devolver 201 Created y Location header
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClienteRequest request)
+    {
+        var command = new UpdateClienteCommand
         {
+            Id = id,
+            Nombre = request.Nombre
+        };
 
-            await _clienteService.UpdateAsync(id, entity);
+        var result = await _sender.Send(command);
+        return HandleResult(result); // Retorna 200 con el dato actualizado
+    }
 
-            return Ok(new { message = $"{typeof(Cliente).Name} actualizado correctamente" });
-        }
-
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteClienteCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result); // Retorna 204 No Content si es éxito
     }
 }
+
+// DTOs de Request
+public record CreateClienteRequest(string Nombre, Guid UsuarioId);
+public record UpdateClienteRequest(string Nombre);

@@ -1,72 +1,145 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.Gastos.Commands;
+using AhorroLand.Application.Features.Gastos.Queries;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/gastos")]
+public class GastosController : AbsController
 {
-    [ApiController]
-    [Route("api/gasto")]
-    [Authorize]
-    public class GastoController : BaseController<Gasto>
+    public GastosController(ISender sender) : base(sender)
     {
-        private readonly IGastoServicio _gastoService;
+    }
 
-        public GastoController(IGastoServicio gastoService) : base(gastoService)
+    /// <summary>
+    /// Obtiene una lista paginada de gastos con soporte para búsqueda y ordenamiento.
+    /// </summary>
+    [HttpGet] // Estandarizado a la raíz (GET /api/gastos)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? sortColumn = null,
+        [FromQuery] string? sortOrder = null)
+    {
+        // 1. Obtener ID del usuario de forma segura
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _gastoService = gastoService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        var query = new GetGastosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            var result = await _gastoService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
-        }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetGastoByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateGastoRequest request)
+    {
+        var userId = GetCurrentUserId();
 
-        [HttpPost]
-        public override async Task<IActionResult> Create([FromBody] Gasto entity)
+        var command = new CreateGastoCommand
         {
+            Importe = request.Importe,
+            Fecha = request.Fecha,
+            Descripcion = request.Descripcion,
+            CategoriaId = request.CategoriaId,
+            ConceptoId = request.ConceptoId,
+            ProveedorId = request.ProveedorId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = userId!.Value
+        };
 
-            var createdEntity = await _gastoService.CreateAsync(entity, false);
+        var result = await _sender.Send(command);
 
-            var message = $"{typeof(Gasto).Name} creado correctamente";
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-            var response = new ResponseOne<Gasto>(createdEntity, message);
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoRequest request)
+    {
+        // Nota: En Updates, generalmente no permitimos cambiar el UsuarioId (seguridad),
+        // por lo que usamos el del request si viene, pero el Handler debería validar la propiedad.
+        // Opcionalmente podrías forzar: command.UsuarioId = GetCurrentUserId();
+        var userId = GetCurrentUserId();
 
-            return Ok(response);
-        }
-
-        [HttpPut("{id}")]
-        public override async Task<IActionResult> Update(int id, [FromBody] Gasto entity)
+        var command = new UpdateGastoCommand
         {
+            Id = id,
+            Importe = request.Importe,
+            Fecha = request.Fecha,
+            Descripcion = request.Descripcion,
+            CategoriaId = request.CategoriaId,
+            ConceptoId = request.ConceptoId,
+            ProveedorId = request.ProveedorId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = userId!.Value
+        };
 
-            await _gastoService.UpdateAsync(id, entity);
-            return Ok(new { message = $"{typeof(Gasto).Name} con ID {id} actualizado correctamente" });
-        }
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
 
-        [HttpGet("getNewGasto/{idUsuario}")]
-        public async Task<IActionResult> GetNewGasto(int idUsuario)
-        {
-            var newGasto = await _gastoService.GetNewGastoAsync(idUsuario);
-
-            return Ok(newGasto);
-        }
-
-        [HttpGet("getById/{id}")]
-        public async Task<IActionResult> GetGastoById(int id)
-        {
-            var gastoById = await _gastoService.GetGastoByIdAsync(id);
-
-            return Ok(gastoById);
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteGastoCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs
+public record CreateGastoRequest(
+    decimal Importe,
+    DateTime Fecha,
+    string? Descripcion,
+    Guid CategoriaId,
+    Guid ConceptoId,
+    Guid ProveedorId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId
+);
+
+public record UpdateGastoRequest(
+    decimal Importe,
+    DateTime Fecha,
+    string? Descripcion,
+    Guid CategoriaId,
+    Guid ConceptoId,
+    Guid ProveedorId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId
+);

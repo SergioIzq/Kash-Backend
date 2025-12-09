@@ -1,71 +1,157 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.Conceptos.Commands;
+using AhorroLand.Application.Features.Conceptos.Queries;
+using AhorroLand.Application.Features.Conceptos.Queries.Recent;
+using AhorroLand.Application.Features.Conceptos.Queries.Search;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using AhorroLand.Shared.Domain.ValueObjects.Ids;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
+namespace AhorroLand.NuevaApi.Controllers;
 
-namespace AppG.Controllers
+[Authorize]
+[ApiController]
+[Route("api/conceptos")]
+public class ConceptosController : AbsController
 {
-    [ApiController]
-    [Route("api/concepto")]
-    [Authorize]
-    public class ConceptoController : BaseController<Concepto>
+    public ConceptosController(ISender sender) : base(sender)
     {
-        private readonly IConceptoServicio _conceptoService;
+    }
 
-        public ConceptoController(IConceptoServicio conceptoService) : base(conceptoService)
+    /// <summary>
+    /// Obtiene lista paginada de conceptos del usuario autenticado.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _conceptoService = conceptoService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getConceptos/{idUsuario}")]
-        public async Task<IActionResult> GetConceptos(int idUsuario)
+        // 2. Crear query filtrando por usuario
+        var query = new GetConceptosPagedListQuery(page, pageSize)
         {
-            var result = await _conceptoService.GetAllAsync(idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Búsqueda rápida para autocomplete.
+    /// </summary>
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10, [FromQuery] string? categoriaId = null)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        var query = new SearchConceptosQuery(search, limit)
         {
-            var result = await _conceptoService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value,
+            CategoriaId = categoriaId
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Obtiene los conceptos más recientes.
+    /// </summary>
+    [HttpGet("recent")]
+    public async Task<IActionResult> GetRecent([FromQuery] int limit = 5, [FromQuery] string? categoriaId = null)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        public override async Task<IActionResult> Create([FromBody] Concepto entity)
+        var query = new GetRecentConceptosQuery(limit, categoriaId)
         {
+            UsuarioId = usuarioId.Value
+        };
 
-            var createdEntity = await _conceptoService.CreateAsync(entity);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            var message = $"{typeof(Concepto).Name} creado correctamente";
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetConceptoByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            var response = new ResponseOne<Concepto>(createdEntity, message);
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateConceptoRequest request)
+    {
+        // Asignación inteligente de UsuarioId (Token o Request)
+        var usuarioId = GetCurrentUserId();
 
-            return Ok(response);
-
-        }
-
-        public override async Task<IActionResult> Update(int id, [FromBody] Concepto entity)
+        var command = new CreateConceptoCommand
         {
+            Nombre = request.Nombre,
+            CategoriaId = request.CategoriaId,
+            UsuarioId = usuarioId!.Value
+        };
 
-            await _conceptoService.UpdateAsync(id, entity);
+        var result = await _sender.Send(command);
 
-            return Ok(new { message = $"{typeof(Concepto).Name} actualizado correctamente" });
+        // Uso seguro de HandleResultForCreation (evita crash si result.Value falla)
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateConceptoRequest request)
+    {
+        var command = new UpdateConceptoCommand
+        {
+            Id = id,
+            Nombre = request.Nombre,
+            CategoriaId = request.CategoriaId
+        };
 
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteConceptoCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs
+public record CreateConceptoRequest(
+    string Nombre,
+    Guid CategoriaId,
+    Guid UsuarioId
+);
+
+public record UpdateConceptoRequest(
+    string Nombre,
+    Guid CategoriaId
+);

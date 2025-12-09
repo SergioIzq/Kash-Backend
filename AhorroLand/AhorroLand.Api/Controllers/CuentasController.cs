@@ -1,78 +1,152 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.Cuentas.Commands;
+using AhorroLand.Application.Features.Cuentas.Queries;
+using AhorroLand.Application.Features.Cuentas.Queries.Recent;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/cuentas")]
+public class CuentasController : AbsController
 {
-    [ApiController]
-    [Route("api/cuenta")]
-    [Authorize]
-
-    public class CuentaController : BaseController<Cuenta>
+    public CuentasController(ISender sender) : base(sender)
     {
-        private readonly ICuentaServicio _cuentaService;
+    }
 
-        public CuentaController(ICuentaServicio cuentaService) : base(cuentaService)
+    /// <summary>
+    /// Obtiene lista paginada de cuentas del usuario autenticado.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        // 1. Obtener ID del usuario (Seguridad)
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _cuentaService = cuentaService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        // 2. Crear query filtrando por usuario
+        var query = new GetCuentasPagedListQuery(page, pageSize)
         {
-            var result = await _cuentaService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value // 👈 IMPORTANTE: Asignar el ID para filtrar
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Búsqueda rápida para autocomplete.
+    /// </summary>
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCuentas/{idUsuario}")]
-        public async Task<IActionResult> GetCuentas(int idUsuario)
+        var query = new SearchCuentasQuery(search, limit)
         {
-            var result = await _cuentaService.GetAllAsync(idUsuario);
+            UsuarioId = usuarioId.Value
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
+    /// <summary>
+    /// Obtiene las cuentas más recientes del usuario.
+    /// </summary>
+    [HttpGet("recent")]
+    public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
+    {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        public override async Task<IActionResult> Create([FromBody] Cuenta entity)
+        var query = new GetRecentCuentasQuery(limit)
         {
-            var createdEntity = await _cuentaService.CreateAsync(entity);
+            UsuarioId = usuarioId.Value
+        };
 
-            var message = $"{typeof(Cuenta).Name} creado correctamente";
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            var response = new ResponseOne<Cuenta>(createdEntity, message);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetCuentaByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(response);
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCuentaRequest request)
+    {
+        // Asignación inteligente de UsuarioId (Token o Request)
+        var usuarioId = request.UsuarioId != Guid.Empty ? request.UsuarioId : GetCurrentUserId() ?? Guid.Empty;
 
-        }
-
-        public override async Task<IActionResult> Update(int id, [FromBody] Cuenta entity)
+        var command = new CreateCuentaCommand
         {
+            Nombre = request.Nombre,
+            Saldo = request.Saldo,
+            UsuarioId = usuarioId
+        };
 
-            await _cuentaService.UpdateAsync(id, entity);
+        var result = await _sender.Send(command);
 
-            return Ok(new { message = $"{typeof(Cuenta).Name} actualizado correctamente" });
-        }
+        // Uso seguro de HandleResultForCreation (evita crash si result.Value falla)
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-        public override async Task<IActionResult> Delete(int id)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCuentaRequest request)
+    {
+        var command = new UpdateCuentaCommand
         {
+            Id = id,
+            Nombre = request.Nombre
+        };
 
-            await _cuentaService.DeleteAsync(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
 
-            return Ok(new { message = $"{typeof(Cuenta).Name} eliminada correctamente" });
-
-        }
-
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteCuentaCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs
+public record CreateCuentaRequest(
+    string Nombre,
+    decimal Saldo,
+    Guid UsuarioId
+);
+
+public record UpdateCuentaRequest(
+    string Nombre
+);

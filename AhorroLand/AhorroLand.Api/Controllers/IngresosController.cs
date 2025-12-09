@@ -1,73 +1,143 @@
-using AppG.BBDD.Respuestas;
-using AppG.Entidades.BBDD;
-using AppG.Servicio;
+﻿using AhorroLand.Application.Features.Ingresos.Commands;
+using AhorroLand.Application.Features.Ingresos.Queries;
+using AhorroLand.NuevaApi.Controllers.Base;
+using AhorroLand.Shared.Domain.Abstractions.Results; // Para Error y Result
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
-namespace AppG.Controllers
+namespace AhorroLand.NuevaApi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/ingresos")]
+public class IngresosController : AbsController
 {
-    [ApiController]
-    [Route("api/ingreso")]
-    [Authorize]
-    public class IngresoController : BaseController<Ingreso>
+    public IngresosController(ISender sender) : base(sender)
     {
-        private readonly IIngresoServicio _ingresoService;
+    }
 
-        public IngresoController(IIngresoServicio ingresoService) : base(ingresoService)
+    /// <summary>
+    /// Obtiene una lista paginada de ingresos con soporte para búsqueda y ordenamiento.
+    /// </summary>
+    [HttpGet] // Estandarizado a la raíz (GET /api/ingresos)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? sortColumn = null,
+        [FromQuery] string? sortOrder = null)
+    {
+        // 1. Obtener ID del usuario de forma segura
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
         {
-            _ingresoService = ingresoService;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
         }
 
-        [HttpGet("getCantidad")]
-        public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
+        var query = new GetIngresosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            var result = await _ingresoService.GetCantidadAsync(page, size, idUsuario);
+            UsuarioId = usuarioId.Value // 👈 Asignación crítica para seguridad
+        };
 
-            if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
-            {
-                return StatusCode(500, errorResult);
-            }
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
-            return Ok(result);
-        }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var query = new GetIngresoByIdQuery(id);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateIngresoRequest request)
+    {
+        // Asignación inteligente de UsuarioId
+        var userId = GetCurrentUserId();
 
-        [HttpPost]
-        public override async Task<IActionResult> Create([FromBody] Ingreso entity)
+        var command = new CreateIngresoCommand
         {
-            var createdEntity = await _ingresoService.CreateAsync(entity);
+            Importe = request.Importe,
+            Fecha = request.Fecha,
+            Descripcion = request.Descripcion,
+            CategoriaId = request.CategoriaId,
+            ConceptoId = request.ConceptoId,
+            ClienteId = request.ClienteId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = userId!.Value
+        };
 
-            var message = $"{typeof(Ingreso).Name} creado correctamente";
+        var result = await _sender.Send(command);
 
-            var response = new ResponseOne<Ingreso>(createdEntity, message);
+        // Uso seguro de HandleResultForCreation
+        return HandleResultForCreation(
+            result,
+            nameof(GetById),
+            new { id = result.IsSuccess ? result.Value : Guid.Empty }
+        );
+    }
 
-            return Ok(response);
-
-        }
-
-        [HttpPut("{id}")]
-        public override async Task<IActionResult> Update(int id, [FromBody] Ingreso entity)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngresoRequest request)
+    {
+        var command = new UpdateIngresoCommand
         {
+            Id = id,
+            Importe = request.Importe,
+            Fecha = request.Fecha,
+            Descripcion = request.Descripcion,
+            CategoriaId = request.CategoriaId,
+            ConceptoId = request.ConceptoId,
+            ClienteId = request.ClienteId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = request.UsuarioId // Nota: Validar si permites cambiar de dueño en el handler
+        };
 
-            await _ingresoService.UpdateAsync(id, entity);
-            return Ok(new { message = $"{typeof(Ingreso).Name} actualizado correctamente" });
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
 
-        }
-
-        [HttpGet("getNewIngreso/{idUsuario}")]
-        public async Task<IActionResult> GetNewIngreso(int idUsuario)
-        {
-            var newIngreso = await _ingresoService.GetNewIngresoAsync(idUsuario);
-
-            return Ok(newIngreso);
-        }
-
-        [HttpGet("getById/{id}")]
-        public async Task<IActionResult> GetIngresoById(int id)
-        {
-            var ingresoById = await _ingresoService.GetIngresoByIdAsync(id);
-
-            return Ok(ingresoById);
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteIngresoCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
     }
 }
+
+// DTOs
+public record CreateIngresoRequest(
+    decimal Importe,
+    DateTime Fecha,
+    string? Descripcion,
+    Guid CategoriaId,
+    Guid ConceptoId,
+    Guid ClienteId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId,
+    Guid UsuarioId
+);
+
+public record UpdateIngresoRequest(
+    decimal Importe,
+    DateTime Fecha,
+    string? Descripcion,
+    Guid CategoriaId,
+    Guid ConceptoId,
+    Guid ClienteId,
+    Guid PersonaId,
+    Guid CuentaId,
+    Guid FormaPagoId,
+    Guid UsuarioId
+);

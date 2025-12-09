@@ -1,101 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<StartupObject>Program</StartupObject>
+		<UserSecretsId>3fb068f7-3fcc-4d94-8192-ee019271fb76</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Entidades\**" />
-		<Content Remove="Entidades\**" />
-		<EmbeddedResource Remove="Entidades\**" />
-		<None Remove="Entidades\**" />
+		<PackageReference Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.22" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="BBDD\Categoria.hbm.xml" />
-    <None Remove="BBDD\Cliente.hbm.xml" />
-    <None Remove="BBDD\Concepto.hbm.xml" />
-    <None Remove="BBDD\Cuenta.hbm.xml" />
-    <None Remove="BBDD\FormaPago.hbm.xml" />
-    <None Remove="BBDD\Gasto.hbm.xml" />
-    <None Remove="BBDD\GastoProgramado.hbm.xml" />
-    <None Remove="BBDD\Ingreso.hbm.xml" />
-    <None Remove="BBDD\IngresoProgramado.hbm.xml" />
-    <None Remove="BBDD\Persona.hbm.xml" />
-    <None Remove="BBDD\Proveedor.hbm.xml" />
-    <None Remove="BBDD\Traspaso.hbm.xml" />
-    <None Remove="BBDD\TraspasoProgramado.hbm.xml" />
-    <None Remove="BBDD\Usuario.hbm.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="BBDD\IngresoProgramado.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\GastoProgramado.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\TraspasoProgramado.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Usuario.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\FormaPago.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Cuenta.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Traspaso.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Persona.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Proveedor.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Cliente.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Concepto.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Categoria.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Gasto.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="BBDD\Ingreso.hbm.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CorsPolicySettings" Version="2.0.0" />
-    <PackageReference Include="EPPlus" Version="7.2.2" />
-    <PackageReference Include="Hangfire" Version="1.8.18" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
-    <PackageReference Include="Hangfire.MySqlStorage" Version="2.0.3" />
-    <PackageReference Include="MailKit" Version="4.12.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
-    <PackageReference Include="MySql.Data" Version="9.3.0" />
-    <PackageReference Include="NHibernate" Version="5.5.2" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-  </ItemGroup>
-
 	<ItemGroup>
-		<None Update="NHibernate\hibernate.cfg.xml">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
+		<ProjectReference Include="..\AhorroLand.Application\AhorroLand.Application.csproj" />
+		<ProjectReference Include="..\AhorroLand.Infrastructure\AhorroLand.Infrastructure.csproj" />
+		<ProjectReference Include="..\AhorroLand.Shared.Application\AhorroLand.Shared.Application.csproj" />
+		<ProjectReference Include="..\AhorroLand.Middleware\AhorroLand.Middleware.csproj" />
 	</ItemGroup>
 
 </Project>
