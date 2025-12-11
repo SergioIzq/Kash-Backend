@@ -85,7 +85,7 @@ public class TraspasosController : AbsController
             CuentaOrigenId = request.CuentaOrigenId,
             CuentaDestinoId = request.CuentaDestinoId,
             Importe = request.Importe,
-            Fecha = request.Fecha,
+            FechaEjecucion = request.Fecha,
             Descripcion = request.Descripcion
         };
 

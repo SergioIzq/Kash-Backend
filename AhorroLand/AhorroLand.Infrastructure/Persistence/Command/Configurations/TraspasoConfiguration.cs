@@ -11,66 +11,85 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
     {
         public void Configure(EntityTypeBuilder<Traspaso> builder)
         {
-            builder.ToTable("traspasos");
+            builder.ToTable("Traspasos");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
                 value => TraspasoId.CreateFromDatabase(value)
             );
 
+            // Configurar conversiones de Value Objects
             builder.Property(e => e.Importe)
-    .HasColumnName("importe")
+                .HasColumnName("importe")
                 .HasColumnType("decimal(18,2)")
-  .IsRequired()
-    .HasConversion(
-         importe => importe.Valor,
-      value => Cantidad.CreateFromDatabase(value));
-
-            builder.Property(e => e.CuentaOrigenId)
-        .HasColumnName("id_cuenta_origen")
-           .IsRequired()
-        .HasConversion(
-                  cuentaId => cuentaId.Value,
-                   value => CuentaId.CreateFromDatabase(value));
-
-            builder.Property(e => e.CuentaDestinoId)
-                  .HasColumnName("id_cuenta_destino")
-               .IsRequired()
-            .HasConversion(
-                 cuentaId => cuentaId.Value,
-            value => CuentaId.CreateFromDatabase(value));
-
-            builder.Property(e => e.UsuarioId)
-                     .HasColumnName("id_usuario")
-           .IsRequired()
-                     .HasConversion(
-              usuarioId => usuarioId.Value,
-           value => UsuarioId.CreateFromDatabase(value));
+                .IsRequired()
+                .HasConversion(
+                    importe => importe.Valor,
+                    value => Cantidad.CreateFromDatabase(value));
 
             builder.Property(e => e.Fecha)
-       .HasColumnName("fecha")
-       .IsRequired()
-       .HasConversion(
-                 fecha => fecha.Valor,
-            value => FechaRegistro.CreateFromDatabase(value));
-
+                .HasColumnName("fecha")
+                .IsRequired()
+                .HasConversion(
+                    fecha => fecha.Valor,
+                    value => FechaRegistro.CreateFromDatabase(value));
 
             builder.Property(e => e.Descripcion)
-    .HasColumnName("descripcion")
-    .HasColumnType("varchar")
-    .HasMaxLength(200)
-    .IsRequired(false)
-    .HasConversion(
-        descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
-        value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
+                .HasColumnName("descripcion")
+                .HasColumnType("varchar")
+                .HasMaxLength(200)
+                .IsRequired(false)
+                .HasConversion(
+                    descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
+                    value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
+
+            // IDs como Value Objects
+            builder.Property(e => e.CuentaOrigenId)
+                .HasColumnName("id_cuenta_origen")
+                .IsRequired()
+                .HasConversion(
+                    cuentaOrigenId => cuentaOrigenId.Value,
+                    value => CuentaId.CreateFromDatabase(value));
+
+            builder.Property(e => e.CuentaDestinoId)
+                .HasColumnName("id_cuenta_destino")
+                .IsRequired()
+                .HasConversion(
+                    cuentaDestinoId => cuentaDestinoId.Value,
+                    value => CuentaId.CreateFromDatabase(value));
+
+            builder.Property(e => e.UsuarioId)
+                .HasColumnName("id_usuario")
+                .IsRequired()
+                .HasConversion(
+                    usuarioId => usuarioId.Value,
+                    value => UsuarioId.CreateFromDatabase(value));
 
             builder.Property(e => e.FechaCreacion)
-            .HasColumnName("fecha_creacion")
-            .IsRequired()
-            .ValueGeneratedOnAdd();
+                .HasColumnName("fecha_creacion")
+                .IsRequired()
+                .ValueGeneratedOnAdd()
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            builder.Property(e => e.FechaCreacion)
-            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+            // Relaciones usando SOLO el nombre de columna
+            builder.HasOne(e => e.CuentaOrigen)
+                .WithMany()
+                .HasForeignKey(e => e.CuentaOrigenId) // <--- CAMBIO: Usa la propiedad ID
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => e.CuentaDestino)
+                .WithMany()
+                .HasForeignKey(e => e.CuentaDestinoId) // <--- CAMBIO
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => e.Usuario)
+                .WithMany()
+                .HasForeignKey(e => e.UsuarioId)   // <--- CAMBIO
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Índices críticos para rendimiento
+            builder.HasIndex(e => new { e.UsuarioId, e.Fecha })
+                .HasDatabaseName("idx_Traspasos_usuario_fecha");
         }
     }
 }

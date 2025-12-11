@@ -18,4 +18,5 @@ public sealed record CreateGastoProgramadoCommand : AbsCreateCommand<GastoProgra
     public Guid PersonaId { get; init; }
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
+    public bool Activo { get; set; } = true;
 }

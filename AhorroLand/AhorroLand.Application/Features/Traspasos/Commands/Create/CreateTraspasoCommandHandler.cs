@@ -71,7 +71,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
             var cuentaDestinoId = CuentaId.Create(command.CuentaDestinoId).Value;
 
             // Creación de la Entidad (solo con VOs de identidad y valor)
-            var traspaso = Traspaso.Create(cuentaOrigenId, cuentaDestinoId, importeVO, fechaVO, usuarioIdVO, descripcionVO);
+            var traspaso = Traspaso.Create(cuentaOrigenId, cuentaDestinoId, importeVO, fechaVO, usuarioIdVO, descripcionVO, command.Activo);
 
             // 5. PERSISTENCIA
             _writeRepository.Add(traspaso);

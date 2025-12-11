@@ -84,7 +84,15 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// </summary>
         protected virtual string BuildCountQuery()
         {
-            return $"SELECT COUNT(*) FROM {_tableName}";
+            var alias = GetTableAlias();
+
+            // Si hay un alias definido (ej: "tp"), generamos "FROM tabla tp"
+            // Si no, dejamos "FROM tabla"
+            var tableReference = string.IsNullOrEmpty(alias)
+                ? _tableName
+                : $"{_tableName} {alias}";
+
+            return $"SELECT COUNT(*) FROM {tableReference}";
         }
 
         /// <summary>

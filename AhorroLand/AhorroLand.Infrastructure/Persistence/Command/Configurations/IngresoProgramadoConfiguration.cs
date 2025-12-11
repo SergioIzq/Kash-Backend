@@ -1,4 +1,4 @@
-using AhorroLand.Domain;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Domain.ValueObjects;
 using AhorroLand.Shared.Domain.ValueObjects.Ids;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                 value => IngresoProgramadoId.CreateFromDatabase(value)
             ); ;
 
-            // ? Configurar conversi�n de Value Object Cantidad
+            // ? Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)
             .HasColumnName("importe")
               .HasColumnType("decimal(18,2)")
@@ -36,7 +36,22 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
                     descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
                     value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
-            // ? Configurar conversi�n de Value Objects de IDs
+            builder.Property(e => e.FechaEjecucion)
+.HasColumnName("fecha_ejecucion")
+   .IsRequired();
+
+            // ✅ Activo
+            builder.Property(e => e.Activo)
+            .HasColumnName("activo")
+          .IsRequired();
+
+            // ✅ HangfireJobId
+            builder.Property(e => e.HangfireJobId)
+    .HasColumnName("hangfire_job_id")
+  .HasColumnType("varchar(100)")
+    .IsRequired();
+
+            // ? Configurar conversión de Value Objects de IDs
             builder.Property(e => e.CuentaId)
           .HasColumnName("id_cuenta")
        .IsRequired()

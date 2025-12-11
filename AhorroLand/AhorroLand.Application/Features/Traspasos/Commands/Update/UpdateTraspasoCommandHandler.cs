@@ -30,7 +30,7 @@ public sealed class UpdateTraspasoCommandHandler
         var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
         var cuentaDestinoId = CuentaId.Create(command.CuentaDestinoId).Value;
         var importe = Cantidad.Create(command.Importe).Value;
-        var fecha = FechaRegistro.Create(command.Fecha).Value;
+        var fecha = FechaRegistro.Create(command.FechaEjecucion).Value;
         var descripcion = new Descripcion(command.Descripcion);
 
         // 🔥 Llamar al método Update de la entidad que dispara el evento
@@ -39,7 +39,8 @@ public sealed class UpdateTraspasoCommandHandler
         cuentaDestinoId,
           importe,
             fecha,
-         descripcion);
+         descripcion,
+         command.Activo);
     }
 }
 

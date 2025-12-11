@@ -22,4 +22,5 @@ public sealed record UpdateIngresoProgramadoCommand : AbsUpdateCommand<IngresoPr
     public required string CuentaNombre { get; init; }
     public required Guid FormaPagoId { get; init; }
     public required string FormaPagoNombre { get; init; }
+    public bool Activo { get; init; } = true;
 }

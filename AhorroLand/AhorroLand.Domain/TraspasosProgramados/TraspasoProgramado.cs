@@ -50,9 +50,9 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
     public bool Activo { get; private set; }
     public string HangfireJobId { get; private set; } = string.Empty;
 
-    // --- Propiedades derivadas (opcional: para proyecciones) ---
-    public Cantidad SaldoCuentaOrigen { get; private set; }
-    public Cantidad SaldoCuentaDestino { get; private set; }
+    public Cuenta CuentaOrigen { get; private set; } = null!;
+    public Cuenta CuentaDestino { get; private set; } = null!;
+    public Usuario Usuario { get; private set; } = null!;
 
     // --- Factory method ---
     public static Result<TraspasoProgramado> Create(
@@ -129,14 +129,5 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
 
         HangfireJobId = jobId;
         return Result.Success();
-    }
-
-    /// <summary>
-    /// Actualiza los saldos de las cuentas (solo informativo, no cambia el dominio de Cuentas).
-    /// </summary>
-    public void ActualizarSaldos(Cantidad saldoOrigen, Cantidad saldoDestino)
-    {
-        SaldoCuentaOrigen = saldoOrigen;
-        SaldoCuentaDestino = saldoDestino;
     }
 }

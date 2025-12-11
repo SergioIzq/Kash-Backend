@@ -13,4 +13,5 @@ public sealed record CreateTraspasoCommand : AbsCreateCommand<Traspaso, Traspaso
     public required decimal Importe { get; init; }
     public required DateTime Fecha { get; init; }
     public string? Descripcion { get; init; }
+    public bool Activo { get; init; }
 }

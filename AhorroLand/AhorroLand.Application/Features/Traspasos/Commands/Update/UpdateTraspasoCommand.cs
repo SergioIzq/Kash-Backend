@@ -10,6 +10,7 @@ public sealed record UpdateTraspasoCommand : AbsUpdateCommand<Traspaso, Traspaso
     public required Guid CuentaOrigenId { get; init; }
     public required Guid CuentaDestinoId { get; init; }
     public required decimal Importe { get; init; }
-    public required DateTime Fecha { get; init; }
+    public required DateTime FechaEjecucion { get; init; }
     public string? Descripcion { get; init; }
+    public bool Activo { get; init; }
 }

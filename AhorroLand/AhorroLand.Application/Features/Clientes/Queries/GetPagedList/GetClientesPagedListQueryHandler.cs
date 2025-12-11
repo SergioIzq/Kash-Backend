@@ -19,7 +19,7 @@ public sealed class GetClientesPagedListQueryHandler
         ICacheService cacheService)
         : base(clienteRepository, cacheService)
     {
- }
+    }
 
     /// <summary>
     /// 🚀 OPTIMIZADO: Usa método específico del repositorio que filtra por usuario.
@@ -28,20 +28,20 @@ public sealed class GetClientesPagedListQueryHandler
         GetClientesPagedListQuery query,
         CancellationToken cancellationToken)
     {
-    // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro
+        // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro
         if (query.UsuarioId.HasValue)
         {
-     return await _dtoRepository.GetPagedReadModelsByUserAsync(
-  query.UsuarioId.Value,
-                query.Page,
-       query.PageSize,
-       null, // searchTerm
-    null, // sortColumn
-   null, // sortOrder
-      cancellationToken);
+            return await _dtoRepository.GetPagedReadModelsByUserAsync(
+         query.UsuarioId.Value,
+                       query.Page,
+              query.PageSize,
+              null, // searchTerm
+           null, // sortColumn
+          null, // sortOrder
+             cancellationToken);
         }
 
         // Sin UsuarioId, dejamos que el handler base maneje
-   return null!;
+        return null!;
     }
 }

@@ -91,7 +91,7 @@ namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configura
 
             // ✅ FechaEjecucion
             builder.Property(e => e.FechaEjecucion)
-          .HasColumnName("proximo_pago")
+          .HasColumnName("fecha_ejecucion")
                .IsRequired();
 
             // ✅ Activo

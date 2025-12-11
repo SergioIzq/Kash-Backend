@@ -107,6 +107,41 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     }
 
     /// <summary>
+    /// Actualiza todos los datos del gasto programado.
+    /// </summary>
+    public Result Update(
+        Cantidad importe,
+        DateTime fechaEjecucion,
+        ConceptoId conceptoId,
+        ProveedorId proveedorId,
+        PersonaId personaId,
+        CuentaId cuentaId,
+        FormaPagoId formaPagoId,
+        Frecuencia frecuencia,
+        bool activo,
+        Descripcion? descripcion = null)
+    {
+        // Validación de fecha
+        if (fechaEjecucion < DateTime.Today)
+        {
+            return Result.Failure(Error.Validation("La fecha de ejecución debe ser futura."));
+        }
+
+        Importe = importe;
+        FechaEjecucion = fechaEjecucion;
+        ConceptoId = conceptoId;
+        ProveedorId = proveedorId;
+        PersonaId = personaId;
+        CuentaId = cuentaId;
+        FormaPagoId = formaPagoId;
+        Frecuencia = frecuencia;
+        Activo = activo;
+        Descripcion = descripcion;
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Marca el Gasto como inactivo.
     /// </summary>
     public void Desactivar()
@@ -117,16 +152,10 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     }
 
     /// <summary>
-    /// Asigna el ID del Job de Hangfire después de la creación/actualización.
+    /// Activa el gasto programado.
     /// </summary>
-    public Result AsignarJobId(string jobId)
+    public void Activar()
     {
-        if (string.IsNullOrWhiteSpace(jobId))
-        {
-            return Result.Failure(Error.Validation("El Job ID no puede ser vacío."));
-        }
-        HangfireJobId = jobId;
-
-        return Result.Success();
+        Activo = true;
     }
 }

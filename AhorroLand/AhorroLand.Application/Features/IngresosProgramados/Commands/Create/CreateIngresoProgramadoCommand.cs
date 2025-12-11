@@ -17,4 +17,5 @@ public sealed record CreateIngresoProgramadoCommand : AbsCreateCommand<IngresoPr
     public Guid PersonaId { get; init; }
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
+    public bool Activo { get; init; } = true;
 }

@@ -9,7 +9,7 @@
 
         // Value Objects
         public decimal Importe { get; init; }
-        public DateTime Fecha { get; init; }
+        public DateTime FechaEjecucion { get; init; }
         public string? Descripcion { get; init; }
 
         // Relaciones (Flattened)

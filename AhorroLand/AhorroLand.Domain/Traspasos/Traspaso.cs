@@ -21,7 +21,8 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
         Cantidad importe,
         FechaRegistro fecha,
         UsuarioId usuarioId,
-        Descripcion? descripcion) : base(id)
+        Descripcion? descripcion,
+        bool activo) : base(id)
     {
         CuentaOrigenId = cuentaOrigen;
         CuentaDestinoId = cuentaDestino;
@@ -29,6 +30,7 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
         Fecha = fecha;
         UsuarioId = usuarioId;
         Descripcion = descripcion;
+        Activo = activo;
     }
 
 
@@ -38,35 +40,40 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
     public Cantidad Importe { get; private set; }
     public FechaRegistro Fecha { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
+    public bool Activo { get; private set; } = true;
 
     public Cuenta CuentaOrigen { get; private set; } = null!;
     public Cuenta CuentaDestino { get; private set; } = null!;
+    public Usuario Usuario { get; private set; } = null!;
     public Descripcion? Descripcion { get; private set; }
-    
+
     public static Traspaso Create(
     CuentaId cuentaOrigen,
         CuentaId cuentaDestino,
         Cantidad importe,
         FechaRegistro fecha,
     UsuarioId usuarioId,
-    Descripcion? descripcion)
+    Descripcion? descripcion,
+    bool activo
+    )
     {
         // ⭐ Única validación de dominio intrínseca del Traspaso:
         if (cuentaOrigen.Equals(cuentaDestino))
         {
-          throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
-      }
+            throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
+        }
 
-    var traspaso = new Traspaso(
-          TraspasoId.Create(Guid.NewGuid()).Value,
-            cuentaOrigen,
-            cuentaDestino,
-        importe,
-   fecha,
-       usuarioId,
-    descripcion);
+        var traspaso = new Traspaso(
+              TraspasoId.Create(Guid.NewGuid()).Value,
+                cuentaOrigen,
+                cuentaDestino,
+            importe,
+       fecha,
+           usuarioId,
+        descripcion,
+        activo);
 
-     // 🔥 Lanzar evento de dominio cuando se crea un traspaso
+        // 🔥 Lanzar evento de dominio cuando se crea un traspaso
         traspaso.AddDomainEvent(new TraspasoCreadoEvent(
       traspaso.Id,
             cuentaOrigen,
@@ -78,54 +85,56 @@ cuentaDestino,
 
     public void Update(
         CuentaId cuentaOrigen,
-  CuentaId cuentaDestino,
+        CuentaId cuentaDestino,
         Cantidad importe,
         FechaRegistro fecha,
-    Descripcion? descripcion)
+        Descripcion? descripcion,
+        bool activo)
     {
-      // ⭐ Validación de dominio
+        // ⭐ Validación de dominio
         if (cuentaOrigen.Equals(cuentaDestino))
         {
             throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
         }
 
         // 🔥 Guardar valores anteriores para el evento
-     var cuentaOrigenAnterior = CuentaOrigenId;
+        var cuentaOrigenAnterior = CuentaOrigenId;
         var cuentaDestinoAnterior = CuentaDestinoId;
         var importeAnterior = Importe;
 
-      CuentaOrigenId = cuentaOrigen;
+        CuentaOrigenId = cuentaOrigen;
         CuentaDestinoId = cuentaDestino;
-     Importe = importe;
+        Importe = importe;
         Fecha = fecha;
         Descripcion = descripcion;
+        Activo = activo;
 
-   // 🔥 Lanzar evento solo si cambió alguna cuenta o el importe
-  if (!cuentaOrigenAnterior.Equals(cuentaOrigen) ||
+        // 🔥 Lanzar evento solo si cambió alguna cuenta o el importe
+        if (!cuentaOrigenAnterior.Equals(cuentaOrigen) ||
             !cuentaDestinoAnterior.Equals(cuentaDestino) ||
             !importeAnterior.Equals(importe))
         {
-  AddDomainEvent(new TraspasoActualizadoEvent(
-     Id,
-  cuentaOrigenAnterior,
-           cuentaDestinoAnterior,
-  importeAnterior,
-      cuentaOrigen,
-    cuentaDestino,
-          importe));
+            AddDomainEvent(new TraspasoActualizadoEvent(
+                Id,
+                cuentaOrigenAnterior,
+                cuentaDestinoAnterior,
+                importeAnterior,
+                cuentaOrigen,
+                cuentaDestino,
+                importe));
         }
     }
 
     /// <summary>
-  /// Marca el traspaso como eliminado y lanza el evento de dominio.
+    /// Marca el traspaso como eliminado y lanza el evento de dominio.
     /// </summary>
     public void MarkAsDeleted()
     {
         // 🔥 Lanzar evento de dominio cuando se elimina un traspaso
-      AddDomainEvent(new TraspasoEliminadoEvent(
-        Id,
-      CuentaOrigenId,
-          CuentaDestinoId,
-            Importe));
+        AddDomainEvent(new TraspasoEliminadoEvent(
+          Id,
+        CuentaOrigenId,
+            CuentaDestinoId,
+              Importe));
     }
 }

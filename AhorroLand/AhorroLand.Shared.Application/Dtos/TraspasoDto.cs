@@ -13,6 +13,7 @@
         public string? Descripcion { get; init; }
 
         // Relaciones (Flattened)
+        public bool Activo { get; init; }
         public Guid CuentaOrigenId { get; init; }
         public string CuentaOrigenNombre { get; init; } = string.Empty;
         public Guid CuentaDestinoId { get; init; }

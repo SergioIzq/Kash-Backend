@@ -24,6 +24,7 @@
 		<ProjectReference Include="..\AhorroLand.Infrastructure\AhorroLand.Infrastructure.csproj" />
 		<ProjectReference Include="..\AhorroLand.Shared.Application\AhorroLand.Shared.Application.csproj" />
 		<ProjectReference Include="..\AhorroLand.Middleware\AhorroLand.Middleware.csproj" />
+		<ProjectReference Include="..\AhorroLand.FicheroLog\AhorroLand.FicheroLog.csproj" />
 	</ItemGroup>
 
 </Project>
