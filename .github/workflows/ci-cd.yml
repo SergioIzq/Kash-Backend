@@ -31,11 +31,11 @@ jobs:
       - name: Detect solution structure
         id: detect
         run: |
-          if [ -f "kash/kash.sln" ]; then
+          if [ -f "Kash/Kash.sln" ]; then
             echo "📁 Detected Clean Architecture structure"
-            echo "solution_path=kash/kash.sln" >> $GITHUB_OUTPUT
-            echo "context_path=./kash" >> $GITHUB_OUTPUT
-            echo "dockerfile_path=./kash/Dockerfile" >> $GITHUB_OUTPUT
+            echo "solution_path=Kash/Kash.sln" >> $GITHUB_OUTPUT
+            echo "context_path=./Kash" >> $GITHUB_OUTPUT
+            echo "dockerfile_path=./Kash/Dockerfile" >> $GITHUB_OUTPUT
           elif [ -f "AppG.sln" ]; then
             echo "📁 Detected standard structure"
             echo "solution_path=AppG.sln" >> $GITHUB_OUTPUT
