@@ -18,6 +18,7 @@ using Serilog;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Globalization;
 
 // 🔥 CONFIGURACIÓN SERILOG
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +26,12 @@ Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
 
 Log.Information("🚀 Iniciando Kash API en .NET 10...");
+
+var cultureInfo = new CultureInfo("es-ES");
+// Forzar el formato de números y fechas
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+// Forzar el formato de la interfaz (textos)
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 try
 {
