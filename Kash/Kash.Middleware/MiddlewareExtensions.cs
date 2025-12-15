@@ -26,12 +26,23 @@ public static class MiddlewareExtensions
     }
 
     /// <summary>
-    /// Registra ambos middlewares en el orden correcto
+    /// ?? NUEVO: Registra el middleware que deshabilita el caché HTTP del navegador.
+    /// Previene que Ctrl+R use datos cacheados obsoletos.
+    /// DEBE registrarse ANTES de UseResponseCompression() para que los headers se apliquen correctamente.
+    /// </summary>
+    public static IApplicationBuilder UseNoCache(this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<NoCacheMiddleware>();
+    }
+
+    /// <summary>
+    /// Registra todos los middlewares de Kash en el orden correcto
     /// </summary>
     public static IApplicationBuilder UseKashExceptionHandling(this IApplicationBuilder app)
     {
         app.UseGlobalExceptionHandler();
         app.UseResultHandler();
+        app.UseNoCache(); // ?? Agregamos el middleware de no-caché
         return app;
     }
 }

@@ -283,7 +283,10 @@ try
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
+    
+    // 🔥 Middleware de manejo de excepciones y resultados (PRIMERO)
     app.UseKashExceptionHandling();
+    
     app.UseRateLimiter();
 
     // CORS debe ir temprano
@@ -291,6 +294,8 @@ try
 
     app.UseStaticFiles(); // Importante para Swagger UI (CSS/JS)
     app.UseCookiePolicy();
+    
+    // 🔥 Compresión después del middleware de no-caché
     app.UseResponseCompression();
 
     // 🔥 SWAGGER (Corregido)
