@@ -87,8 +87,7 @@ jobs:
     if: github.event_name != 'pull_request'
     # CORRECCIÓN: Definir outputs para que 'notify' pueda leerlos
     outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-    
+      tags: ${{ steps.meta.outputs.version }}    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -150,6 +149,7 @@ jobs:
         run: |
           echo "✅ Docker image built and pushed successfully!"
           echo "📦 Image: ${{ env.DOCKER_IMAGE }}"
-          # Ahora esto funcionará porque definimos los outputs arriba
-          echo "🏷️ Tags: ${{ needs.docker-build-and-push.outputs.tags }}"
-          echo "🚀 Deploy with: docker pull ${{ env.DOCKER_IMAGE }}:latest"
+          # CAMBIO AQUÍ: Mostramos la versión limpia
+          echo "🏷️ Version: ${{ needs.docker-build-and-push.outputs.tags }}"
+          # Reconstruimos el comando de pull para que sea útil copiar y pegar
+          echo "🚀 Deploy with: docker pull ${{ env.DOCKER_IMAGE }}:${{ needs.docker-build-and-push.outputs.tags }}"
