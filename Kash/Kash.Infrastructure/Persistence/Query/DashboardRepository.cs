@@ -159,13 +159,20 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
             return await ObtenerHistoricoUltimos6MesesAsync(conn, usuarioId, cuentaId, categoriaId, filtroCuenta, filtroCategoria);
         });
 
+        var taskPresupuesto = Task.Run(async () =>
+        {
+            using var conn = _dbConnectionFactory.CreateConnection();
+            return await ObtenerPresupuestoAnualAsync(conn, usuarioId, cuentaId, categoriaId, filtroCuenta, filtroCategoria);
+        });
+
         // Esperar todas las tareas en paralelo
         await Task.WhenAll(
             taskMetricasPrincipales,
             taskCuentas,
             taskTopCategorias,
             taskUltimosMovimientos,
-            taskHistorico
+            taskHistorico,
+            taskPresupuesto
         );
 
         // Obtener resultados
@@ -174,6 +181,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
         var topCategoriasRaw = await taskTopCategorias;
         var ultimosMovimientos = await taskUltimosMovimientos;
         var historicoUltimos6Meses = await taskHistorico;
+        var presupuestoAnual = await taskPresupuesto;
 
         // Extraer métricas del resultset
         var balanceTotal = metricasPrincipales[0];
@@ -234,6 +242,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
             DiasTranscurridosMes = diasTranscurridos,
             DiasRestantesMes = diasRestantes,
             HistoricoUltimos6Meses = historicoUltimos6Meses,
+            PresupuestoAnual = presupuestoAnual,
             Alertas = alertas
         };
     }
@@ -564,5 +573,49 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
         }
 
         return alertas;
+    }
+
+    /// <summary>
+    /// ? NUEVO: Calcula el gasto promedio mensual por año.
+    /// </summary>
+    private async Task<List<PresupuestoAnualDto>> ObtenerPresupuestoAnualAsync(
+        System.Data.IDbConnection connection,
+        Guid usuarioId,
+        Guid? cuentaId,
+        Guid? categoriaId,
+        string filtroCuenta,
+        string filtroCategoria)
+    {
+        // SQL Explicado:
+        // 1. Agrupamos por Año.
+        // 2. Sumamos todos los gastos del año.
+        // 3. Contamos cuántos meses distintos tuvieron movimientos (para no dividir por 12 si el año actual lleva solo 3 meses).
+        // 4. Dividimos el Total entre los Meses con datos para sacar el promedio "para sobrevivir".
+
+        var sql = $@"
+        SELECT 
+            YEAR(g.fecha) as Anio,
+            COALESCE(SUM(g.importe), 0) as GastoTotalAnual,
+            COUNT(DISTINCT MONTH(g.fecha)) as MesesRegistrados,
+            CASE 
+                WHEN COUNT(DISTINCT MONTH(g.fecha)) > 0 
+                THEN COALESCE(SUM(g.importe), 0) / COUNT(DISTINCT MONTH(g.fecha))
+                ELSE 0 
+            END as PromedioMensualNecesario
+        FROM gastos g
+        INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+        INNER JOIN conceptos con ON g.id_concepto = con.id
+        INNER JOIN categorias cat ON con.id_categoria = cat.id
+        WHERE g.id_usuario = @UsuarioId
+        {filtroCuenta}
+        {filtroCategoria}
+        GROUP BY YEAR(g.fecha)
+        ORDER BY Anio DESC";
+
+        var presupuesto = await connection.QueryAsync<PresupuestoAnualDto>(
+            sql,
+            new { UsuarioId = usuarioId, CuentaId = cuentaId, CategoriaId = categoriaId });
+
+        return presupuesto.ToList();
     }
 }

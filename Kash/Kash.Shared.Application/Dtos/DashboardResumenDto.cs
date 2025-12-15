@@ -78,6 +78,11 @@ public sealed record DashboardResumenDto
     public List<HistoricoMensualDto> HistoricoUltimos6Meses { get; init; } = new();
 
     /// <summary>
+    /// Presupuesto necesario calculado por cada año registrado.
+    /// </summary>
+    public List<PresupuestoAnualDto> PresupuestoAnual { get; init; } = new();
+
+    /// <summary>
     /// Alertas y notificaciones para el usuario.
     /// </summary>
     public List<AlertaDto> Alertas { get; init; } = new();
@@ -156,4 +161,32 @@ public sealed record AlertaDto
     public string Titulo { get; init; } = string.Empty;
     public string Mensaje { get; init; } = string.Empty;
     public string? Icono { get; init; }
+}
+
+/// <summary>
+/// Proyección de presupuesto necesario basado en gastos históricos anuales.
+/// </summary>
+public sealed record PresupuestoAnualDto
+{
+    /// <summary>
+    /// Año del registro histórico.
+    /// </summary>
+    public int Anio { get; init; }
+
+    /// <summary>
+    /// Total gastado acumulado durante todo el año.
+    /// </summary>
+    public decimal GastoTotalAnual { get; init; }
+
+    /// <summary>
+    /// Cantidad de meses que tuvieron actividad registrada ese año.
+    /// (Útil para calcular promedios reales en años incompletos, como el actual).
+    /// </summary>
+    public int MesesRegistrados { get; init; }
+
+    /// <summary>
+    /// El "Costo de Vida" mensual promedio calculado para ese año.
+    /// Fórmula: GastoTotalAnual / MesesRegistrados.
+    /// </summary>
+    public decimal PromedioMensualNecesario { get; init; }
 }
