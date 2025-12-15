@@ -2,11 +2,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace Kash.Middleware;
 
-/// <summary>
-/// Middleware que deshabilita completamente el caché HTTP del navegador.
-/// Agrega headers que fuerzan al navegador a revalidar siempre con el servidor.
-/// Soluciona el problema de que Ctrl+R use caché mientras que Ctrl+Shift+R lo ignore.
-/// </summary>
 public sealed class NoCacheMiddleware
 {
     private readonly RequestDelegate _next;
@@ -18,25 +13,30 @@ public sealed class NoCacheMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Ejecutar el pipeline primero para generar la respuesta
-        await _next(context);
-
-        // Solo aplicar a respuestas de API (JSON)
-        // No aplicar a archivos estáticos (CSS, JS, imágenes)
-        if (IsApiResponse(context))
+        // Hook: Esto se ejecutará justo antes de enviar los headers a la red,
+        // pero DESPUÉS de que el controlador haya definido el Content-Type.
+        context.Response.OnStarting(() =>
         {
-            // ?? HEADERS CRÍTICOS: Deshabilitan caché HTTP del navegador
-            context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
-            context.Response.Headers["Pragma"] = "no-cache";
-            context.Response.Headers["Expires"] = "0";
-        }
+            if (IsApiResponse(context))
+            {
+                var headers = context.Response.Headers;
+
+                // Sobrescribimos cualquier valor previo para asegurar el no-cache
+                headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
+                headers["Pragma"] = "no-cache";
+                headers["Expires"] = "0";
+            }
+            return Task.CompletedTask;
+        });
+
+        // Continuar con el pipeline
+        await _next(context);
     }
 
     private static bool IsApiResponse(HttpContext context)
     {
-        // Verificar si la respuesta es JSON (API)
         var contentType = context.Response.ContentType;
-        
+
         if (string.IsNullOrEmpty(contentType))
             return false;
 
