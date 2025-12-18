@@ -44,15 +44,32 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
             return Result.Failure(AuthErrors.InvalidCredentials);
         }
 
+        Apellido? apellido = null;
+
+        // 2. Si viene el dato, intentamos crearlo y validamos errores
+        if (!string.IsNullOrWhiteSpace(request.Apellidos))
+        {
+            var apellidosResult = Apellido.Create(request.Apellidos);
+
+            // IMPORTANTE: Debes verificar si falló la validación del apellido
+            if (apellidosResult.IsFailure)
+            {
+                // Retorna el error inmediatamente (asumiendo que estás en un método que devuelve Result)
+                return Result.Failure<Guid>(apellidosResult.Error);
+            }
+
+            // Si todo fue bien, extraemos el valor
+            apellido = apellidosResult.Value;
+        }
+
         // 2. Hash de la contraseña
         var hashedPassword = _passwordHasher.HashPassword(request.Contrasena);
         var passwordHashResult = PasswordHash.Create(hashedPassword);
 
         var nombreResult = Nombre.Create(request.Nombre);
-        var apellidosResult = Apellido.Create(request.Apellidos);
 
         // 3. Crear el usuario usando el método Factory del dominio
-        var newUsuario = Usuario.Create(emailResult.Value, nombreResult.Value, apellidosResult.Value, passwordHashResult.Value);
+        var newUsuario = Usuario.Create(emailResult.Value, nombreResult.Value, apellido, passwordHashResult.Value);
 
         // 4. Guardar en el repositorio
         await _usuarioWriteRepository.CreateAsync(newUsuario, cancellationToken);
@@ -60,8 +77,8 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
 
         // 5. Encolar email de confirmación (no bloqueante)
         var baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:4200";
-        var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={newUsuario.TokenConfirmacion!.Value.Value}";
-        var nombrePila = newUsuario.Nombre!.Value; // Accedemos al string dentro del VO
+        var confirmUrl = $"{baseUrl}/auth/confirmar-email?token={newUsuario.TokenConfirmacion!.Value.Value}";
+        string nombrePila = newUsuario.Nombre!.Value.Value; // Accedemos al string dentro del VO
 
         var emailBody = $@"
         <html>
