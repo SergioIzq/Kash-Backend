@@ -16,14 +16,14 @@ public sealed class Ingreso : AbsEntity<IngresoId>
 
     private Ingreso(
         IngresoId id,
-     Cantidad importe,
-     FechaRegistro fecha,
-      ConceptoId conceptoId,
-        ClienteId clienteId,
-   PersonaId personaId,
-  CuentaId cuentaId,
+        Cantidad importe,
+        FechaRegistro fecha,
+        ConceptoId conceptoId,
+        ClienteId? clienteId,      // 🔥 NULLABLE
+        PersonaId? personaId,      // 🔥 NULLABLE
+        CuentaId cuentaId,
         FormaPagoId formaPagoId,
-  UsuarioId usuarioId,
+        UsuarioId usuarioId,
         Descripcion? descripcion) : base(id)
     {
         Importe = importe;
@@ -42,26 +42,28 @@ public sealed class Ingreso : AbsEntity<IngresoId>
     public Descripcion? Descripcion { get; private set; }
 
     public ConceptoId ConceptoId { get; private set; }
-    public ClienteId ClienteId { get; private set; }
-    public PersonaId PersonaId { get; private set; }
+    public ClienteId? ClienteId { get; private set; }     // 🔥 NULLABLE
+    public PersonaId? PersonaId { get; private set; }     // 🔥 NULLABLE
     public CuentaId CuentaId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
     public Concepto Concepto { get; private set; } = null!;
-    public Cliente Cliente { get; private set; } = null!;
-    public Persona Persona { get; private set; } = null!;
+    public Cliente? Cliente { get; private set; }          // 🔥 NULLABLE
+    public Persona? Persona { get; private set; }          // 🔥 NULLABLE
     public Cuenta Cuenta { get; private set; } = null!;
     public FormaPago FormaPago { get; private set; } = null!;
     public Usuario Usuario { get; private set; } = null!;
 
-    // El método Create genera el ID y no recibe los "Nombre"
+    /// <summary>
+    /// Crea un nuevo ingreso con Cliente y Persona opcionales.
+    /// </summary>
     public static Ingreso Create(
-   Cantidad importe,
- FechaRegistro fecha,
+        Cantidad importe,
+        FechaRegistro fecha,
         ConceptoId conceptoId,
-      ClienteId clienteId,
-     PersonaId personaId,
+        ClienteId? clienteId,      // 🔥 NULLABLE
+        PersonaId? personaId,      // 🔥 NULLABLE
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         UsuarioId usuarioId,
@@ -69,15 +71,15 @@ public sealed class Ingreso : AbsEntity<IngresoId>
     {
         var ingreso = new Ingreso(
             IngresoId.Create(Guid.NewGuid()).Value,
-    importe,
-          fecha,
+            importe,
+            fecha,
             conceptoId,
-      clienteId,
-            personaId,
+            clienteId,     // Puede ser null
+            personaId,     // Puede ser null
             cuentaId,
             formaPagoId,
-  usuarioId,
-  descripcion);
+            usuarioId,
+            descripcion);
 
         // 🔥 Lanzar evento de dominio cuando se crea un ingreso
         ingreso.AddDomainEvent(new IngresoCreadoEvent(ingreso.Id, cuentaId, importe));
@@ -85,12 +87,15 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         return ingreso;
     }
 
+    /// <summary>
+    /// Actualiza el ingreso con Cliente y Persona opcionales.
+    /// </summary>
     public void Update(
         Cantidad importe,
-     FechaRegistro fecha,
+        FechaRegistro fecha,
         ConceptoId conceptoId,
-        ClienteId clienteId,
-        PersonaId personaId,
+        ClienteId? clienteId,      // 🔥 NULLABLE
+        PersonaId? personaId,      // 🔥 NULLABLE
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         UsuarioId usuarioId,
@@ -103,8 +108,8 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         Importe = importe;
         Fecha = fecha;
         ConceptoId = conceptoId;
-        ClienteId = clienteId;
-        PersonaId = personaId;
+        ClienteId = clienteId;     // Puede ser null
+        PersonaId = personaId;     // Puede ser null
         CuentaId = cuentaId;
         FormaPagoId = formaPagoId;
         UsuarioId = usuarioId;
@@ -114,11 +119,11 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         if (!cuentaIdAnterior.Equals(cuentaId) || !importeAnterior.Equals(importe))
         {
             AddDomainEvent(new IngresoActualizadoEvent(
-      Id,
-            cuentaIdAnterior,
-             importeAnterior,
-             cuentaId,
-             importe));
+                Id,
+                cuentaIdAnterior,
+                importeAnterior,
+                cuentaId,
+                importe));
         }
     }
 

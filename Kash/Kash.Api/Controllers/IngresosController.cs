@@ -57,7 +57,6 @@ public class IngresosController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoRequest request)
     {
-        // Asignación inteligente de UsuarioId
         var userId = GetCurrentUserId();
 
         var command = new CreateIngresoCommand
@@ -71,7 +70,11 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value
+            UsuarioId = userId!.Value,
+            // 🔥 NUEVO: Pasar nombres para auto-creación
+            ConceptoNombre = request.ConceptoNombre,
+            ClienteNombre = request.ClienteNombre,
+            PersonaNombre = request.PersonaNombre
         };
 
         var result = await _sender.Send(command);
@@ -124,11 +127,15 @@ public record CreateIngresoRequest(
     string? Descripcion,
     Guid CategoriaId,
     Guid ConceptoId,
-    Guid ClienteId,
-    Guid PersonaId,
+    Guid? ClienteId,
+    Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-    Guid UsuarioId
+    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
+    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    string? ConceptoNombre = null,
+    string? ClienteNombre = null,
+    string? PersonaNombre = null
 );
 
 public record UpdateIngresoRequest(
@@ -137,8 +144,8 @@ public record UpdateIngresoRequest(
     string? Descripcion,
     Guid CategoriaId,
     Guid ConceptoId,
-    Guid ClienteId,
-    Guid PersonaId,
+    Guid? ClienteId,
+    Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId
 );

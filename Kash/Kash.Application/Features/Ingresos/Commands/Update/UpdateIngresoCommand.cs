@@ -15,8 +15,8 @@ public sealed record UpdateIngresoCommand : AbsUpdateCommand<Ingreso, IngresoId,
     public required DateTime Fecha { get; init; }
     public required Guid ConceptoId { get; init; }
     public required Guid CategoriaId { get; init; }
-    public required Guid ClienteId { get; init; }
-    public required Guid PersonaId { get; init; }
+    public required Guid? ClienteId { get; init; }
+    public required Guid? PersonaId { get; init; }
     public required Guid FormaPagoId { get; init; }
     public required Guid CuentaId { get; init; }
     public required Guid UsuarioId { get; init; }

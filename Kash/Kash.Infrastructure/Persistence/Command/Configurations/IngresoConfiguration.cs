@@ -16,7 +16,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
             builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd().HasConversion(
                 id => id.Value,
                 value => IngresoId.CreateFromDatabase(value)
-            ); ;
+            );
 
             // Configurar conversiones de Value Objects
             builder.Property(e => e.Importe)
@@ -43,7 +43,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
                     value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
-            // IDs como Value Objects
+            // IDs como Value Objects obligatorios
             builder.Property(e => e.ConceptoId)
                 .HasColumnName("id_concepto")
                 .IsRequired()
@@ -51,19 +51,25 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     conceptoId => conceptoId.Value,
                     value => ConceptoId.CreateFromDatabase(value));
 
+            // 🔥 NULLABLE: ClienteId es opcional
             builder.Property(e => e.ClienteId)
                 .HasColumnName("id_cliente")
-                .IsRequired()
-                .HasConversion(
-                    clienteId => clienteId.Value,
-                    value => ClienteId.CreateFromDatabase(value));
+                .IsRequired(false);
 
+            builder.Property(e => e.ClienteId)
+                .HasConversion<Guid?>(
+                    clienteId => clienteId.HasValue ? clienteId.Value.Value : null,
+                    value => value.HasValue ? ClienteId.CreateFromDatabase(value.Value) : null);
+
+            // 🔥 NULLABLE: PersonaId es opcional
             builder.Property(e => e.PersonaId)
                 .HasColumnName("id_persona")
-                .IsRequired()
-                .HasConversion(
-                    personaId => personaId.Value,
-                    value => PersonaId.CreateFromDatabase(value));
+                .IsRequired(false);
+
+            builder.Property(e => e.PersonaId)
+                .HasConversion<Guid?>(
+                    personaId => personaId.HasValue ? personaId.Value.Value : null,
+                    value => value.HasValue ? PersonaId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.CuentaId)
                 .HasColumnName("id_cuenta")
@@ -92,35 +98,39 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                 .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            // Relaciones usando SOLO el nombre de columna
+            // Relaciones usando las propiedades tipadas
             builder.HasOne(e => e.Concepto)
                 .WithMany()
-                .HasForeignKey(e => e.ConceptoId) // <--- CAMBIO: Usa la propiedad tipada
+                .HasForeignKey(e => e.ConceptoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 🔥 NULLABLE: Cliente es opcional - relación nullable
             builder.HasOne(e => e.Cliente)
                 .WithMany()
-                .HasForeignKey(e => e.ClienteId) // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(e => e.ClienteId)
+                .OnDelete(DeleteBehavior.SetNull) // ✅ SetNull en lugar de Cascade para FK nullable
+                .IsRequired(false); // ✅ Relación opcional
 
+            // 🔥 NULLABLE: Persona es opcional - relación nullable
             builder.HasOne(e => e.Persona)
                 .WithMany()
-                .HasForeignKey(e => e.PersonaId)   // <--- CAMBIO
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(e => e.PersonaId)
+                .OnDelete(DeleteBehavior.SetNull) // ✅ SetNull en lugar de Cascade para FK nullable
+                .IsRequired(false); // ✅ Relación opcional
 
             builder.HasOne(e => e.Cuenta)
                 .WithMany()
-                .HasForeignKey(e => e.CuentaId)    // <--- CAMBIO
+                .HasForeignKey(e => e.CuentaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.FormaPago)
                 .WithMany()
-                .HasForeignKey(e => e.FormaPagoId) // <--- CAMBIO
+                .HasForeignKey(e => e.FormaPagoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Usuario)
                 .WithMany()
-                .HasForeignKey(e => e.UsuarioId)   // <--- CAMBIO
+                .HasForeignKey(e => e.UsuarioId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Índices críticos para rendimiento
