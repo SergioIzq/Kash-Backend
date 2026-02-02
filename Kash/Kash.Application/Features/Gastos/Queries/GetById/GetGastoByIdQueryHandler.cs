@@ -15,7 +15,7 @@ public sealed class GetGastoByIdQueryHandler
 {
     public GetGastoByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepositoryWithDto<Gasto, GastoDto, GastoId> readOnlyRepository
+        IReadRepository<Gasto, GastoDto, GastoId> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

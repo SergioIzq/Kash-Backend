@@ -17,15 +17,15 @@ namespace Kash.Application.Features.GastosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<ExecuteGastoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> _gastoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IReadRepository<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> _gastoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteGastoProgramadoCommandHandler> _logger;
 
     public ExecuteGastoProgramadoCommandHandler(
-        IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> gastoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IReadRepository<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> gastoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteGastoProgramadoCommandHandler> logger)

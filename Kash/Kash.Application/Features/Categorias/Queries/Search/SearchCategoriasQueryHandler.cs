@@ -14,7 +14,7 @@ public sealed class SearchCategoriasQueryHandler
     : SearchForAutocompleteQueryHandler<Categoria, CategoriaDto, SearchCategoriasQuery, CategoriaId>
 {
     public SearchCategoriasQueryHandler(
-        IReadRepositoryWithDto<Categoria, CategoriaDto, CategoriaId> repository,
+        IReadRepository<Categoria, CategoriaDto, CategoriaId> repository,
    ICacheService cacheService)
   : base(repository, cacheService)
     {

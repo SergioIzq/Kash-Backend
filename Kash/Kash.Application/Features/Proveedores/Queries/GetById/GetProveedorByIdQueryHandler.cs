@@ -15,7 +15,7 @@ public sealed class GetProveedorByIdQueryHandler
 {
     public GetProveedorByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepositoryWithDto<Proveedor, ProveedorDto, ProveedorId> readOnlyRepository
+        IReadRepository<Proveedor, ProveedorDto, ProveedorId> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

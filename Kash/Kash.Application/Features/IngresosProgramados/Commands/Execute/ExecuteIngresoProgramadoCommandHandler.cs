@@ -17,15 +17,15 @@ namespace Kash.Application.Features.IngresosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<ExecuteIngresoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> _ingresoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IReadRepository<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> _ingresoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteIngresoProgramadoCommandHandler> _logger;
 
     public ExecuteIngresoProgramadoCommandHandler(
-        IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> ingresoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IReadRepository<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> ingresoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteIngresoProgramadoCommandHandler> logger)

@@ -10,107 +10,40 @@ namespace Kash.Infrastructure.Persistence.Data.Conceptos
     public class ConceptoReadRepository : AbsReadRepository<Concepto, ConceptoDto, ConceptoId>, IConceptoReadRepository
     {
         public ConceptoReadRepository(IDbConnectionFactory dbConnectionFactory)
-      : base(dbConnectionFactory, "conceptos")
+            : base(dbConnectionFactory)
         {
         }
 
         /// <summary>
-        /// 🔥 Alias de la tabla principal para usar en JOINs.
+        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
-        protected override string GetTableAlias()
+        protected override ReadRepositoryConfiguration ConfigureRepository()
         {
-            return "c";
-        }
-
-        /// <summary>
-        /// 🔥 Query de conteo que usa el alias correcto y los JOINs necesarios.
-        /// </summary>
-        protected override string BuildCountQuery()
-        {
-            return @"SELECT COUNT(*) FROM conceptos c
-LEFT JOIN categorias cat ON c.id_categoria = cat.id";
-        }
-
-        /// <summary>
-        /// 🔥 Query específico para Concepto con todas sus columnas incluyendo CategoriaNombre.
-        /// </summary>
-        protected override string BuildGetByIdQuery()
-        {
-            return @"
-SELECT 
-    c.id as Id,
-    c.nombre as Nombre,
-    c.id_categoria as CategoriaId,
-    COALESCE(cat.nombre, '') as CategoriaNombre,
-    c.id_usuario as UsuarioId
-FROM conceptos c
-LEFT JOIN categorias cat ON c.id_categoria = cat.id
-WHERE c.id = @id";
-        }
-
-        /// <summary>
-        /// 🔥 Query para obtener todos los conceptos con CategoriaNombre.
-        /// </summary>
-        protected override string BuildGetAllQuery()
-        {
-            return @"
-SELECT 
-    c.id as Id,
- c.nombre as Nombre,
- c.id_categoria as CategoriaId,
-    COALESCE(cat.nombre, '') as CategoriaNombre,
-    c.id_usuario as UsuarioId
-FROM conceptos c
-LEFT JOIN categorias cat ON c.id_categoria = cat.id";
-        }
-
-        /// <summary>
-        /// 🔥 IMPORTANTE: Query para paginación (debe incluir los mismos JOINs).
-        /// </summary>
-        protected override string BuildGetPagedQuery()
-        {
-            return BuildGetAllQuery();
-        }
-
-        /// <summary>
-        /// 🔥 ORDER BY por nombre ascendente.
-        /// </summary>
-        protected override string GetDefaultOrderBy()
-        {
-            return "ORDER BY c.nombre ASC";
-        }
-
-        /// <summary>
-        /// 🔥 Columna WHERE para filtrar por usuario (con alias).
-        /// </summary>
-        protected override string GetUserIdColumn()
-        {
-            return "c.id_usuario";
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
-        /// </summary>
-        protected override Dictionary<string, string> GetSortableColumns()
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-   {
-                { "Nombre", "c.nombre" },
-  { "CategoriaNombre", "cat.nombre" },
-        { "FechaCreacion", "c.fecha_creacion" }
-       };
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
-        /// </summary>
-        protected override List<string> GetSearchableColumns()
-        {
-            return new List<string>
-      {
-      "c.nombre",
-         "cat.nombre"
-};
+            return ReadRepositoryConfiguration.WithJoins(
+                tableName: "conceptos",
+                tableAlias: "c",
+                selectColumns: new List<string>
+                {
+                    "c.id as Id",
+                    "c.nombre as Nombre",
+                    "c.id_categoria as CategoriaId",
+                    "COALESCE(cat.nombre, '') as CategoriaNombre",
+                    "c.id_usuario as UsuarioId"
+                },
+                joinClause: "LEFT JOIN categorias cat ON c.id_categoria = cat.id",
+                searchableColumns: new List<string>
+                {
+                    "c.nombre",
+                    "cat.nombre"
+                },
+                sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Nombre", "c.nombre" },
+                    { "CategoriaNombre", "cat.nombre" },
+                    { "FechaCreacion", "c.fecha_creacion" }
+                },
+                defaultOrderBy: "c.nombre ASC"
+            );
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)

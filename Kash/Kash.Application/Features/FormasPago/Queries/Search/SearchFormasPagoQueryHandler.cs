@@ -14,7 +14,7 @@ public sealed class SearchFormasPagoQueryHandler
     : SearchForAutocompleteQueryHandler<FormaPago, FormaPagoDto, SearchFormasPagoQuery, FormaPagoId>
 {
     public SearchFormasPagoQueryHandler(
-        IReadRepositoryWithDto<FormaPago, FormaPagoDto, FormaPagoId> repository,
+        IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> repository,
    ICacheService cacheService)
 : base(repository, cacheService)
     {

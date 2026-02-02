@@ -16,7 +16,7 @@ public sealed class GetGastosPagedListQueryHandler
     : GetPagedListQueryHandler<Gasto, GastoId, GastoDto, GetGastosPagedListQuery>
 {
     public GetGastosPagedListQueryHandler(
-        IReadRepositoryWithDto<Gasto, GastoDto, GastoId> gastoRepository,
+        IReadRepository<Gasto, GastoDto, GastoId> gastoRepository,
         ICacheService cacheService)
         : base(gastoRepository, cacheService)
     {

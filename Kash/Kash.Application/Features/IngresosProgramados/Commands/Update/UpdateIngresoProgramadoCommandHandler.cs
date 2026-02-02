@@ -23,7 +23,7 @@ public sealed class UpdateIngresoProgramadoCommandHandler
     {
     }
 
-    protected override void ApplyChanges(IngresoProgramado entity, UpdateIngresoProgramadoCommand command)
+    protected override void ApplyChanges(IngresoProgramado entity, UpdateIngresoProgramadoCommand command, Dictionary<string, object>? dependencies = null)
     {
         // Convertir los datos del comando a Value Objects
         var importeVO = Cantidad.Create(command.Importe).Value;
@@ -58,5 +58,6 @@ public sealed class UpdateIngresoProgramadoCommandHandler
             throw new InvalidOperationException(result.Error.Message);
         }
     }
+
 }
 

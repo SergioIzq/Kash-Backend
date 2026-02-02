@@ -19,8 +19,8 @@ public sealed class Gasto : AbsEntity<GastoId>
    Cantidad importe,
 FechaRegistro fecha,
         ConceptoId conceptoId,
-     ProveedorId proveedorId,
-    PersonaId personaId,
+     ProveedorId? proveedorId,
+    PersonaId? personaId,
     CuentaId cuentaId,
  FormaPagoId formaPagoId,
         UsuarioId usuarioId,
@@ -44,16 +44,16 @@ FechaRegistro fecha,
 
     // --- IDs (Referencias a otros Agregados) ---
     public ConceptoId ConceptoId { get; private set; }
-    public ProveedorId ProveedorId { get; private set; }
-    public PersonaId PersonaId { get; private set; }
+    public ProveedorId? ProveedorId { get; private set; }
+    public PersonaId? PersonaId { get; private set; }
     public CuentaId CuentaId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
     // --- Detalles de Infraestructura (Solo para Proyecciones/Queries) ---
     public Concepto Concepto { get; private set; } = null!;
-    public Proveedor Proveedor { get; private set; } = null!;
-    public Persona Persona { get; private set; } = null!;
+    public Proveedor? Proveedor { get; private set; } = null!;
+    public Persona? Persona { get; private set; } = null!;
     public Cuenta Cuenta { get; private set; } = null!;
     public FormaPago FormaPago { get; private set; } = null!;
     public Usuario Usuario { get; private set; } = null!;
@@ -62,25 +62,26 @@ FechaRegistro fecha,
     public static Gasto Create(
         Cantidad importe,
         FechaRegistro fecha,
-     ConceptoId conceptoId,
-    ProveedorId proveedorId,
-                PersonaId personaId,
-          CuentaId cuentaId,
+        ConceptoId conceptoId,
+        ProveedorId? proveedorId,
+        PersonaId? personaId,
+        CuentaId cuentaId,
         FormaPagoId formaPagoId,
-      UsuarioId usuarioId,
+        UsuarioId usuarioId,
         Descripcion? descripcion)
     {
         var gasto = new Gasto(
-    GastoId.Create(Guid.NewGuid()).Value,
-        importe,
-        fecha,
-      conceptoId,
-      proveedorId,
-    personaId,
-  cuentaId,
-       formaPagoId,
-           usuarioId,
-      descripcion);
+            GastoId.Create(Guid.NewGuid()).Value,
+                importe,
+                fecha,
+                conceptoId,
+                proveedorId,
+                personaId,
+                cuentaId,
+                formaPagoId,
+                usuarioId,
+                descripcion
+         );
 
         // 🔥 Lanzar evento de dominio cuando se crea un gasto
         gasto.AddDomainEvent(new GastoCreadoEvent(gasto.Id, cuentaId, importe));

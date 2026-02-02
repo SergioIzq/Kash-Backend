@@ -10,68 +10,35 @@ namespace Kash.Infrastructure.Persistence.Data.Proveedores
     public class ProveedorReadRepository : AbsReadRepository<Proveedor, ProveedorDto, ProveedorId>, IProveedorReadRepository
     {
         public ProveedorReadRepository(IDbConnectionFactory dbConnectionFactory)
-        : base(dbConnectionFactory, "proveedores")
+            : base(dbConnectionFactory)
         {
         }
 
         /// <summary>
-        /// 🔥 Query específico para Proveedor con todas sus columnas.
+        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
-        protected override string BuildGetByIdQuery()
+        protected override ReadRepositoryConfiguration ConfigureRepository()
         {
-            return @"
-       SELECT 
-          id as Id,
-         nombre as Nombre,
-       id_usuario as UsuarioId,
-       fecha_creacion as FechaCreacion
-     FROM proveedores 
-   WHERE id = @id";
-        }
-
-        /// <summary>
-        /// 🔥 Query para obtener todos los proveedores.
-        /// </summary>
-        protected override string BuildGetAllQuery()
-        {
-            return @"
-    SELECT 
-        id as Id,
-        nombre as Nombre,
-      id_usuario as UsuarioId,
-      fecha_creacion as FechaCreacion
-          FROM proveedores";
-        }
-
-        /// <summary>
-        /// 🔥 ORDER BY por nombre ascendente.
-        /// </summary>
-        protected override string GetDefaultOrderBy()
-        {
-            return "ORDER BY nombre ASC";
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
-        /// </summary>
-        protected override Dictionary<string, string> GetSortableColumns()
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-   {
-   { "Nombre", "nombre" },
- { "FechaCreacion", "fecha_creacion" }
-    };
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
-        /// </summary>
-        protected override List<string> GetSearchableColumns()
-        {
-            return new List<string>
-    {
-      "nombre"
-   };
+            return ReadRepositoryConfiguration.Simple(
+                tableName: "proveedores",
+                selectColumns: new List<string>
+                {
+                    "id as Id",
+                    "nombre as Nombre",
+                    "id_usuario as UsuarioId",
+                    "fecha_creacion as FechaCreacion"
+                },
+                searchableColumns: new List<string>
+                {
+                    "nombre"
+                },
+                sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Nombre", "nombre" },
+                    { "FechaCreacion", "fecha_creacion" }
+                },
+                defaultOrderBy: "nombre ASC"
+            );
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)

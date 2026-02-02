@@ -20,10 +20,10 @@ public abstract class GetRecentQueryHandler<TEntity, TDto, TId, TQuery>
     where TDto : class
     where TId : IGuidValueObject
 {
-    protected readonly IReadRepositoryWithDto<TEntity, TDto, TId> _repository;
+    protected readonly IReadRepository<TEntity, TDto, TId> _repository;
 
     protected GetRecentQueryHandler(
-        IReadRepositoryWithDto<TEntity, TDto, TId> repository,
+        IReadRepository<TEntity, TDto, TId> repository,
         ICacheService cacheService)
         : base(cacheService)
     {

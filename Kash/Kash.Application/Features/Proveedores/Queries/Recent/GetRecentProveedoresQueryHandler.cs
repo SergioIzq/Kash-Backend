@@ -11,7 +11,7 @@ public sealed class GetRecentProveedoresQueryHandler
     : GetRecentQueryHandler<Proveedor, ProveedorDto, ProveedorId, GetRecentProveedoresQuery>
 {
     public GetRecentProveedoresQueryHandler(
-      IReadRepositoryWithDto<Proveedor, ProveedorDto, ProveedorId> repository,
+      IReadRepository<Proveedor, ProveedorDto, ProveedorId> repository,
 ICacheService cacheService)
         : base(repository, cacheService)
     {

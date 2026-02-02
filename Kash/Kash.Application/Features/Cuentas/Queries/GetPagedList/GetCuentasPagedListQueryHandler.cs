@@ -11,7 +11,7 @@ public sealed class GetCuentasPagedListQueryHandler
     : GetPagedListQueryHandler<Cuenta, CuentaId, CuentaDto, GetCuentasPagedListQuery>
 {
     public GetCuentasPagedListQueryHandler(
-     IReadRepositoryWithDto<Cuenta, CuentaDto, CuentaId> repository,
+     IReadRepository<Cuenta, CuentaDto, CuentaId> repository,
   ICacheService cacheService)
         : base(repository, cacheService)
     {

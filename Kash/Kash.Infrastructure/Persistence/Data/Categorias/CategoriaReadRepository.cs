@@ -10,89 +10,37 @@ namespace Kash.Infrastructure.Persistence.Data.Categorias
     public class CategoriaReadRepository : AbsReadRepository<Categoria, CategoriaDto, CategoriaId>, ICategoriaReadRepository
     {
         public CategoriaReadRepository(IDbConnectionFactory dbConnectionFactory)
-   : base(dbConnectionFactory, "categorias")
+            : base(dbConnectionFactory)
         {
         }
 
         /// <summary>
-        /// 🔥 Query específico para Categoría con todas sus columnas incluyendo Descripcion.
-        /// IMPORTANTE: La tabla categorias usa id_usuario (sin prefijo id_)
+        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
-        protected override string BuildGetByIdQuery()
+        protected override ReadRepositoryConfiguration ConfigureRepository()
         {
-            return @"
-         SELECT 
-     id as Id,
-        nombre as Nombre,
-   descripcion as Descripcion,
-          id_usuario as UsuarioId,
-       fecha_creacion as FechaCreacion
-   FROM categorias 
-   WHERE id = @id";
-        }
-
-        /// <summary>
-        /// 🔥 Query para obtener todas las categorías con Descripcion.
-        /// </summary>
-        protected override string BuildGetAllQuery()
-        {
-            return @"
-   SELECT 
-     id as Id,
-      nombre as Nombre,
-      descripcion as Descripcion,
-     id_usuario as UsuarioId,
-       fecha_creacion as FechaCreacion
-     FROM categorias";
-        }
-
-        /// <summary>
-        /// 🔥 Query para paginación (debe ser igual a BuildGetAllQuery).
-        /// </summary>
-        protected override string BuildGetPagedQuery()
-        {
-            return BuildGetAllQuery();
-        }
-
-        /// <summary>
-        /// 🔥 Columna WHERE para filtrar por usuario.
-        /// IMPORTANTE: Usa id_usuario (sin prefijo id_)
-        /// </summary>
-        protected override string GetUserIdColumn()
-        {
-            return "id_usuario";
-        }
-
-        /// <summary>
-        /// 🔥 ORDER BY por nombre ascendente.
-        /// </summary>
-        protected override string GetDefaultOrderBy()
-        {
-            return "ORDER BY nombre ASC";
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
-        /// </summary>
-        protected override Dictionary<string, string> GetSortableColumns()
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-  { "Nombre", "nombre" },
-  { "FechaCreacion", "fecha_creacion" }
-            };
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
-        /// </summary>
-        protected override List<string> GetSearchableColumns()
-        {
-            return new List<string>
-       {
-        "nombre",
-"descripcion"
-            };
+            return ReadRepositoryConfiguration.Simple(
+                tableName: "categorias",
+                selectColumns: new List<string>
+                {
+                    "id as Id",
+                    "nombre as Nombre",
+                    "descripcion as Descripcion",
+                    "id_usuario as UsuarioId",
+                    "fecha_creacion as FechaCreacion"
+                },
+                searchableColumns: new List<string>
+                {
+                    "nombre",
+                    "descripcion"
+                },
+                sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Nombre", "nombre" },
+                    { "FechaCreacion", "fecha_creacion" }
+                },
+                defaultOrderBy: "nombre ASC"
+            );
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)

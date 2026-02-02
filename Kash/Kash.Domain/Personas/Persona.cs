@@ -22,9 +22,9 @@ public sealed class Persona : AbsEntity<PersonaId>
     public Nombre Nombre { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
-    public static Persona Create(Guid id, Nombre nombre, UsuarioId usuarioId)
+    public static Persona Create(Nombre nombre, UsuarioId usuarioId)
     {
-        var persona = new Persona(PersonaId.Create(id).Value, nombre, usuarioId);
+        var persona = new Persona(PersonaId.Create(Guid.NewGuid()).Value, nombre, usuarioId);
 
         return persona;
     }

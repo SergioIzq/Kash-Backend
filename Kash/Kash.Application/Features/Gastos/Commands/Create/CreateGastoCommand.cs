@@ -17,4 +17,23 @@ public sealed record CreateGastoCommand : AbsCreateCommand<Gasto, GastoId>
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
+
+    // ?? NUEVO: Nombres opcionales para auto-creación
+    /// <summary>
+    /// Nombre del concepto. Si ConceptoId no existe y se proporciona este valor,
+    /// se creará automáticamente el concepto.
+    /// </summary>
+    public string? ConceptoNombre { get; init; }
+
+    /// <summary>
+    /// Nombre del proveedor. Si Proveedor no existe y se proporciona este valor,
+    /// se creará automáticamente el proveedor.
+    /// </summary>
+    public string? ProveedorNombre { get; init; }
+
+    /// <summary>
+    /// Nombre de la persona. Si PersonaId no existe y se proporciona este valor,
+    /// se creará automáticamente la persona.
+    /// </summary>
+    public string? PersonaNombre { get; init; }
 }

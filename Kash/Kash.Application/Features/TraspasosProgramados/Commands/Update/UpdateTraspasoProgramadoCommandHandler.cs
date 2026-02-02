@@ -17,14 +17,14 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<TraspasoProgramado, TraspasoProgramadoId> writeRepository,
         ICacheService cacheService,
-        IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> readOnlyRepository,
+        IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> readOnlyRepository,
         IUserContext userContext
     )
     : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 
-    protected override void ApplyChanges(TraspasoProgramado entity, UpdateTraspasoProgramadoCommand command)
+    protected override void ApplyChanges(TraspasoProgramado entity, UpdateTraspasoProgramadoCommand command, Dictionary<string, object>? dependencies = null)
     {
         // Crear Value Objects desde el command
         var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
@@ -52,4 +52,5 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
         }
     }
 }
+
 

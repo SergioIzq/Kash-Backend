@@ -29,7 +29,7 @@ public sealed class UpdateGastoCommandHandler
         _validator = validator;
     }
 
-    protected override void ApplyChanges(Gasto entity, UpdateGastoCommand command)
+    protected override void ApplyChanges(Gasto entity, UpdateGastoCommand command, Dictionary<string, object>? dependencies = null)
     {
         var importeVO = Cantidad.Create(command.Importe).Value;
         var fechaVO = FechaRegistro.Create(command.Fecha).Value;

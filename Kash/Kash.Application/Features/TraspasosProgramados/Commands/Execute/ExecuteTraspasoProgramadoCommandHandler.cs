@@ -17,15 +17,15 @@ namespace Kash.Application.Features.TraspasosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<ExecuteTraspasoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> _traspasoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> _traspasoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteTraspasoProgramadoCommandHandler> _logger;
 
     public ExecuteTraspasoProgramadoCommandHandler(
-        IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> traspasoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> traspasoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteTraspasoProgramadoCommandHandler> logger)
