@@ -41,4 +41,10 @@ public sealed record CreateIngresoCommand : AbsCreateCommand<Ingreso, IngresoId>
     /// se creará automáticamente la persona.
     /// </summary>
     public string? PersonaNombre { get; init; }
+
+    /// <summary>
+    /// Nombre de la forma de pago. Si FormaPagoId no existe y se proporciona este valor,
+    /// se creará automáticamente la forma de pago.
+    /// </summary>
+    public string? FormaPagoNombre { get; init; }
 }

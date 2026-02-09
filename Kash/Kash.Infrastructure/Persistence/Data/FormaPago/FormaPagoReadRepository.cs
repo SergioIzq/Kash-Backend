@@ -49,7 +49,7 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
           SELECT EXISTS(
    SELECT 1 
       FROM formas_pago 
-      WHERE nombre = @Nombre AND id_usuario = @UsuarioId
+      WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId
    ) as ItemExists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -68,7 +68,7 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
   SELECT EXISTS(
    SELECT 1 
      FROM formas_pago 
-  WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
+  WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId AND id != @ExcludeId
          ) as ItemExists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -77,6 +77,24 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
                cancellationToken: cancellationToken));
 
             return exists;
+        }
+
+        public async Task<FormaPago?> GetByNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+
+            const string sql = @"
+      SELECT id
+        FROM formas_pago 
+       WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId
+       LIMIT 1";
+
+            var id = await connection.QueryFirstOrDefaultAsync<Guid?>(
+                new CommandDefinition(sql,
+                    new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
+                    cancellationToken: cancellationToken));
+
+            return null; // Este método ya no se usará, se mantiene por compatibilidad con la interfaz
         }
     }
 }

@@ -80,16 +80,16 @@ public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
 }
 
 /// <summary>
-/// Servicio para buscar o crear Fromas de Pago.
+/// Servicio para buscar o crear Formas de Pago.
 /// </summary>
 public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
 {
     private readonly IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> _readRepository;
-    private readonly IWriteRepository<FormaPago, FormaPagoId> _writeRepository;
+    private readonly IFormaPagoWriteRepository _writeRepository;
 
     public FormaPagoFinderOrCreatorService(
         IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> readRepository,
-        IWriteRepository<FormaPago, FormaPagoId> writeRepository)
+        IFormaPagoWriteRepository writeRepository)
     {
         _readRepository = readRepository;
         _writeRepository = writeRepository;
@@ -102,6 +102,7 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
+        // 1. Buscar por ID si se proporcionó
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -111,34 +112,25 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
             }
         }
 
-        // 3. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionó
         if (!string.IsNullOrWhiteSpace(nombre))
         {
-            var conceptos = await _readRepository.SearchForAutocompleteAsync(
-                usuarioId,
-                nombre,
-                limit: 100,
-                cancellationToken: cancellationToken);
-
-            var matchExacto = conceptos.FirstOrDefault(c =>
-                c.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase));
-
-            if (matchExacto != null)
-            {
-                return matchExacto.Id;
-            }
-
-            // 4. Crear nueva forma de pago
+            // Crear la entidad temporal para buscar o crear
             var nombreVO = Nombre.Create(nombre).Value;
             var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
             var nuevaFormaPago = FormaPago.Create(nombreVO, usuarioIdVO);
-            _writeRepository.Add(nuevaFormaPago);
 
-            return nuevaFormaPago.Id.Value;
+            // Usar el método FindOrCreateAsync que reutiliza si existe
+            var result = await _writeRepository.FindOrCreateAsync(nuevaFormaPago, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return result.Value.Id.Value;
+            }
         }
 
         // Si llegamos aquí, no se proporcionó ni ID ni nombre
-        throw new ArgumentException("Se requiere ID o Nombre para buscar o crear un Concepto.");
+        return null;
     }
 }
 

@@ -74,7 +74,8 @@ public class IngresosController : AbsController
             // 🔥 NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             ClienteNombre = request.ClienteNombre,
-            PersonaNombre = request.PersonaNombre
+            PersonaNombre = request.PersonaNombre,
+            FormaPagoNombre = request.FormaPagoNombre
         };
 
         var result = await _sender.Send(command);
@@ -135,7 +136,8 @@ public record CreateIngresoRequest(
     // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
     string? ClienteNombre = null,
-    string? PersonaNombre = null
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null
 );
 
 public record UpdateIngresoRequest(

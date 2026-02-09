@@ -39,7 +39,7 @@ public sealed class CreateIngresoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Prepara las dependencias (Concepto, Cliente, Persona).
+    /// 🔥 HOOK: Prepara las dependencias (Concepto, Cliente, Persona, FormaPago).
     /// Busca o crea las entidades relacionadas de forma asíncrona.
     /// </summary>
     protected override async Task<Result<Dictionary<string, object>>> PrepareDependenciesAsync(
@@ -93,18 +93,17 @@ public sealed class CreateIngresoCommandHandler
                 dependencies["PersonaId"] = PersonaId.Create(personaGuid.Value).Value;
             }
 
-            // 1. 🔥 CONCEPTO: Buscar o crear (obligatorio)
+            // 4. 🔥 FORMA DE PAGO: Buscar o crear (obligatorio)
             var formaPagoGuid = await _formaPagoFinderService.FindOrCreateAsync(
-                command.ConceptoId,
-                command.ConceptoNombre,
+                command.FormaPagoId,
+                command.FormaPagoNombre,
                 usuarioId.Value,
-                new Dictionary<string, object> { { "CategoriaId", categoriaId.Value } },
+                null,
                 cancellationToken);
 
-            if (conceptoGuid == null)
+            if (formaPagoGuid.HasValue)
             {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere un Concepto para crear el ingreso."));
+                dependencies["FormaPagoId"] = FormaPagoId.Create(formaPagoGuid.Value).Value;
             }
 
             return Result.Success(dependencies);
@@ -126,16 +125,20 @@ public sealed class CreateIngresoCommandHandler
         var fechaVO = FechaRegistro.Create(command.Fecha).Value;
         var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
-        // 2. IDs obligatorios
+        // 2. ID obligatorio que no cambia
         var cuentaId = CuentaId.Create(command.CuentaId).Value;
-        var formaPagoId = FormaPagoId.Create(command.FormaPagoId).Value;
 
         // 3. IDs de las dependencias preparadas
         var conceptoId = (ConceptoId)dependencies!["ConceptoId"];
         var clienteId = dependencies.ContainsKey("ClienteId") ? (ClienteId?)dependencies["ClienteId"] : null;
         var personaId = dependencies.ContainsKey("PersonaId") ? (PersonaId?)dependencies["PersonaId"] : null;
+        
+        // 4. FormaPagoId: usar del diccionario si existe, sino del command
+        var formaPagoId = dependencies.ContainsKey("FormaPagoId") 
+            ? (FormaPagoId)dependencies["FormaPagoId"]
+            : FormaPagoId.Create(command.FormaPagoId).Value;
 
-        // 4. Creación de la entidad de dominio
+        // 5. Creación de la entidad de dominio
         return Ingreso.Create(
             importeVO,
             fechaVO,
