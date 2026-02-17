@@ -54,6 +54,17 @@ public abstract class AbsCreateCommandHandler<TEntity, TId, TCommand>
     }
 
     /// <summary>
+    /// 🔥 HOOK 2.5: Persistir dependencias antes de crear la entidad principal (opcional).
+    /// Override si las entidades relacionadas deben guardarse ANTES de crear la entidad principal.
+    /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
+    /// Por defecto no hace nada (false).
+    /// </summary>
+    protected virtual bool ShouldPersistDependenciesFirst()
+    {
+        return false; // Por defecto NO persiste las dependencias primero
+    }
+
+    /// <summary>
     /// 🔥 HOOK 3: Creación de la entidad (REQUERIDO).
     /// Método abstracto que DEBE implementarse en cada handler concreto.
     /// Recibe el command y opcionalmente las dependencias preparadas.
@@ -112,6 +123,12 @@ public abstract class AbsCreateCommandHandler<TEntity, TId, TCommand>
                 return Result.Failure<Guid>(dependenciesResult.Error);
             }
 
+            // 2.5 🔥 NUEVO: Guardar dependencias PRIMERO si es necesario (evita problemas de concurrencia)
+            if (ShouldPersistDependenciesFirst())
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
             // 3. 🏗️ Creación de la entidad
             var entity = CreateEntity(command, dependenciesResult.Value);
 
@@ -128,7 +145,7 @@ public abstract class AbsCreateCommandHandler<TEntity, TId, TCommand>
                 _writeRepository.Add(entity);
             }
 
-            // Guardar cambios
+            // Guardar cambios (solo la entidad principal si ya guardamos las dependencias)
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 6. 🎉 Acciones post-persistencia

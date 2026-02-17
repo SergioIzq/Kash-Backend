@@ -14,6 +14,19 @@ public interface IConceptoFinderOrCreatorService : IApplicationService
 }
 
 /// <summary>
+/// Servicio base para buscar o crear entidades Categoria.
+/// </summary>
+public interface ICategoriaFinderOrCreatorService : IApplicationService
+{
+    Task<Guid?> FindOrCreateAsync(
+        Guid? id,
+        string? nombre,
+        Guid usuarioId,
+        Dictionary<string, object>? additionalData = null,
+        CancellationToken cancellationToken = default);
+}
+
+/// <summary>
 /// Servicio base para buscar o crear entidades Cliente.
 /// </summary>
 public interface IClienteFinderOrCreatorService : IApplicationService
@@ -53,7 +66,20 @@ public interface IPersonaFinderOrCreatorService : IApplicationService
 }
 
 /// <summary>
-/// Servicio base para buscar o crear entidades Formas de Pago.
+/// Servicio base para buscar o crear entidades Cuenta.
+/// </summary>
+public interface ICuentaFinderOrCreatorService : IApplicationService
+{
+    Task<Guid?> FindOrCreateAsync(
+        Guid? id,
+        string? nombre,
+        Guid usuarioId,
+        Dictionary<string, object>? additionalData = null,
+        CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Servicio base para buscar o crear entidades FormaPago.
 /// </summary>
 public interface IFormaPagoFinderOrCreatorService : IApplicationService
 {

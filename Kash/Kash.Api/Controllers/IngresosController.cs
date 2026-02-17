@@ -73,6 +73,8 @@ public class IngresosController : AbsController
             UsuarioId = userId!.Value,
             // 🔥 NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
+            CategoriaNombre = request.CategoriaNombre,
+            CuentaNombre = request.CuentaNombre,
             ClienteNombre = request.ClienteNombre,
             PersonaNombre = request.PersonaNombre,
             FormaPagoNombre = request.FormaPagoNombre
@@ -105,7 +107,14 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value
+            UsuarioId = userId!.Value,
+            // 🔥 NUEVO: Pasar nombres para auto-creación
+            ConceptoNombre = request.ConceptoNombre,
+            CategoriaNombre = request.CategoriaNombre,
+            ClienteNombre = request.ClienteNombre,
+            PersonaNombre = request.PersonaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
+            CuentaNombre = request.CuentaNombre
         };
 
         var result = await _sender.Send(command);
@@ -135,9 +144,11 @@ public record CreateIngresoRequest(
     Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
     // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
     string? ClienteNombre = null,
     string? PersonaNombre = null,
-    string? FormaPagoNombre = null
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );
 
 public record UpdateIngresoRequest(
@@ -149,5 +160,11 @@ public record UpdateIngresoRequest(
     Guid? ClienteId,
     Guid? PersonaId,
     Guid CuentaId,
-    Guid FormaPagoId
+    Guid FormaPagoId,
+    string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
+    string? ClienteNombre = null,
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );

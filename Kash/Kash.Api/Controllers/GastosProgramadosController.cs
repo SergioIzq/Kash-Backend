@@ -102,12 +102,17 @@ public class GastosProgramadosController : AbsController
             FechaEjecucion = request.FechaEjecucion,
             Descripcion = request.Descripcion,
             ConceptoId = request.ConceptoId,
-            ConceptoNombre = request.ConceptoNombre,
             ProveedorId = request.ProveedorId,
             CategoriaId = request.CategoriaId,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId
+            FormaPagoId = request.FormaPagoId,
+            // 🔥 NUEVO: Pasar nombres para auto-creación
+            ConceptoNombre = request.ConceptoNombre!,
+            CategoriaNombre = request.CategoriaNombre,
+            PersonaNombre = request.PersonaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
+            CuentaNombre = request.CuentaNombre
         };
 
         var result = await _sender.Send(command);
@@ -130,12 +135,17 @@ public record CreateGastoProgramadoRequest(
     DateTime? FechaEjecucion,
     string? Descripcion,
     Guid ConceptoId,
-    string ConceptoNombre,
     Guid ProveedorId,
     Guid CategoriaId,
     Guid PersonaId,
     Guid CuentaId,
-    Guid FormaPagoId
+    Guid FormaPagoId,
+    string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
+    string? ProveedorNombre = null,
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );
 
 public record UpdateGastoProgramadoRequest(
@@ -144,10 +154,15 @@ public record UpdateGastoProgramadoRequest(
     DateTime? FechaEjecucion,
     string? Descripcion,
     Guid ConceptoId,
-    string ConceptoNombre,
     Guid ProveedorId,
     Guid CategoriaId,
     Guid PersonaId,
     Guid CuentaId,
-    Guid FormaPagoId
+    Guid FormaPagoId,
+    string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
+    string? ProveedorNombre = null,
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );

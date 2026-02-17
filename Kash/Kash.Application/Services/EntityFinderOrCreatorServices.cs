@@ -8,6 +8,71 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Services;
 
 /// <summary>
+/// Servicio para buscar o crear Categorías.
+/// </summary>
+public class CategoriaFinderOrCreatorService : ICategoriaFinderOrCreatorService
+{
+    private readonly IReadRepository<Categoria, CategoriaDto, CategoriaId> _readRepository;
+    private readonly IWriteRepository<Categoria, CategoriaId> _writeRepository;
+
+    public CategoriaFinderOrCreatorService(
+        IReadRepository<Categoria, CategoriaDto, CategoriaId> readRepository,
+        IWriteRepository<Categoria, CategoriaId> writeRepository)
+    {
+        _readRepository = readRepository;
+        _writeRepository = writeRepository;
+    }
+
+    public async Task<Guid?> FindOrCreateAsync(
+        Guid? id,
+        string? nombre,
+        Guid usuarioId,
+        Dictionary<string, object>? additionalData = null,
+        CancellationToken cancellationToken = default)
+    {
+        // 1. Buscar por ID si se proporcionó
+        if (id.HasValue)
+        {
+            var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
+            if (existing != null)
+            {
+                return existing.Id;
+            }
+        }
+
+        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        if (!string.IsNullOrWhiteSpace(nombre))
+        {
+            var categorias = await _readRepository.SearchForAutocompleteAsync(
+                usuarioId,
+                nombre,
+                limit: 100,
+                cancellationToken: cancellationToken);
+
+            var matchExacto = categorias.FirstOrDefault(c =>
+                c.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase));
+
+            if (matchExacto != null)
+            {
+                return matchExacto.Id;
+            }
+
+            // 3. Crear nueva categoría
+            var nombreVO = Nombre.Create(nombre).Value;
+            var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
+            var descripcionVO = new Descripcion(""); // Descripción vacía por defecto
+            var nuevaCategoria = Categoria.Create(nombreVO, usuarioIdVO, descripcionVO);
+            _writeRepository.Add(nuevaCategoria);
+
+            return nuevaCategoria.Id.Value;
+        }
+
+        // Si no se proporcionó ni ID ni nombre, lanzar error (Categoria es obligatoria para Concepto)
+        throw new ArgumentException("Se requiere ID o Nombre para buscar o crear una Categoría.");
+    }
+}
+
+/// <summary>
 /// Servicio para buscar o crear Conceptos.
 /// </summary>
 public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
@@ -131,6 +196,62 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
 
         // Si llegamos aquí, no se proporcionó ni ID ni nombre
         return null;
+    }
+}
+
+/// <summary>
+/// Servicio para buscar o crear cuentas.
+/// </summary>
+public class CuentaFinderOrCreatorService : ICuentaFinderOrCreatorService
+{
+    private readonly IReadRepository<Cuenta, CuentaDto, CuentaId> _readRepository;
+    private readonly ICuentaWriteRepository _writeRepository;
+
+    public CuentaFinderOrCreatorService(
+        IReadRepository<Cuenta, CuentaDto, CuentaId> readRepository,
+        ICuentaWriteRepository writeRepository)
+    {
+        _readRepository = readRepository;
+        _writeRepository = writeRepository;
+    }
+
+    public async Task<Guid?> FindOrCreateAsync(
+        Guid? id,
+        string? nombre,
+        Guid usuarioId,
+        Dictionary<string, object>? additionalData = null,
+        CancellationToken cancellationToken = default)
+    {
+        // 1. Buscar por ID si se proporcionó
+        if (id.HasValue)
+        {
+            var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
+            if (existing != null)
+            {
+                return existing.Id;
+            }
+        }
+
+        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        if (!string.IsNullOrWhiteSpace(nombre))
+        {
+            // Crear la entidad temporal para buscar o crear
+            var nombreVO = Nombre.Create(nombre).Value;
+            var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
+            var cantidadVO = Cantidad.Create(0).Value;
+            var nuevaCuenta = Cuenta.Create(nombreVO, cantidadVO, usuarioIdVO);
+
+            // Usar el método FindOrCreateAsync que reutiliza si existe
+            var result = await _writeRepository.FindOrCreateAsync(nuevaCuenta, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return result.Value.Id.Value;
+            }
+        }
+
+        // Si llegamos aquí, no se proporcionó ni ID ni nombre
+        throw new ArgumentException("Se requiere ID o Nombre para buscar o crear una Cuenta.");
     }
 }
 
@@ -317,6 +438,7 @@ public class PersonaFinderOrCreatorService : IPersonaFinderOrCreatorService
             var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
             var nuevaPersona = Persona.Create(nombreVO, usuarioIdVO);
             _writeRepository.Add(nuevaPersona);
+
 
             return nuevaPersona.Id.Value;
         }

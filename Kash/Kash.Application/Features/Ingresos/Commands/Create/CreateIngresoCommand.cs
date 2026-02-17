@@ -23,10 +23,16 @@ public sealed record CreateIngresoCommand : AbsCreateCommand<Ingreso, IngresoId>
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
 
-    // ?? NUEVO: Nombres opcionales para auto-creación
+    // ?? Nombres opcionales para auto-creación
+    /// <summary>
+    /// Nombre de la categoría. Si CategoriaId no existe y se proporciona este valor,
+    /// se creará automáticamente la categoría.
+    /// </summary>
+    public string? CategoriaNombre { get; init; }
+
     /// <summary>
     /// Nombre del concepto. Si ConceptoId no existe y se proporciona este valor,
-    /// se creará automáticamente el concepto.
+    /// se creará automáticamente el concepto (con la categoría especificada o creada).
     /// </summary>
     public string? ConceptoNombre { get; init; }
 
@@ -41,6 +47,12 @@ public sealed record CreateIngresoCommand : AbsCreateCommand<Ingreso, IngresoId>
     /// se creará automáticamente la persona.
     /// </summary>
     public string? PersonaNombre { get; init; }
+
+    /// <summary>
+    /// Nombre de la cuenta. Si CuentaId no existe y se proporciona este valor,
+    /// se creará automáticamente la cuenta.
+    /// </summary>
+    public string? CuentaNombre { get; init; }
 
     /// <summary>
     /// Nombre de la forma de pago. Si FormaPagoId no existe y se proporciona este valor,

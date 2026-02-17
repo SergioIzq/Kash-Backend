@@ -19,4 +19,9 @@ public sealed record UpdateGastoProgramadoCommand : AbsUpdateCommand<GastoProgra
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
     public bool Activo { get; init; } = true;
+    public string? CategoriaNombre { get; init; } // 🔥 Para auto-creación
+    public string? ProveedorNombre { get; init; } // 🔥 Para auto-creación
+    public string? PersonaNombre { get; init; } // 🔥 Para auto-creación
+    public string? CuentaNombre { get; init; } // 🔥 Para auto-creación
+    public string? FormaPagoNombre { get; init; } // 🔥 Para auto-creación
 }

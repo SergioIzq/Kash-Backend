@@ -56,6 +56,17 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     }
 
     /// <summary>
+    /// 🔥 HOOK 2.5: Persistir dependencias antes de actualizar la entidad principal (opcional).
+    /// Override si las entidades relacionadas deben guardarse ANTES de actualizar la entidad principal.
+    /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
+    /// Por defecto no hace nada (false).
+    /// </summary>
+    protected virtual bool ShouldPersistDependenciesFirst()
+    {
+        return false; // Por defecto NO persiste las dependencias primero
+    }
+
+    /// <summary>
     /// 🔥 HOOK 3: Aplicar cambios a la entidad (REQUERIDO).
     /// Método abstracto que DEBE implementarse en cada handler concreto.
     /// Recibe la entidad cargada de la BD, el command y opcionalmente las dependencias preparadas.
@@ -114,6 +125,12 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
                 return Result.Failure<Guid>(dependenciesResult.Error);
             }
 
+            // 2.5 🔥 NUEVO: Guardar dependencias PRIMERO si es necesario (evita problemas de concurrencia)
+            if (ShouldPersistDependenciesFirst())
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
             // 3. 📦 Obtener la entidad (con tracking para Update)
             var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
             if (entity is null)
@@ -138,7 +155,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
                 _writeRepository.Update(entity);
             }
 
-            // Guardar cambios
+            // Guardar cambios (solo la entidad principal si ya guardamos las dependencias)
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 7. 🎉 Acciones post-actualización
