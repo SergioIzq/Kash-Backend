@@ -49,7 +49,10 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
         var passwordHashResult = PasswordHash.Create(hashedPassword);
 
         var nombreResult = Nombre.Create(request.Nombre);
-        var apellidosResult = Apellido.Create(request.Apellidos);
+        var apellidosResult = Apellido.Create(string.Empty); // Valor por defecto
+
+        if (!string.IsNullOrEmpty(request.Apellidos))
+            apellidosResult = Apellido.Create(request.Apellidos);
 
         // 3. Crear el usuario usando el método Factory del dominio
         var newUsuario = Usuario.Create(emailResult.Value, nombreResult.Value, apellidosResult.Value, passwordHashResult.Value);

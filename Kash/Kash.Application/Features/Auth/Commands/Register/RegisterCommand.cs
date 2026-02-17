@@ -6,5 +6,5 @@ public sealed record RegisterCommand(
     string Correo,
     string Contrasena,
     string Nombre,
-    string Apellidos
+    string? Apellidos
 ) : ICommand;
