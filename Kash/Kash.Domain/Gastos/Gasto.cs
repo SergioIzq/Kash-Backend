@@ -90,15 +90,15 @@ FechaRegistro fecha,
     }
 
     public void Update(
-    Cantidad importe,
+        Cantidad importe,
         FechaRegistro fecha,
-    ConceptoId conceptoId,
-  ProveedorId proveedorId,
-  PersonaId personaId,
-      CuentaId cuentaId,
-    FormaPagoId formaPagoId,
+        ConceptoId conceptoId,
+        ProveedorId? proveedorId,
+        PersonaId? personaId,
+        CuentaId cuentaId,
+        FormaPagoId formaPagoId,
         UsuarioId usuarioId,
- Descripcion? descripcion)
+        Descripcion? descripcion)
     {
         // 🔥 Guardar valores anteriores para el evento
         var cuentaIdAnterior = CuentaId;
@@ -118,11 +118,11 @@ FechaRegistro fecha,
         if (!cuentaIdAnterior.Equals(cuentaId) || !importeAnterior.Equals(importe))
         {
             AddDomainEvent(new GastoActualizadoEvent(
-                 Id,
-              cuentaIdAnterior,
-               importeAnterior,
-        cuentaId,
-         importe));
+                Id,
+                cuentaIdAnterior,
+                importeAnterior,
+                cuentaId,
+                importe));
         }
     }
 

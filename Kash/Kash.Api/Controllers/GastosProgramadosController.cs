@@ -2,6 +2,8 @@
 using Kash.Application.Features.GastosProgramados.Queries;
 using Kash.NuevaApi.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
+using Kash.Shared.Domain.ValueObjects;
+using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,10 +77,14 @@ public class GastosProgramadosController : AbsController
             ConceptoId = request.ConceptoId,
             ConceptoNombre = request.ConceptoNombre,
             ProveedorId = request.ProveedorId,
+            ProveedorNombre = request.ProveedorNombre,
+            CategoriaNombre = request.CategoriaNombre,
+            PersonaNombre = request.PersonaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
             CategoriaId = request.CategoriaId,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId,
+            FormaPagoId = request.FormaPagoId
         };
 
         var result = await _sender.Send(command);
@@ -102,17 +108,16 @@ public class GastosProgramadosController : AbsController
             FechaEjecucion = request.FechaEjecucion,
             Descripcion = request.Descripcion,
             ConceptoId = request.ConceptoId,
+            ConceptoNombre = request.ConceptoNombre,
             ProveedorId = request.ProveedorId,
-            CategoriaId = request.CategoriaId,
-            PersonaId = request.PersonaId,
-            CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId,
-            // 🔥 NUEVO: Pasar nombres para auto-creación
-            ConceptoNombre = request.ConceptoNombre!,
+            ProveedorNombre = request.ProveedorNombre,
             CategoriaNombre = request.CategoriaNombre,
             PersonaNombre = request.PersonaNombre,
             FormaPagoNombre = request.FormaPagoNombre,
-            CuentaNombre = request.CuentaNombre
+            CategoriaId = request.CategoriaId,
+            PersonaId = request.PersonaId,
+            CuentaId = request.CuentaId,
+            FormaPagoId = request.FormaPagoId
         };
 
         var result = await _sender.Send(command);
@@ -135,9 +140,9 @@ public record CreateGastoProgramadoRequest(
     DateTime? FechaEjecucion,
     string? Descripcion,
     Guid ConceptoId,
-    Guid ProveedorId,
+    Guid? ProveedorId,
     Guid CategoriaId,
-    Guid PersonaId,
+    Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
     string? ConceptoNombre = null,
@@ -154,9 +159,9 @@ public record UpdateGastoProgramadoRequest(
     DateTime? FechaEjecucion,
     string? Descripcion,
     Guid ConceptoId,
-    Guid ProveedorId,
+    Guid? ProveedorId,
     Guid CategoriaId,
-    Guid PersonaId,
+    Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
     string? ConceptoNombre = null,

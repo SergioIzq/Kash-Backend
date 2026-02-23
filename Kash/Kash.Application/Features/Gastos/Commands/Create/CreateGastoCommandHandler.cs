@@ -100,13 +100,10 @@ public sealed class CreateGastoCommandHandler
                 usuarioId.Value,
                 cancellationToken: cancellationToken);
 
-            if (proveedorGuid == null)
+            if (proveedorGuid.HasValue)
             {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere un Proveedor para crear el gasto."));
+                dependencies["ProveedorId"] = ProveedorId.Create(proveedorGuid.Value).Value;
             }
-
-            dependencies["ProveedorId"] = ProveedorId.Create(proveedorGuid.Value).Value;
 
             // 3. 🔥 PERSONA: Buscar o crear (obligatorio)
             var personaGuid = await _personaFinderService.FindOrCreateAsync(
@@ -115,13 +112,10 @@ public sealed class CreateGastoCommandHandler
                 usuarioId.Value,
                 cancellationToken: cancellationToken);
 
-            if (personaGuid == null)
+            if (personaGuid.HasValue)
             {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Persona para crear el gasto."));
+                dependencies["PersonaId"] = PersonaId.Create(personaGuid.Value).Value;
             }
-
-            dependencies["PersonaId"] = PersonaId.Create(personaGuid.Value).Value;
 
             // 4. 🔥 CUENTA: Buscar o crear (obligatorio)
             var cuentaGuid = await _cuentaFinderService.FindOrCreateAsync(
@@ -183,8 +177,8 @@ public sealed class CreateGastoCommandHandler
 
         // 2. IDs de las dependencias preparadas (pueden haber sido creados)
         var conceptoId = (ConceptoId)dependencies!["ConceptoId"];
-        var proveedorId = (ProveedorId)dependencies["ProveedorId"];
-        var personaId = (PersonaId)dependencies["PersonaId"];
+        var proveedorId = dependencies.ContainsKey("ProveedorId") ? (ProveedorId?)dependencies["ProveedorId"] : null;
+        var personaId = dependencies.ContainsKey("PersonaId") ? (PersonaId?)dependencies["PersonaId"] : null;
         var cuentaId = (CuentaId)dependencies["CuentaId"];
         var formaPagoId = (FormaPagoId)dependencies["FormaPagoId"];
 

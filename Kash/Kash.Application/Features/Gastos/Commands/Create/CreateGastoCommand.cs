@@ -17,8 +17,8 @@ public sealed record CreateGastoCommand : AbsCreateCommand<Gasto, GastoId>
     // IDs de entidades relacionadas
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
-    public required Guid ProveedorId { get; init; }
-    public required Guid PersonaId { get; init; }
+    public required Guid? ProveedorId { get; init; }
+    public required Guid? PersonaId { get; init; }
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
