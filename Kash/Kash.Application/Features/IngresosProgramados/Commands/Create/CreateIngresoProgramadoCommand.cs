@@ -17,6 +17,7 @@ public sealed record CreateIngresoProgramadoCommand : AbsCreateCommand<IngresoPr
     public bool Activo { get; init; } = true;
 
     // IDs de entidades relacionadas
+    public required Guid UsuarioId { get; init; }
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
     public Guid? ClienteId { get; init; }  // ?? Opcional

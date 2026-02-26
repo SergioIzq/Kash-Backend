@@ -85,7 +85,7 @@ public sealed class JobSchedulingService : IJobSchedulingService
         {
             // Intenta triggear el job de forma inmediata para verificar que existe
             // Si no existe, lanzará una excepción
-            RecurringJob.Trigger(jobId);
+            RecurringJob.TriggerJob(jobId);
             return true;
         }
         catch

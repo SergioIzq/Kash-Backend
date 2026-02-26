@@ -20,6 +20,7 @@ public sealed record UpdateIngresoProgramadoCommand : AbsUpdateCommand<IngresoPr
     // IDs de entidades relacionadas
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
+    public required Guid UsuarioId { get; init; }
     public Guid? ClienteId { get; init; }     // 🔥 Opcional
     public Guid? PersonaId { get; init; }     // 🔥 Opcional
     public required Guid CuentaId { get; init; }

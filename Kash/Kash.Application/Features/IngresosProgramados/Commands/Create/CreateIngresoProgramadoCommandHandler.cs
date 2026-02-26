@@ -7,6 +7,7 @@ using Kash.Shared.Domain.Interfaces;
 using Kash.Shared.Domain.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
+using MediatR;
 
 namespace Kash.Application.Features.IngresosProgramados.Commands;
 
@@ -27,6 +28,7 @@ public sealed class CreateIngresoProgramadoCommandHandler
     private readonly ICuentaFinderOrCreatorService _cuentaFinderService;
     private readonly IFormaPagoFinderOrCreatorService _formaPagoFinderService;
     private readonly IJobSchedulingService _jobSchedulingService;
+    private readonly IMediator _mediator;
 
     public CreateIngresoProgramadoCommandHandler(
         IUnitOfWork unitOfWork,
@@ -39,7 +41,8 @@ public sealed class CreateIngresoProgramadoCommandHandler
         IPersonaFinderOrCreatorService personaFinderService,
         ICuentaFinderOrCreatorService cuentaFinderService,
         IFormaPagoFinderOrCreatorService formaPagoFinderService,
-        IJobSchedulingService jobSchedulingService)
+        IJobSchedulingService jobSchedulingService,
+        IMediator mediator)
     : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _categoriaFinderService = categoriaFinderService;
@@ -49,6 +52,7 @@ public sealed class CreateIngresoProgramadoCommandHandler
         _cuentaFinderService = cuentaFinderService;
         _formaPagoFinderService = formaPagoFinderService;
         _jobSchedulingService = jobSchedulingService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -190,13 +194,9 @@ public sealed class CreateIngresoProgramadoCommandHandler
         var formaPagoId = (FormaPagoId)dependencies["FormaPagoId"];
 
         // Cliente y Persona: Si no existen en dependencies, crear IDs vacíos
-        var clienteId = dependencies.ContainsKey("ClienteId") 
-            ? (ClienteId)dependencies["ClienteId"] 
-            : ClienteId.Create(Guid.Empty).Value; // Default si no existe
-
-        var personaId = dependencies.ContainsKey("PersonaId") 
-            ? (PersonaId)dependencies["PersonaId"] 
-            : PersonaId.Create(Guid.Empty).Value; // Default si no existe
+        var clienteId = dependencies.ContainsKey("ClienteId") ? (ClienteId?)dependencies["ClienteId"] : null;
+        var personaId = dependencies.ContainsKey("PersonaId") ? (PersonaId?)dependencies["PersonaId"] : null;
+        var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
         // HangfireJobId desde las dependencias
         var hangfireJobId = (string)dependencies["HangfireJobId"];
@@ -212,6 +212,7 @@ public sealed class CreateIngresoProgramadoCommandHandler
             cuentaId,
             formaPagoId,
             hangfireJobId,
+            usuarioId,
             descripcion
         );
     }
@@ -228,22 +229,44 @@ public sealed class CreateIngresoProgramadoCommandHandler
         // Solo programar si está activo
         if (entity.Activo)
         {
+            var cronExpression = ConvertToCronExpression(entity.Frecuencia.Value, entity.FechaEjecucion);
             await _jobSchedulingService.ScheduleRecurringJobAsync(
                 entity.HangfireJobId,
                 entity.FechaEjecucion,
-                entity.Frecuencia.Value,
-                () => ExecuteIngresoProgramadoAsync(entityId));
+                cronExpression,
+                () => ExecuteIngresoProgramadoAsync(new Guid(entity.HangfireJobId)));
         }
     }
 
     /// <summary>
-    /// Método que ejecutará Hangfire periódicamente.
-    /// Este método dispararía un comando MediatR: ExecuteIngresoProgramadoCommand
+    /// Convierte el valor de Frecuencia (Diario, Semanal, etc.) a una expresión cron válida.
+    /// Respeta la hora y minutos de FechaEjecucion.
     /// </summary>
-    private Task ExecuteIngresoProgramadoAsync(Guid ingresoProgramadoId)
+    private static string ConvertToCronExpression(string frecuencia, DateTime fechaEjecucion)
     {
-        // TODO: Implementar ejecución del ingreso programado
-        // await _mediator.Send(new ExecuteIngresoProgramadoCommand(ingresoProgramadoId));
-        return Task.CompletedTask;
+        var minuto = fechaEjecucion.Minute;
+        var hora = fechaEjecucion.Hour;
+        var dia = fechaEjecucion.Day;
+        var mes = fechaEjecucion.Month;
+        var diaSemana = (int)fechaEjecucion.DayOfWeek;
+
+        return frecuencia.ToLowerInvariant() switch
+        {
+            "diario" => $"{minuto} {hora} * * *",                    // Todos los días a la hora especificada
+            "semanal" => $"{minuto} {hora} * * {diaSemana}",         // Mismo día de la semana a la hora especificada
+            "mensual" => $"{minuto} {hora} {dia} * *",               // Mismo día del mes a la hora especificada
+            "anual" => $"{minuto} {hora} {dia} {mes} *",             // Mismo día y mes del año a la hora especificada
+            _ => throw new ArgumentException($"Frecuencia no soportada: {frecuencia}")
+        };
+    }
+
+    /// <summary>
+    /// Método que ejecutará Hangfire periódicamente.
+    /// Envía el comando ExecuteIngresoProgramadoCommand a través de MediatR.
+    /// 🔥 IMPORTANTE: Debe ser PUBLIC para que Hangfire pueda invocarlo.
+    /// </summary>
+    public async Task ExecuteIngresoProgramadoAsync(Guid hangfireId)
+    {
+        await _mediator.Send(new Execute.ExecuteIngresoProgramadoCommand(hangfireId));
     }
 }

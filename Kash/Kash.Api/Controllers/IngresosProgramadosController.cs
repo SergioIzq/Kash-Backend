@@ -80,7 +80,10 @@ public class IngresosProgramadosController : AbsController
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
             Activo = request.Activo,
-            CategoriaNombre = request.CategoriaNombre
+            CategoriaNombre = request.CategoriaNombre,
+            CuentaNombre = request.CuentaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(command);
@@ -115,7 +118,8 @@ public class IngresosProgramadosController : AbsController
             FormaPagoId = request.FormaPagoId,
             FormaPagoNombre = request.FormaPagoNombre,
             Activo = request.Activo,
-            CategoriaNombre = request.CategoriaNombre
+            CategoriaNombre = request.CategoriaNombre,
+            UsuarioId = request.UsuarioId
         };
 
         var result = await _sender.Send(command);
@@ -169,5 +173,6 @@ public record UpdateIngresoProgramadoRequest(
     string? CuentaNombre,
     Guid FormaPagoId,
     string? FormaPagoNombre,
-    bool Activo
+    bool Activo,
+    Guid UsuarioId
 );

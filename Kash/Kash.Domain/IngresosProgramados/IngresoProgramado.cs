@@ -18,12 +18,13 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        ClienteId clienteId,
-        PersonaId personaId,
+        ClienteId? clienteId,
+        PersonaId? personaId,
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         Frecuencia frecuencia,
         string hangfireJobId,
+        UsuarioId usuarioId,
         Descripcion? descripcion = null) : base(id)
     {
         Importe = importe;
@@ -39,6 +40,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Descripcion = descripcion;
         Activo = true;
         HangfireJobId = hangfireJobId;
+        UsuarioId = usuarioId;
     }
 
     public Cantidad Importe { get; private set; }
@@ -47,8 +49,8 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
     public DateTime FechaEjecucion { get; private set; }
     public bool Activo { get; private set; }
     public ConceptoId ConceptoId { get; private set; }
-    public ClienteId ClienteId { get; private set; }
-    public PersonaId PersonaId { get; private set; }
+    public ClienteId? ClienteId { get; private set; }
+    public PersonaId? PersonaId { get; private set; }
     public CuentaId CuentaId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
@@ -58,12 +60,13 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        ClienteId clienteId,
+        ClienteId? clienteId,
         Frecuencia frecuencia,
-        PersonaId personaId,
+        PersonaId? personaId,
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         string hangfireJobId,
+        UsuarioId usuarioId,
         Descripcion? descripcion = null)
     {
         var ingresoProgram = new IngresoProgramado(
@@ -77,6 +80,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
             formaPagoId,
             frecuencia,
             hangfireJobId,
+            usuarioId,
             descripcion);
 
         // 🔥 LANZAR EVENTO DE DOMINIO
@@ -112,8 +116,8 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        ClienteId clienteId,
-        PersonaId personaId,
+        ClienteId? clienteId,
+        PersonaId? personaId,
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         Frecuencia frecuencia,
