@@ -55,7 +55,7 @@ public sealed class Usuario : AbsEntity<UsuarioId>
     public static Usuario Create(
         Email correo,
         Nombre nombre,
-        Apellido apellidos,
+        Apellido? apellidos,
         PasswordHash contrasenaHash)
     {
         // 1. Generar elementos iniciales de seguridad
