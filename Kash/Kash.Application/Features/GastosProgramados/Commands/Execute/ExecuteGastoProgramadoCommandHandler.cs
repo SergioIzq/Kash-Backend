@@ -17,15 +17,15 @@ namespace Kash.Application.Features.GastosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<ExecuteGastoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> _gastoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IReadRepository<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> _gastoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteGastoProgramadoCommandHandler> _logger;
 
     public ExecuteGastoProgramadoCommandHandler(
-        IReadRepositoryWithDto<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> gastoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IReadRepository<GastoProgramado, GastoProgramadoDto, GastoProgramadoId> gastoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteGastoProgramadoCommandHandler> logger)
@@ -139,7 +139,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
                         <div style='background-color: #fff3e0; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #f44336;'>
                             <h3 style='margin-top: 0; color: #555;'>Detalles del Gasto:</h3>
                             <ul style='list-style: none; padding: 0;'>
-                                <li><strong>Importe:</strong> ${gasto.Importe:N2}</li>
+                                <li><strong>Importe:</strong> {gasto.Importe:N2}€</li>
                                 <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                 <li><strong>Frecuencia:</strong> {gasto.Frecuencia}</li>
                                 {(string.IsNullOrWhiteSpace(gasto.Descripcion) ? "" : $"<li><strong>Descripción:</strong> {gasto.Descripcion}</li>")}

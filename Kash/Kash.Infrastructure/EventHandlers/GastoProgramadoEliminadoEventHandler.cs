@@ -26,7 +26,7 @@ public sealed class GastoProgramadoEliminadoEventHandler : INotificationHandler<
     {
         try
         {
-            var jobId = notification.GastoProgramadoId.Value.ToString();
+            var jobId = notification.HangfireJobId;
 
             // Eliminar el job recurrente de Hangfire
             _recurringJobManager.RemoveIfExists(jobId);

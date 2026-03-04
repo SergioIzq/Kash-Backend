@@ -15,7 +15,7 @@ public sealed class GetFormaPagoByIdQueryHandler
 {
     public GetFormaPagoByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepositoryWithDto<FormaPago, FormaPagoDto, FormaPagoId> readOnlyRepository
+        IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

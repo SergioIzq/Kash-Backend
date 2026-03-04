@@ -19,10 +19,10 @@ public abstract class GetByIdQueryHandler<TEntity, TId, TDto, TQuery>
     where TId : IGuidValueObject
 {
     // Solo usamos el repo de lectura optimizado (Dapper/SQL directo)
-    protected readonly IReadRepositoryWithDto<TEntity, TDto, TId> _dtoRepository;
+    protected readonly IReadRepository<TEntity, TDto, TId> _dtoRepository;
 
     protected GetByIdQueryHandler(
-        IReadRepositoryWithDto<TEntity, TDto, TId> dtoRepository,
+        IReadRepository<TEntity, TDto, TId> dtoRepository,
         ICacheService cacheService)
         : base(cacheService)
     {

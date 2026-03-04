@@ -182,6 +182,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
     {
         // 🔥 Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new TraspasoProgramadoEliminadoEvent(
+            HangfireJobId,
             Id,
             CuentaOrigenId,
             CuentaDestinoId,

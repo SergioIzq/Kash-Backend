@@ -21,22 +21,41 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
         null)!;
 
     public UsuarioReadRepository(IDbConnectionFactory connectionFactory)
-        : base(connectionFactory, "usuarios")
+        : base(connectionFactory)
     {
     }
 
-    protected override string BuildGetByIdQuery()
+    /// <summary>
+    /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+    /// </summary>
+    protected override ReadRepositoryConfiguration ConfigureRepository()
     {
-        return @"
-          SELECT 
-            id as Id,
-            correo as Correo,
-            nombre as Nombre,
-            apellidos as Apellidos,
-            fecha_creacion as FechaCreacion,
-            avatar as Avatar
-          FROM usuarios 
-          WHERE id = @id";
+        return ReadRepositoryConfiguration.Simple(
+            tableName: "usuarios",
+            selectColumns: new List<string>
+            {
+                "id as Id",
+                "correo as Correo",
+                "nombre as Nombre",
+                "apellidos as Apellidos",
+                "fecha_creacion as FechaCreacion",
+                "avatar as Avatar"
+            },
+            searchableColumns: new List<string>
+            {
+                "correo",
+                "nombre",
+                "apellidos"
+            },
+            sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Correo", "correo" },
+                { "Nombre", "nombre" },
+                { "Apellidos", "apellidos" },
+                { "FechaCreacion", "fecha_creacion" }
+            },
+            defaultOrderBy: "fecha_creacion DESC"
+        );
     }
 
     public async Task<Usuario?> GetByEmailAsync(Email correo, CancellationToken cancellationToken = default)

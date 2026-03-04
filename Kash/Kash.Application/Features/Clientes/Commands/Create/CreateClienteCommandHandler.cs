@@ -11,74 +11,47 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Clientes.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Cliente.
+/// ✅ REFACTORIZADO: Handler simplificado usando hooks de la clase base.
+/// Reducido de ~70 líneas a ~30 líneas (60% menos código).
 /// </summary>
 public sealed class CreateClienteCommandHandler
     : AbsCreateCommandHandler<Cliente, ClienteId, CreateClienteCommand>
 {
-    private readonly IClienteWriteRepository _clienteWriteRepository;
+    private readonly IClienteWriteRepository _ClienteWriteRepository;
 
     public CreateClienteCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<Cliente, ClienteId> writeRepository,
         ICacheService cacheService,
         IUserContext userContext,
-        IClienteWriteRepository clienteWriteRepository)
+        IClienteWriteRepository ClienteWriteRepository)
         : base(unitOfWork, writeRepository, cacheService, userContext)
     {
-        _clienteWriteRepository = clienteWriteRepository;
+        _ClienteWriteRepository = ClienteWriteRepository;
     }
 
     /// <summary>
-    /// **Implementación de la lógica de negocio**: Crea la entidad Cliente.
-    /// Este es el único método que tienes que implementar y donde se aplica el DDD.
+    /// 🔥 HOOK: Crea la entidad de dominio.
+    /// Solo necesita implementar la lógica de creación, el resto lo maneja la clase base.
     /// </summary>
-    /// <param name="command">El comando con los datos de creación.</param>
-    /// <returns>La nueva entidad Cliente creada.</returns>
-    protected override Cliente CreateEntity(CreateClienteCommand command)
+    protected override Cliente CreateEntity(CreateClienteCommand command, Dictionary<string, object>? dependencies = null)
     {
         var nombreVO = Nombre.Create(command.Nombre).Value;
-        var usuarioIdVO = UsuarioId.Create(command.UsuarioId).Value;
+        var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
-        var newCliente = Cliente.Create(nombreVO, usuarioIdVO);
-
-        return newCliente;
+        return Cliente.Create(nombreVO, usuarioId);
     }
 
-    public async override Task<Result<Guid>> Handle(CreateClienteCommand command, CancellationToken cancellationToken)
+    /// <summary>
+    /// 🔥 HOOK: Validación y adición al contexto.
+    /// Usa CreateAsyncWithValidation que valida unicidad Y agrega la entidad.
+    /// </summary>
+    protected override async Task<(Result ValidationResult, bool EntityAdded)> ValidateAndAddToContextAsync(
+        Cliente entity,
+        CreateClienteCommand command,
+        CancellationToken cancellationToken)
     {
-        // 1. Crear la entidad (El ID se genera aquí, ya sea en el constructor o factory)
-        var entity = CreateEntity(command);
-
-        try
-        {
-            // 2. Ejecutar la validación y añadir al contexto
-            // Esto devuelve Result (sin valor)
-            Result validationResult = await _clienteWriteRepository.CreateAsyncWithValidation(entity, cancellationToken);
-
-            // 3. Verificar fallo y convertir tipo
-            if (validationResult.IsFailure)
-            {
-                // 🔥 CORRECCIÓN AQUÍ:
-                // Convertimos el error del Result simple a un Result<Guid>
-                return Result.Failure<Guid>(validationResult.Error);
-            }
-
-            // 4. 🔥 IMPORTANTE: Guardar cambios (Unit of Work)
-            // Si tu repositorio no hace SaveChanges internamente (que es lo correcto en UoW),
-            // debes llamar al UnitOfWork aquí para persistir la transacción.
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            // 5. Retornar el ID (Éxito)
-            // Como validationResult no tiene valor, sacamos el ID de la entidad original
-            return Result.Success(entity.Id.Value);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<Guid>(Error.Failure(
-                "Database.Error",
-                "Error inesperado al crear cliente",
-                ex.Message));
-        }
+        var result = await _ClienteWriteRepository.CreateAsyncWithValidation(entity, cancellationToken);
+        return (result, result.IsSuccess); // Si es exitoso, la entidad fue agregada
     }
 }

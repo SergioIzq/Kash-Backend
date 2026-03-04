@@ -65,10 +65,16 @@ public class GastosController : AbsController
             Fecha = request.Fecha,
             Descripcion = request.Descripcion,
             CategoriaId = request.CategoriaId,
+            CategoriaNombre = request.CategoriaNombre,
+            ConceptoNombre = request.ConceptoNombre,
             ConceptoId = request.ConceptoId,
             ProveedorId = request.ProveedorId,
+            ProveedorNombre = request.ProveedorNombre,
+            PersonaNombre = request.PersonaNombre,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
+            CuentaNombre = request.CuentaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
             FormaPagoId = request.FormaPagoId,
             UsuarioId = userId!.Value
         };
@@ -98,10 +104,16 @@ public class GastosController : AbsController
             Fecha = request.Fecha,
             Descripcion = request.Descripcion,
             CategoriaId = request.CategoriaId,
+            CategoriaNombre = request.CategoriaNombre,
+            ConceptoNombre = request.ConceptoNombre,
             ConceptoId = request.ConceptoId,
             ProveedorId = request.ProveedorId,
+            ProveedorNombre = request.ProveedorNombre,
+            PersonaNombre = request.PersonaNombre,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
+            CuentaNombre = request.CuentaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
             FormaPagoId = request.FormaPagoId,
             UsuarioId = userId!.Value
         };
@@ -126,10 +138,18 @@ public record CreateGastoRequest(
     string? Descripcion,
     Guid CategoriaId,
     Guid ConceptoId,
-    Guid ProveedorId,
-    Guid PersonaId,
+    Guid? ProveedorId,
+    Guid? PersonaId,
     Guid CuentaId,
-    Guid FormaPagoId
+    Guid FormaPagoId,
+    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
+                    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
+    string? ProveedorNombre = null,
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );
 
 public record UpdateGastoRequest(
@@ -138,8 +158,14 @@ public record UpdateGastoRequest(
     string? Descripcion,
     Guid CategoriaId,
     Guid ConceptoId,
-    Guid ProveedorId,
-    Guid PersonaId,
+    Guid? ProveedorId,
+    Guid? PersonaId,
     Guid CuentaId,
-    Guid FormaPagoId
+    Guid FormaPagoId,
+    string? ConceptoNombre = null,
+    string? CategoriaNombre = null,
+    string? ProveedorNombre = null,
+    string? PersonaNombre = null,
+    string? FormaPagoNombre = null,
+    string? CuentaNombre = null
 );

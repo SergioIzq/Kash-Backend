@@ -11,7 +11,7 @@ public sealed class GetFormasPagoPagedListQueryHandler
     : GetPagedListQueryHandler<FormaPago, FormaPagoId, FormaPagoDto, GetFormasPagoPagedListQuery>
 {
     public GetFormasPagoPagedListQueryHandler(
-      IReadRepositoryWithDto<FormaPago, FormaPagoDto, FormaPagoId> repository,
+      IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

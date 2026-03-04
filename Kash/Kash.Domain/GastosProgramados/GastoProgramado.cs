@@ -19,12 +19,13 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        ProveedorId proveedorId,
-        PersonaId personaId,
+        ProveedorId? proveedorId,
+        PersonaId? personaId,
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         Frecuencia frecuencia,
         string hangfireJobId,
+        UsuarioId usuarioId,
         Descripcion? descripcion = null) : base(id)
     {
         Importe = importe;
@@ -35,7 +36,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         PersonaId = personaId;
         CuentaId = cuentaId;
         FormaPagoId = formaPagoId;
-
+        UsuarioId = usuarioId;
         Frecuencia = frecuencia;
         Descripcion = descripcion;
         Activo = true;
@@ -48,8 +49,8 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     public DateTime FechaEjecucion { get; private set; }
     public bool Activo { get; private set; }
     public ConceptoId ConceptoId { get; private set; }
-    public ProveedorId ProveedorId { get; private set; }
-    public PersonaId PersonaId { get; private set; }
+    public ProveedorId? ProveedorId { get; private set; }
+    public PersonaId? PersonaId { get; private set; }
     public CuentaId CuentaId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
@@ -59,12 +60,14 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
         Cantidad importe,
         DateTime fechaEjecucion,
         ConceptoId conceptoId,
-        ProveedorId proveedorId,
+        ProveedorId? proveedorId,
         Frecuencia frecuencia,
-        PersonaId personaId,
+        PersonaId? personaId,
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
+        UsuarioId usuarioId,
         string hangfireJobId,
+
         Descripcion? descripcion = null)
     {
         var gasto = new GastoProgramado(
@@ -78,6 +81,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
             formaPagoId,
             frecuencia,
             hangfireJobId,
+            usuarioId,
             descripcion);
 
         // 🔥 LANZAR EVENTO DE DOMINIO
@@ -167,6 +171,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     {
         // 🔥 Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new GastoProgramadoEliminadoEvent(
+            HangfireJobId,
             Id,
             CuentaId,
             Importe));

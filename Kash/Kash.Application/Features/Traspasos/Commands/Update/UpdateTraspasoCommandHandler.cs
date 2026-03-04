@@ -17,14 +17,14 @@ public sealed class UpdateTraspasoCommandHandler
         IUnitOfWork unitOfWork,
         IWriteRepository<Traspaso, TraspasoId> writeRepository,
    ICacheService cacheService,
-        IReadRepositoryWithDto<Traspaso, TraspasoDto, TraspasoId> readOnlyRepository,
+        IReadRepository<Traspaso, TraspasoDto, TraspasoId> readOnlyRepository,
         IUserContext userContext
         )
    : base(unitOfWork, writeRepository, cacheService, userContext)
     {
     }
 
-    protected override void ApplyChanges(Traspaso entity, UpdateTraspasoCommand command)
+    protected override void ApplyChanges(Traspaso entity, UpdateTraspasoCommand command, Dictionary<string, object>? dependencies = null)
     {
         // Crear Value Objects desde el command
         var cuentaOrigenId = CuentaId.Create(command.CuentaOrigenId).Value;
@@ -43,4 +43,5 @@ public sealed class UpdateTraspasoCommandHandler
          command.Activo);
     }
 }
+
 

@@ -1,4 +1,5 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
+using Kash.Application.Interfaces.Repositories;
 using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging;
 using Kash.Shared.Application.Abstractions.Services;
@@ -17,15 +18,15 @@ namespace Kash.Application.Features.IngresosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<ExecuteIngresoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> _ingresoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IIngresoProgramadoReadRepository _ingresoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteIngresoProgramadoCommandHandler> _logger;
 
     public ExecuteIngresoProgramadoCommandHandler(
-        IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> ingresoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IIngresoProgramadoReadRepository ingresoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteIngresoProgramadoCommandHandler> logger)
@@ -43,18 +44,17 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
         {
             if (_logger.IsEnabled(LogLevel.Information))
             {
-                _logger.LogInformation("Ejecutando IngresoProgramado {IngresoProgramadoId}", request.IngresoProgramadoId);
+                _logger.LogInformation("Ejecutando IngresoProgramado {IngresoProgramadoId}", request.hangfireId);
             }
 
-            // 1. Obtener el IngresoProgramado
-            var ingresoProgramado = await _ingresoProgramadoReadRepository.GetReadModelByIdAsync(
-                request.IngresoProgramadoId,
-                cancellationToken);
+            var ingresoProgramado = await _ingresoProgramadoReadRepository.GetByHangfireJobIdAsync(
+                                    request.hangfireId.ToString(),
+                                    cancellationToken);
 
             if (ingresoProgramado == null)
             {
-                _logger.LogWarning("IngresoProgramado {IngresoProgramadoId} no encontrado", request.IngresoProgramadoId);
-                return Result.Failure(Error.NotFound($"IngresoProgramado con ID {request.IngresoProgramadoId} no encontrado"));
+                _logger.LogWarning("IngresoProgramado {IngresoProgramadoId} no encontrado", request.hangfireId);
+                return Result.Failure(Error.NotFound($"IngresoProgramado con ID {request.hangfireId} no encontrado"));
             }
 
             // 🔥 VALIDACIÓN: Si está inactivo, no ejecutar
@@ -62,7 +62,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("IngresoProgramado {IngresoProgramadoId} está inactivo, se omite la ejecución", request.IngresoProgramadoId);
+                    _logger.LogInformation("IngresoProgramado {IngresoProgramadoId} está inactivo, se omite la ejecución", request.hangfireId);
                 }
                 return Result.Success();
             }
@@ -88,7 +88,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Ingreso creado exitosamente desde IngresoProgramado {IngresoProgramadoId}", request.IngresoProgramadoId);
+                    _logger.LogInformation("Ingreso creado exitosamente desde IngresoProgramado {IngresoProgramadoId}", request.hangfireId);
                 }
 
                 // 🔥 NUEVO: Enviar email de notificación al usuario
@@ -97,14 +97,14 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
             else
             {
                 _logger.LogError("Error al crear Ingreso desde IngresoProgramado {IngresoProgramadoId}: {Error}",
-                    request.IngresoProgramadoId, result.Error);
+                    request.hangfireId, result.Error);
             }
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error inesperado al ejecutar IngresoProgramado {IngresoProgramadoId}", request.IngresoProgramadoId);
+            _logger.LogError(ex, "Error inesperado al ejecutar IngresoProgramado {IngresoProgramadoId}", request.hangfireId);
             return Result.Failure(Error.Failure("Execute.IngresoProgramado", "Error de Ejecución", ex.Message));
         }
     }
@@ -139,7 +139,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
                         <div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #4caf50;'>
                             <h3 style='margin-top: 0; color: #555;'>Detalles del Ingreso:</h3>
                             <ul style='list-style: none; padding: 0;'>
-                                <li><strong>Importe:</strong> ${ingreso.Importe:N2}</li>
+                                <li><strong>Importe:</strong> {ingreso.Importe:N2}€</li>
                                 <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                 <li><strong>Frecuencia:</strong> {ingreso.Frecuencia}</li>
                                 {(string.IsNullOrWhiteSpace(ingreso.Descripcion) ? "" : $"<li><strong>Descripción:</strong> {ingreso.Descripcion}</li>")}

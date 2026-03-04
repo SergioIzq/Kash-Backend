@@ -14,7 +14,7 @@ public sealed class GetRecentCategoriasQueryHandler
     : GetRecentQueryHandler<Categoria, CategoriaDto, CategoriaId, GetRecentCategoriasQuery>
 {
     public GetRecentCategoriasQueryHandler(
-        IReadRepositoryWithDto<Categoria, CategoriaDto, CategoriaId> repository,
+        IReadRepository<Categoria, CategoriaDto, CategoriaId> repository,
       ICacheService cacheService)
       : base(repository, cacheService)
     {

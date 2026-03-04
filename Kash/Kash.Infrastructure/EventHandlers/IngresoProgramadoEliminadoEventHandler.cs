@@ -26,7 +26,8 @@ public sealed class IngresoProgramadoEliminadoEventHandler : INotificationHandle
     {
         try
         {
-            var jobId = notification.IngresoProgramadoId.Value.ToString();
+            // Usar el HangfireJobId (no el IngresoProgramadoId)
+            var jobId = notification.HangfireJobId;
 
             // Eliminar el job recurrente de Hangfire
             _recurringJobManager.RemoveIfExists(jobId);
@@ -46,7 +47,7 @@ public sealed class IngresoProgramadoEliminadoEventHandler : INotificationHandle
                 ex, 
                 "Error al cancelar job de IngresoProgramado {IngresoProgramadoId}", 
                 notification.IngresoProgramadoId);
-            
+
             return Task.CompletedTask;
         }
     }

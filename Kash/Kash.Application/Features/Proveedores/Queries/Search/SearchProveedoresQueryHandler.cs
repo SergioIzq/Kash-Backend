@@ -14,7 +14,7 @@ public sealed class SearchProveedoresQueryHandler
     : SearchForAutocompleteQueryHandler<Proveedor, ProveedorDto, SearchProveedoresQuery, ProveedorId>
 {
     public SearchProveedoresQueryHandler(
-    IReadRepositoryWithDto<Proveedor, ProveedorDto, ProveedorId> repository,
+    IReadRepository<Proveedor, ProveedorDto, ProveedorId> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

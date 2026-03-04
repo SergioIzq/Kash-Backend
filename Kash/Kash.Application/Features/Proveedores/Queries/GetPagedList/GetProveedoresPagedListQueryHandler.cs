@@ -11,7 +11,7 @@ public sealed class GetProveedoresPagedListQueryHandler
     : GetPagedListQueryHandler<Proveedor, ProveedorId, ProveedorDto, GetProveedoresPagedListQuery>
 {
     public GetProveedoresPagedListQueryHandler(
-        IReadRepositoryWithDto<Proveedor, ProveedorDto, ProveedorId> repository,
+        IReadRepository<Proveedor, ProveedorDto, ProveedorId> repository,
      ICacheService cacheService)
   : base(repository, cacheService)
     {

@@ -10,68 +10,35 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
     public class FormaPagoReadRepository : AbsReadRepository<FormaPago, FormaPagoDto, FormaPagoId>, IFormaPagoReadRepository
     {
         public FormaPagoReadRepository(IDbConnectionFactory dbConnectionFactory)
-             : base(dbConnectionFactory, "formas_pago")
+            : base(dbConnectionFactory)
         {
         }
 
         /// <summary>
-        /// 🔥 Query específico para FormaPago con todas sus columnas.
+        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
-        protected override string BuildGetByIdQuery()
+        protected override ReadRepositoryConfiguration ConfigureRepository()
         {
-            return @"
-   SELECT 
-            id as Id,
-  nombre as Nombre,
-            id_usuario as UsuarioId,
-        fecha_creacion as FechaCreacion
-      FROM formas_pago 
-         WHERE id = @id";
-        }
-
-        /// <summary>
-        /// 🔥 Query para obtener todas las formas de pago.
-        /// </summary>
-        protected override string BuildGetAllQuery()
-        {
-            return @"
-       SELECT 
-         id as Id,
- nombre as Nombre,
-        id_usuario as UsuarioId,
-     fecha_creacion as FechaCreacion
-   FROM formas_pago";
-        }
-
-        /// <summary>
-        /// 🔥 ORDER BY por nombre ascendente.
-        /// </summary>
-        protected override string GetDefaultOrderBy()
-        {
-            return "ORDER BY nombre ASC";
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
-        /// </summary>
-        protected override Dictionary<string, string> GetSortableColumns()
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-            { "Nombre", "nombre" },
-{ "FechaCreacion", "fecha_creacion" }
-       };
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
-        /// </summary>
-        protected override List<string> GetSearchableColumns()
-        {
-            return new List<string>
-      {
-    "nombre"
- };
+            return ReadRepositoryConfiguration.Simple(
+                tableName: "formas_pago",
+                selectColumns: new List<string>
+                {
+                    "id as Id",
+                    "nombre as Nombre",
+                    "id_usuario as UsuarioId",
+                    "fecha_creacion as FechaCreacion"
+                },
+                searchableColumns: new List<string>
+                {
+                    "nombre"
+                },
+                sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Nombre", "nombre" },
+                    { "FechaCreacion", "fecha_creacion" }
+                },
+                defaultOrderBy: "nombre ASC"
+            );
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
@@ -82,7 +49,7 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
           SELECT EXISTS(
    SELECT 1 
       FROM formas_pago 
-      WHERE nombre = @Nombre AND id_usuario = @UsuarioId
+      WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId
    ) as ItemExists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -101,7 +68,7 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
   SELECT EXISTS(
    SELECT 1 
      FROM formas_pago 
-  WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
+  WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId AND id != @ExcludeId
          ) as ItemExists";
 
             var exists = await connection.ExecuteScalarAsync<bool>(
@@ -110,6 +77,24 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
                cancellationToken: cancellationToken));
 
             return exists;
+        }
+
+        public async Task<FormaPago?> GetByNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+
+            const string sql = @"
+      SELECT id
+        FROM formas_pago 
+       WHERE LOWER(nombre) = LOWER(@Nombre) AND id_usuario = @UsuarioId
+       LIMIT 1";
+
+            var id = await connection.QueryFirstOrDefaultAsync<Guid?>(
+                new CommandDefinition(sql,
+                    new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
+                    cancellationToken: cancellationToken));
+
+            return null; // Este método ya no se usará, se mantiene por compatibilidad con la interfaz
         }
     }
 }

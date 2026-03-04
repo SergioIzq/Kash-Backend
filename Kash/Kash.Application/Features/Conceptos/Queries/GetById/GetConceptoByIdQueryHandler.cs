@@ -15,7 +15,7 @@ public sealed class GetConceptoByIdQueryHandler
 {
     public GetConceptoByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepositoryWithDto<Concepto, ConceptoDto, ConceptoId> readOnlyRepository
+        IReadRepository<Concepto, ConceptoDto, ConceptoId> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

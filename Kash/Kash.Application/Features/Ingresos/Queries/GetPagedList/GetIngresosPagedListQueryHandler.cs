@@ -11,7 +11,7 @@ public sealed class GetIngresosPagedListQueryHandler
     : GetPagedListQueryHandler<Ingreso, IngresoId, IngresoDto, GetIngresosPagedListQuery>
 {
     public GetIngresosPagedListQueryHandler(
-        IReadRepositoryWithDto<Ingreso, IngresoDto, IngresoId> repository,
+        IReadRepository<Ingreso, IngresoDto, IngresoId> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

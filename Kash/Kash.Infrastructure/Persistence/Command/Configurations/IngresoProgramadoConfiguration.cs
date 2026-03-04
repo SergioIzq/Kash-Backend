@@ -68,10 +68,10 @@ value => FormaPagoId.CreateFromDatabase(value));
 
             builder.Property(e => e.PersonaId)
 .HasColumnName("id_persona")
-.IsRequired()
-.HasConversion(
-personaId => personaId.Value,
-value => PersonaId.CreateFromDatabase(value));
+.IsRequired(false)
+.HasConversion<Guid?>(
+                    personaId => personaId.HasValue ? personaId.Value.Value : null,
+                    value => value.HasValue ? PersonaId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.ConceptoId)
 .HasColumnName("id_concepto")
@@ -82,10 +82,10 @@ value => ConceptoId.CreateFromDatabase(value));
 
             builder.Property(e => e.ClienteId)
        .HasColumnName("id_cliente")
-       .IsRequired()
-    .HasConversion(
-    clienteId => clienteId.Value,
-            value => ClienteId.CreateFromDatabase(value));
+       .IsRequired(false)
+    .HasConversion<Guid?>(
+clienteId => clienteId.HasValue ? clienteId.Value.Value : null,
+                    value => value.HasValue ? ClienteId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.UsuarioId)
        .HasColumnName("id_usuario")

@@ -11,7 +11,7 @@ public sealed class GetRecentFormasPagoQueryHandler
     : GetRecentQueryHandler<FormaPago, FormaPagoDto, FormaPagoId, GetRecentFormasPagoQuery>
 {
     public GetRecentFormasPagoQueryHandler(
-        IReadRepositoryWithDto<FormaPago, FormaPagoDto, FormaPagoId> repository,
+        IReadRepository<FormaPago, FormaPagoDto, FormaPagoId> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

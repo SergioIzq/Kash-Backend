@@ -100,7 +100,7 @@ namespace Kash.Infrastructure
         .FromAssemblies(Assembly.GetExecutingAssembly())
             .AddClasses(classes => classes.Where(type =>
           type.GetInterfaces().Any(i => i.IsGenericType &&
-               i.GetGenericTypeDefinition() == typeof(IReadRepositoryWithDto<,,>))))
+               i.GetGenericTypeDefinition() == typeof(IReadRepository<,,>))))
           .AsImplementedInterfaces()
               .WithScopedLifetime());
 

@@ -9,6 +9,7 @@ namespace Kash.Domain.GastosProgramados.Eventos;
 /// Permite cancelar el job de Hangfire correspondiente.
 /// </summary>
 public sealed record GastoProgramadoEliminadoEvent(
+    string HangfireJobId,
     GastoProgramadoId GastoProgramadoId,
     CuentaId CuentaId,
     Cantidad Importe

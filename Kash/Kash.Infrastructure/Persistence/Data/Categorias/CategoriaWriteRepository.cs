@@ -3,6 +3,7 @@ using Kash.Domain.Errors;
 using Kash.Infrastructure.Persistence.Command;
 using Kash.Shared.Domain.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kash.Infrastructure.Persistence.Data.Categorias
 {
@@ -15,6 +16,29 @@ namespace Kash.Infrastructure.Persistence.Data.Categorias
             ICategoriaReadRepository readRepository) : base(context)
         {
             _readRepository = readRepository;
+        }
+
+        public async Task<Result<Categoria>> FindOrCreateAsync(Categoria entity, CancellationToken cancellationToken = default)
+        {
+            var nombreBuscado = entity.Nombre.Value;
+
+            var usuarioIdObj = entity.IdUsuario;
+
+            var categoriasDelUsuario = await _context.Set<Categoria>()
+                .Where(fp => fp.IdUsuario == usuarioIdObj)
+                .ToListAsync(cancellationToken);
+
+            var existingCategoria = categoriasDelUsuario
+                .FirstOrDefault(fp => fp.Nombre.Value.Equals(nombreBuscado, StringComparison.OrdinalIgnoreCase));
+
+            if (existingCategoria != null)
+            {
+                return Result.Success(existingCategoria);
+            }
+
+            await base.CreateAsync(entity, cancellationToken);
+
+            return Result.Success(entity);
         }
 
         public async Task<Result> CreateAsyncWithValidation(Categoria entity, CancellationToken cancellationToken = default)

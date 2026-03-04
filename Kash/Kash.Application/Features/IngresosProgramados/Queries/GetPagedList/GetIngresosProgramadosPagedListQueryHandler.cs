@@ -11,7 +11,7 @@ public sealed class GetIngresosProgramadosPagedListQueryHandler
     : GetPagedListQueryHandler<IngresoProgramado, IngresoProgramadoId, IngresoProgramadoDto, GetIngresosProgramadosPagedListQuery>
 {
     public GetIngresosProgramadosPagedListQueryHandler(
-        IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> repository,
+        IReadRepository<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> repository,
      ICacheService cacheService)
    : base(repository, cacheService)
     {
