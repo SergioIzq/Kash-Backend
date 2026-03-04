@@ -11,7 +11,7 @@ public sealed class SearchConceptosQueryHandler
     : SearchForAutocompleteQueryHandler<Concepto, ConceptoDto, SearchConceptosQuery, ConceptoId>
 {
     public SearchConceptosQueryHandler(
-        IReadRepositoryWithDto<Concepto, ConceptoDto, ConceptoId> repository,
+        IReadRepository<Concepto, ConceptoDto, ConceptoId> repository,
         ICacheService cacheService)
     : base(repository, cacheService)
     {

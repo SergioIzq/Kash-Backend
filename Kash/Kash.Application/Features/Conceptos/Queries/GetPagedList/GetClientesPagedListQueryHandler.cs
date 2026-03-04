@@ -14,7 +14,7 @@ public sealed class GetConceptosPagedListQueryHandler
     : GetPagedListQueryHandler<Concepto, ConceptoId, ConceptoDto, GetConceptosPagedListQuery>
 {
     public GetConceptosPagedListQueryHandler(
-        IReadRepositoryWithDto<Concepto, ConceptoDto, ConceptoId> repository,
+        IReadRepository<Concepto, ConceptoDto, ConceptoId> repository,
         ICacheService cacheService)
     : base(repository, cacheService)
     {

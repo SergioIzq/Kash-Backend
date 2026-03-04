@@ -11,7 +11,7 @@ public sealed class GetRecentPersonasQueryHandler
     : GetRecentQueryHandler<Persona, PersonaDto, PersonaId, GetRecentPersonasQuery>
 {
     public GetRecentPersonasQueryHandler(
- IReadRepositoryWithDto<Persona, PersonaDto, PersonaId> repository,
+ IReadRepository<Persona, PersonaDto, PersonaId> repository,
     ICacheService cacheService)
         : base(repository, cacheService)
     {

@@ -15,7 +15,7 @@ public sealed class GetClientesPagedListQueryHandler
     : GetPagedListQueryHandler<Cliente, ClienteId, ClienteDto, GetClientesPagedListQuery>
 {
     public GetClientesPagedListQueryHandler(
-        IReadRepositoryWithDto<Cliente, ClienteDto, ClienteId> clienteRepository,
+        IReadRepository<Cliente, ClienteDto, ClienteId> clienteRepository,
         ICacheService cacheService)
         : base(clienteRepository, cacheService)
     {

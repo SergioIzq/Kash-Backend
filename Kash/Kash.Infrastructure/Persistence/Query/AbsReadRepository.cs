@@ -11,185 +11,220 @@ namespace Kash.Infrastructure.Persistence.Query
     /// <summary>
     /// Repositorio de lectura base abstracto implementado con Dapper.
     /// ✅ OPTIMIZADO: Usa DTOs directamente desde SQL sin mapeo intermedio.
-    /// 🔧 Implementa IReadRepositoryWithDto como la ÚNICA interfaz de lectura.
+    /// 🔧 Usa configuración declarativa para eliminar el batiburrillo de overrides.
     /// </summary>
     /// <typeparam name="T">La entidad que debe heredar de AbsEntity</typeparam>
     /// <typeparam name="TReadModel">El modelo de lectura (DTO plano para Dapper)</typeparam>
-    public abstract class AbsReadRepository<T, TReadModel, TId> : IReadRepositoryWithDto<T, TReadModel, TId>
+    public abstract class AbsReadRepository<T, TReadModel, TId> : IReadRepository<T, TReadModel, TId>
         where T : AbsEntity<TId>
         where TReadModel : class
         where TId : IGuidValueObject
     {
         protected readonly IDbConnectionFactory _dbConnectionFactory;
-        protected readonly string _tableName;
+        protected readonly ReadRepositoryConfiguration _config;
         private readonly IDistributedCache? _cache;
 
+        /// <summary>
+        /// Constructor que recibe la configuración declarativa.
+        /// Los repositorios concretos deben llamar ConfigureRepository() para configurar.
+        /// </summary>
         protected AbsReadRepository(
-   IDbConnectionFactory dbConnectionFactory,
-    string tableName,
-   IDistributedCache? cache = null)
+            IDbConnectionFactory dbConnectionFactory,
+            IDistributedCache? cache = null)
         {
             _dbConnectionFactory = dbConnectionFactory;
-            _tableName = tableName;
             _cache = cache;
+            _config = ConfigureRepository();
         }
 
-        #region Query Builders - Override para personalizar SQL
+        #region Configuration - Override ÚNICO requerido
 
         /// <summary>
-        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query de GetById.
-        /// Por defecto solo incluye columnas básicas (id, id_usuario, fecha_creacion).
-        /// DEBES SOBRESCRIBIR si tu tabla tiene más columnas (nombre, descripcion, importe, etc.).
+        /// 🔥 ÚNICO MÉTODO QUE DEBE SOBRESCRIBIRSE: Configura el repositorio.
+        /// Retorna un objeto ReadRepositoryConfiguration con todas las opciones.
         /// </summary>
-        protected virtual string BuildGetByIdQuery()
+        protected abstract ReadRepositoryConfiguration ConfigureRepository();
+
+        #endregion
+
+        #region Query Builders - Internos, usan la configuración
+
+        /// <summary>
+        /// Construye el query SELECT base con las columnas configuradas
+        /// </summary>
+        private string BuildSelectClause()
         {
-            return $@"
- SELECT 
-      id as Id,
+            if (_config.SelectColumns == null || _config.SelectColumns.Count == 0)
+            {
+                // Columnas por defecto si no se especifican
+                return @"
+    id as Id,
     id_usuario as UsuarioId,
-       fecha_creacion as FechaCreacion
-        FROM {_tableName} 
-    WHERE id = @id";
+    fecha_creacion as FechaCreacion";
+            }
+
+            return string.Join(",\n    ", _config.SelectColumns);
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query de GetAll.
-        /// Por defecto solo incluye columnas básicas (id, id_usuario, fecha_creacion).
-        /// DEBES SOBRESCRIBIR si tu tabla tiene más columnas (nombre, descripcion, importe, etc.).
+        /// Construye la referencia a la tabla (con o sin alias)
         /// </summary>
-        protected virtual string BuildGetAllQuery()
+        private string BuildTableReference()
+        {
+            return string.IsNullOrEmpty(_config.TableAlias)
+                ? _config.TableName
+                : $"{_config.TableName} {_config.TableAlias}";
+        }
+
+        /// <summary>
+        /// Construye la cláusula FROM con JOINs opcionales
+        /// </summary>
+        private string BuildFromClause()
+        {
+            var fromClause = $"FROM {BuildTableReference()}";
+
+            if (!string.IsNullOrEmpty(_config.JoinClause))
+            {
+                fromClause += $"\n{_config.JoinClause}";
+            }
+
+            return fromClause;
+        }
+
+        /// <summary>
+        /// Construye el query de GetById
+        /// </summary>
+        private string BuildGetByIdQuery()
+        {
+            var tablePrefix = GetTablePrefix();
+            return $@"
+SELECT 
+{BuildSelectClause()}
+{BuildFromClause()}
+WHERE {tablePrefix}id = @id";
+        }
+
+        /// <summary>
+        /// Construye el query de GetAll
+        /// </summary>
+        private string BuildGetAllQuery()
         {
             return $@"
-   SELECT 
-     id as Id,
- id_usuario as UsuarioId,
-       fecha_creacion as FechaCreacion
-    FROM {_tableName}";
+SELECT 
+{BuildSelectClause()}
+{BuildFromClause()}";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query base de paginación (SIN ORDER BY).
-        /// Por defecto usa BuildGetAllQuery(), pero puedes personalizarlo.
-        /// El ORDER BY se agrega dinámicamente en cada método según el contexto.
+        /// Construye el query base de paginación (sin ORDER BY)
         /// </summary>
-        protected virtual string BuildGetPagedQuery()
+        private string BuildGetPagedQuery()
         {
             return BuildGetAllQuery();
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de conteo total.
-        /// Por defecto cuenta por id_usuario (campo común).
+        /// Construye el query de conteo
         /// </summary>
-        protected virtual string BuildCountQuery()
+        private string BuildCountQuery()
         {
-            var alias = GetTableAlias();
-
-            // Si hay un alias definido (ej: "tp"), generamos "FROM tabla tp"
-            // Si no, dejamos "FROM tabla"
-            var tableReference = string.IsNullOrEmpty(alias)
-                ? _tableName
-                : $"{_tableName} {alias}";
-
-            return $"SELECT COUNT(*) FROM {tableReference}";
+            return $"SELECT COUNT(*) {BuildFromClause()}";
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Devuelve el alias de la tabla principal para filtros con JOINs.
-        /// Por defecto no usa alias (tablas simples sin JOINs).
-        /// DEBES SOBRESCRIBIR si usas JOINs para especificar el alias de la tabla principal.
+        /// Obtiene el prefijo de tabla para las columnas (vacío o "alias.")
         /// </summary>
-        protected virtual string GetTableAlias()
+        private string GetTablePrefix()
         {
-            return string.Empty; // Sin alias por defecto
+            return string.IsNullOrEmpty(_config.TableAlias)
+                ? string.Empty
+                : $"{_config.TableAlias}.";
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Devuelve la columna WHERE para filtrar por usuario.
-        /// Usa el alias si existe (para queries con JOINs) o el nombre directo.
+        /// Obtiene la columna de usuario con el prefijo correcto
         /// </summary>
-        protected virtual string GetUserIdColumn()
+        private string GetUserIdColumn()
         {
-            var alias = GetTableAlias();
-            return string.IsNullOrEmpty(alias) ? "id_usuario" : $"{alias}.id_usuario";
+            if (!string.IsNullOrEmpty(_config.UserIdColumn))
+            {
+                return _config.UserIdColumn;
+            }
+
+            return $"{GetTablePrefix()}id_usuario";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE RECOMENDADO: Proporciona el ORDER BY por defecto para paginación sin filtros.
-        /// Por defecto ordena por fecha_creacion DESC.
-        /// Sobrescribe si prefieres otro orden (ej: por nombre, por importe, etc.).
+        /// Obtiene el ORDER BY por defecto
         /// </summary>
-        protected virtual string GetDefaultOrderBy()
+        private string GetDefaultOrderBy()
         {
-            return "ORDER BY fecha_creacion DESC";
+            if (!string.IsNullOrEmpty(_config.DefaultOrderBy))
+            {
+                var tablePrefix = GetTablePrefix();
+                // Si el DefaultOrderBy ya tiene prefijo, usarlo tal cual
+                if (_config.DefaultOrderBy.Contains('.'))
+                {
+                    return $"ORDER BY {_config.DefaultOrderBy}";
+                }
+                // Si no tiene prefijo y hay alias, agregarlo
+                return string.IsNullOrEmpty(_config.TableAlias)
+                    ? $"ORDER BY {_config.DefaultOrderBy}"
+                    : $"ORDER BY {_config.DefaultOrderBy}";
+            }
+
+            // Orden por defecto: fecha_creacion DESC
+            return $"ORDER BY {GetTablePrefix()}fecha_creacion DESC";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY para paginación filtrada por usuario.
-        /// Por defecto usa GetDefaultOrderBy(), pero puedes personalizarlo.
+        /// Obtiene las columnas ordenables configuradas
         /// </summary>
-        protected virtual string GetUserFilterOrderBy()
+        private Dictionary<string, string> GetSortableColumns()
         {
-            return GetDefaultOrderBy();
-        }
+            if (_config.SortableColumns != null && _config.SortableColumns.Count > 0)
+            {
+                return _config.SortableColumns;
+            }
 
-        /// <summary>
-        /// 🔥 NUEVO: Permite agregar parámetros adicionales para filtros (como id_usuario)
-        /// </summary>
-        protected virtual void AddCustomParameters(DynamicParameters parameters)
-        {
-            // Override en repositorios concretos si necesitas agregar parámetros personalizados
-        }
-
-        /// <summary>
-        /// 🔥 NUEVO: Devuelve las columnas válidas para ordenamiento.
-        /// Por defecto solo permite ordenar por fecha_creacion.
-        /// DEBES SOBRESCRIBIR para permitir ordenamiento por otras columnas.
-        /// </summary>
-        protected virtual Dictionary<string, string> GetSortableColumns()
-        {
+            // Columnas ordenables por defecto
+            var tablePrefix = GetTablePrefix();
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-  {
-        { "FechaCreacion", "fecha_creacion" },
-     { "Fecha", "fecha_creacion" }
-};
+            {
+                { "FechaCreacion", $"{tablePrefix}fecha_creacion" },
+                { "Fecha", $"{tablePrefix}fecha_creacion" }
+            };
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Devuelve las columnas de texto sobre las cuales se puede realizar búsqueda con LIKE.
-        /// Por defecto no hay columnas de búsqueda.
-        /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas de texto (nombre, descripcion, etc.).
+        /// Obtiene las columnas de texto buscables
         /// </summary>
-        protected virtual List<string> GetSearchableColumns()
+        private List<string> GetSearchableColumns()
         {
-            return new List<string>(); // Sin búsqueda por defecto
+            return _config.SearchableColumns ?? new List<string>();
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Devuelve las columnas numéricas sobre las cuales se puede realizar búsqueda con comparación exacta.
-        /// Por defecto no hay columnas numéricas de búsqueda.
-        /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas numéricas (importe, cantidad, etc.).
+        /// Obtiene las columnas numéricas buscables
         /// </summary>
-        protected virtual List<string> GetNumericSearchableColumns()
+        private List<string> GetNumericSearchableColumns()
         {
-            return new List<string>(); // Sin búsqueda numérica por defecto
+            return _config.NumericSearchableColumns ?? new List<string>();
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Devuelve las columnas de fecha sobre las cuales se puede realizar búsqueda con comparación de fecha.
-        /// Por defecto no hay columnas de fecha de búsqueda.
-        /// DEBES SOBRESCRIBIR para habilitar búsqueda por columnas de fecha (fecha, fecha_registro, etc.).
+        /// Obtiene las columnas de fecha buscables
         /// </summary>
-        protected virtual List<string> GetDateSearchableColumns()
+        private List<string> GetDateSearchableColumns()
         {
-            return new List<string>(); // Sin búsqueda por fecha por defecto
+            return _config.DateSearchableColumns ?? new List<string>();
         }
 
         /// <summary>
-        /// 🔥 MEJORADO: Construye la cláusula WHERE para la búsqueda con soporte para texto, números y fechas.
+        /// Construye la cláusula WHERE para la búsqueda con soporte para texto, números y fechas.
         /// ⚠️ IMPORTANTE: Excluye automáticamente columnas que contengan 'id' para evitar búsquedas en GUIDs.
         /// </summary>
-        protected virtual string BuildSearchWhereClause(string searchTerm, DynamicParameters parameters)
+        private string BuildSearchWhereClause(string searchTerm, DynamicParameters parameters)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -198,21 +233,22 @@ namespace Kash.Infrastructure.Persistence.Query
 
             var conditions = new List<string>();
 
-            // 1. Búsqueda en columnas de TEXTO (usa LIKE)
-            // 🔥 FIX: Filtrar columnas que contengan 'id' para evitar búsquedas en GUIDs
+            // 1. Búsqueda en columnas de TEXTO
             var textColumns = GetSearchableColumns()
                 .Where(col => !col.Contains("id", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             if (textColumns.Count > 0)
             {
-                var textConditions = textColumns.Select(col => $"{col} LIKE @SearchTerm");
+                // 🔥 MODIFICACIÓN: Aplicamos LOWER() a la columna y usaremos el parámetro en minúsculas
+                var textConditions = textColumns.Select(col => $"LOWER({col}) LIKE @SearchTerm");
                 conditions.AddRange(textConditions);
-                parameters.Add("SearchTerm", $"%{searchTerm}%");
+
+                // Pasamos el término a minúsculas desde C#
+                parameters.Add("SearchTerm", $"%{searchTerm.ToLower()}%");
             }
 
-            // 2. Búsqueda en columnas NUMÉRICAS (usa comparación exacta o conversión a string)
-            // 🔥 FIX: Filtrar columnas que contengan 'id' para evitar búsquedas en IDs numéricos
+            // 2. Búsqueda en columnas NUMÉRICAS
             var numericColumns = GetNumericSearchableColumns()
                 .Where(col => !col.Contains("id", StringComparison.OrdinalIgnoreCase))
                 .ToList();
@@ -226,22 +262,21 @@ namespace Kash.Infrastructure.Persistence.Query
                 parameters.Add("NumericSearchTerm", numericValue);
             }
 
-            // 3. Búsqueda en columnas de FECHA (usa DATE() para buscar por día completo)
+            // 3. Búsqueda en columnas de FECHA
             var dateColumns = GetDateSearchableColumns();
             if (dateColumns.Count > 0 && DateTime.TryParse(searchTerm, out var dateValue))
             {
                 foreach (var col in dateColumns)
                 {
-                    // Buscar por fecha exacta (ignora hora)
                     conditions.Add($"DATE({col}) = @DateSearchTerm");
                 }
                 parameters.Add("DateSearchTerm", dateValue.Date);
             }
-            // También permite buscar por formato de texto en fecha (ej: "2024", "2024-01", "01-15")
             else if (dateColumns.Count > 0)
             {
                 foreach (var col in dateColumns)
                 {
+                    // Las fechas formateadas son strings, así que también aplicamos LIKE con el término procesado
                     conditions.Add($"DATE_FORMAT({col}, '%Y-%m-%d') LIKE @DateTextSearchTerm");
                 }
                 parameters.Add("DateTextSearchTerm", $"%{searchTerm}%");
@@ -251,9 +286,9 @@ namespace Kash.Infrastructure.Persistence.Query
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Construye la cláusula ORDER BY dinámica.
+        /// Construye la cláusula ORDER BY dinámica.
         /// </summary>
-        protected virtual string BuildOrderByClause(string? sortColumn, string? sortOrder)
+        private string BuildOrderByClause(string? sortColumn, string? sortOrder)
         {
             var sortableColumns = GetSortableColumns();
 
@@ -272,7 +307,7 @@ namespace Kash.Infrastructure.Persistence.Query
 
         #endregion
 
-        #region IReadRepositoryWithDto Implementation - Métodos optimizados con DTOs
+        #region IReadRepository Implementation - Métodos optimizados con DTOs
 
         /// <summary>
         /// 🚀 OPTIMIZADO: Obtiene el DTO con cache opcional.
@@ -282,7 +317,7 @@ namespace Kash.Infrastructure.Persistence.Query
             // 1. Intentar obtener del cache
             if (_cache != null)
             {
-                var cacheKey = $"{_tableName}:{id}";
+                var cacheKey = $"{_config.TableName}:{id}";
                 var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
 
                 if (cachedData != null)
@@ -295,7 +330,6 @@ namespace Kash.Infrastructure.Persistence.Query
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var parameters = new DynamicParameters();
-            // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente, no necesita conversión
             parameters.Add("id", id);
 
             var sql = BuildGetByIdQuery();
@@ -306,7 +340,7 @@ namespace Kash.Infrastructure.Persistence.Query
             // 3. Guardar en cache si existe
             if (result != null && _cache != null)
             {
-                var cacheKey = $"{_tableName}:{id}";
+                var cacheKey = $"{_config.TableName}:{id}";
                 var serialized = JsonSerializer.SerializeToUtf8Bytes(result);
                 var options = new DistributedCacheEntryOptions
                 {
@@ -360,9 +394,6 @@ namespace Kash.Infrastructure.Persistence.Query
             parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);
 
-            // 🔧 FIX: Permitir que repositorios concretos agreguen parámetros personalizados
-            AddCustomParameters(parameters);
-
             using var multi = await connection.QueryMultipleAsync(
     new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
@@ -388,10 +419,9 @@ namespace Kash.Infrastructure.Persistence.Query
 
             var baseQuery = BuildGetPagedQuery();
             var countQuery = BuildCountQuery();
-            var orderBy = GetUserFilterOrderBy();
-            var userIdColumn = GetUserIdColumn(); // 🔥 NUEVO: Usa el alias correcto
+            var orderBy = GetDefaultOrderBy();
+            var userIdColumn = GetUserIdColumn();
 
-            // 🚀 OPTIMIZACIÓN: Query única con múltiples resultsets (reduce roundtrips)
             var sql = $@"
            {baseQuery}
            WHERE {userIdColumn} = @usuarioId
@@ -402,7 +432,6 @@ namespace Kash.Infrastructure.Persistence.Query
     WHERE {userIdColumn} = @usuarioId;";
 
             var parameters = new DynamicParameters();
-            // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
             parameters.Add("usuarioId", usuarioId);
             parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);
@@ -482,7 +511,7 @@ namespace Kash.Infrastructure.Persistence.Query
                 Guid usuarioId,
                 string searchTerm,
                 int limit = 10,
-                Dictionary<string, object>? extraFilters = null, // <--- Nuevo argumento
+                Dictionary<string, object>? extraFilters = null,
                 CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -531,20 +560,20 @@ namespace Kash.Infrastructure.Persistence.Query
         public virtual async Task<IEnumerable<TReadModel>> GetRecentAsync(
                 Guid usuarioId,
                 int limit = 5,
-                Dictionary<string, object>? extraFilters = null, // <--- Nuevo argumento
+                Dictionary<string, object>? extraFilters = null,
                 CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var baseQuery = BuildGetPagedQuery();
             var userIdColumn = GetUserIdColumn();
-            var alias = GetTableAlias();
+            var tablePrefix = GetTablePrefix();
 
             var parameters = new DynamicParameters();
             parameters.Add("usuarioId", usuarioId);
             parameters.Add("limit", limit);
 
-            var orderByColumn = string.IsNullOrEmpty(alias) ? "fecha_creacion" : $"{alias}.fecha_creacion";
+            var orderByColumn = $"{tablePrefix}fecha_creacion";
 
             // SQL Base
             var sql = $@"
@@ -569,12 +598,17 @@ namespace Kash.Infrastructure.Persistence.Query
         {
             if (_cache != null)
             {
-                var cacheKey = $"{_tableName}:{id}";
+                var cacheKey = $"{_config.TableName}:{id}";
                 await _cache.RemoveAsync(cacheKey, cancellationToken);
             }
         }
         #endregion
 
+        #region Helper Methods
+
+        /// <summary>
+        /// Construye filtros dinámicos para WHERE clause
+        /// </summary>
         protected string BuildDynamicFilters(Dictionary<string, object> filters, DynamicParameters parameters)
         {
             if (filters == null || filters.Count == 0) return string.Empty;
@@ -598,6 +632,8 @@ namespace Kash.Infrastructure.Persistence.Query
 
             return " AND " + string.Join(" AND ", conditions);
         }
+
+        #endregion
     }
 
 }

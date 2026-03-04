@@ -11,7 +11,7 @@ public sealed class GetTraspasosPagedListQueryHandler
     : GetPagedListQueryHandler<Traspaso, TraspasoId, TraspasoDto, GetTraspasosPagedListQuery>
 {
     public GetTraspasosPagedListQueryHandler(
-    IReadRepositoryWithDto<Traspaso, TraspasoDto, TraspasoId> repository,
+    IReadRepository<Traspaso, TraspasoDto, TraspasoId> repository,
    ICacheService cacheService)
       : base(repository, cacheService)
     {

@@ -37,18 +37,18 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
 
             // ✅ Estos NO son nullable en la entidad, son structs requeridos
             builder.Property(e => e.ProveedorId)
-                  .HasColumnName("id_proveedor")
-           .IsRequired()
-             .HasConversion(
-          proveedorId => proveedorId.Value,
-                  value => ProveedorId.CreateFromDatabase(value));
+.HasColumnName("id_proveedor")
+.IsRequired(false)
+.HasConversion<Guid?>(
+                    proveedorId => proveedorId.HasValue ? proveedorId.Value.Value : null,
+                    value => value.HasValue ? ProveedorId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.PersonaId)
-               .HasColumnName("id_persona")
-                        .IsRequired()
-                   .HasConversion(
-               personaId => personaId.Value,
-                  value => PersonaId.CreateFromDatabase(value));
+.HasColumnName("id_persona")
+.IsRequired(false)
+.HasConversion<Guid?>(
+                    personaId => personaId.HasValue ? personaId.Value.Value : null,
+                    value => value.HasValue ? PersonaId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.FormaPagoId)
                 .HasColumnName("id_forma_pago")

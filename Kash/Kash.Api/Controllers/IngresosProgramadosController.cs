@@ -79,6 +79,11 @@ public class IngresosProgramadosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
+            Activo = request.Activo,
+            CategoriaNombre = request.CategoriaNombre,
+            CuentaNombre = request.CuentaNombre,
+            FormaPagoNombre = request.FormaPagoNombre,
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(command);
@@ -111,7 +116,10 @@ public class IngresosProgramadosController : AbsController
             CuentaId = request.CuentaId,
             CuentaNombre = request.CuentaNombre,
             FormaPagoId = request.FormaPagoId,
-            FormaPagoNombre = request.FormaPagoNombre
+            FormaPagoNombre = request.FormaPagoNombre,
+            Activo = request.Activo,
+            CategoriaNombre = request.CategoriaNombre,
+            UsuarioId = request.UsuarioId
         };
 
         var result = await _sender.Send(command);
@@ -136,14 +144,16 @@ public record CreateIngresoProgramadoRequest(
     Guid ConceptoId,
     string ConceptoNombre,
     Guid CategoriaId,
-    Guid ClienteId,
-    string ClienteNombre,
-    Guid PersonaId,
-    string PersonaNombre,
+    string CategoriaNombre,
+    Guid? ClienteId,
+    string? ClienteNombre,
+    Guid? PersonaId,
+    string? PersonaNombre,
     Guid CuentaId,
-    string CuentaNombre,
+    string? CuentaNombre,
     Guid FormaPagoId,
-    string FormaPagoNombre
+    string? FormaPagoNombre,
+    bool Activo
 );
 
 public record UpdateIngresoProgramadoRequest(
@@ -154,12 +164,15 @@ public record UpdateIngresoProgramadoRequest(
     Guid ConceptoId,
     string ConceptoNombre,
     Guid CategoriaId,
-    Guid ClienteId,
-    string ClienteNombre,
-    Guid PersonaId,
-    string PersonaNombre,
+    string CategoriaNombre,
+    Guid? ClienteId,
+    string? ClienteNombre,
+    Guid? PersonaId,
+    string? PersonaNombre,
     Guid CuentaId,
-    string CuentaNombre,
+    string? CuentaNombre,
     Guid FormaPagoId,
-    string FormaPagoNombre
+    string? FormaPagoNombre,
+    bool Activo,
+    Guid UsuarioId
 );

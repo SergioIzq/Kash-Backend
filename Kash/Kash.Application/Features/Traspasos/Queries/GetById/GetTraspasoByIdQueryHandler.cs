@@ -12,7 +12,7 @@ public sealed class GetTraspasoByIdQueryHandler
 {
     public GetTraspasoByIdQueryHandler(
      ICacheService cacheService,
-        IReadRepositoryWithDto<Traspaso, TraspasoDto, TraspasoId> readOnlyRepository
+        IReadRepository<Traspaso, TraspasoDto, TraspasoId> readOnlyRepository
       )
         : base(readOnlyRepository, cacheService)
     {

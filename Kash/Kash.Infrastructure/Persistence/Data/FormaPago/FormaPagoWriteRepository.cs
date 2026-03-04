@@ -3,6 +3,7 @@ using Kash.Domain.Errors;
 using Kash.Infrastructure.Persistence.Command;
 using Kash.Shared.Domain.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kash.Infrastructure.Persistence.Data.FormasPago
 {
@@ -15,6 +16,29 @@ namespace Kash.Infrastructure.Persistence.Data.FormasPago
             IFormaPagoReadRepository readRepository) : base(context)
         {
             _readRepository = readRepository;
+        }
+
+        public async Task<Result<FormaPago>> FindOrCreateAsync(FormaPago entity, CancellationToken cancellationToken = default)
+        {
+            var nombreBuscado = entity.Nombre.Value;
+
+            var usuarioIdObj = entity.UsuarioId;
+
+            var formasPagoDelUsuario = await _context.Set<FormaPago>()
+                .Where(fp => fp.UsuarioId == usuarioIdObj)
+                .ToListAsync(cancellationToken);
+
+            var existingFormaPago = formasPagoDelUsuario
+                .FirstOrDefault(fp => fp.Nombre.Value.Equals(nombreBuscado, StringComparison.OrdinalIgnoreCase));
+
+            if (existingFormaPago != null)
+            {
+                return Result.Success(existingFormaPago);
+            }
+
+            await base.CreateAsync(entity, cancellationToken);
+
+            return Result.Success(entity);
         }
 
         public async Task<Result> CreateAsyncWithValidation(FormaPago entity, CancellationToken cancellationToken = default)

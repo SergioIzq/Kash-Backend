@@ -14,10 +14,10 @@ public abstract class SearchForAutocompleteQueryHandler<TEntity, TDto, TQuery, T
     where TDto : class
     where TId : IGuidValueObject
 {
-    protected readonly IReadRepositoryWithDto<TEntity, TDto, TId> _repository;
+    protected readonly IReadRepository<TEntity, TDto, TId> _repository;
 
     protected SearchForAutocompleteQueryHandler(
-        IReadRepositoryWithDto<TEntity, TDto, TId> repository,
+        IReadRepository<TEntity, TDto, TId> repository,
         ICacheService cacheService)
         : base(cacheService)
     {

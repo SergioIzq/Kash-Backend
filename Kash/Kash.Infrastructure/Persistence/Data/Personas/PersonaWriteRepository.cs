@@ -1,5 +1,7 @@
 ﻿using Kash.Domain;
+using Kash.Domain.Errors;
 using Kash.Infrastructure.Persistence.Command;
+using Kash.Shared.Domain.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Infrastructure.Persistence.Data.Personas
@@ -15,8 +17,9 @@ namespace Kash.Infrastructure.Persistence.Data.Personas
             _readRepository = readRepository;
         }
 
-        public override async Task CreateAsync(Persona entity, CancellationToken cancellationToken = default)
+        public async Task<Result> CreateAsyncWithValidation(Persona entity, CancellationToken cancellationToken = default)
         {
+            // 1. Validar duplicados
             var exists = await _readRepository.ExistsWithSameNameAsync(
                 entity.Nombre,
                 entity.UsuarioId,
@@ -24,27 +27,33 @@ namespace Kash.Infrastructure.Persistence.Data.Personas
 
             if (exists)
             {
-                throw new InvalidOperationException(
-                    $"Ya existe una persona con el nombre '{entity.Nombre.Value}' para este usuario.");
+                return Result.Failure(PersonaErrors.NombreDuplicado(entity.Nombre.Value));
             }
 
+            // 2. Agregar al contexto
             await base.CreateAsync(entity, cancellationToken);
+
+            return Result.Success();
         }
 
-        public override async void Update(Persona entity)
+        public async Task<Result> UpdateAsync(Persona entity, CancellationToken cancellationToken = default)
         {
-            base.Update(entity);
-
+            // 1. Validar duplicados (excepto la propia entidad)
             var exists = await _readRepository.ExistsWithSameNameExceptAsync(
                 entity.Nombre,
                 entity.UsuarioId,
-                entity.Id.Value);
+                entity.Id.Value,
+                cancellationToken);
 
             if (exists)
             {
-                throw new InvalidOperationException(
-                    $"Ya existe otra persona con el nombre '{entity.Nombre.Value}' para este usuario.");
+                return Result.Failure(PersonaErrors.NombreDuplicado(entity.Nombre.Value));
             }
+
+            // 2. Marcar como modificado
+            base.Update(entity);
+
+            return Result.Success();
         }
     }
 }

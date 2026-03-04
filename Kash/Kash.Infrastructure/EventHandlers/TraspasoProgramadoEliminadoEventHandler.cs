@@ -26,7 +26,7 @@ public sealed class TraspasoProgramadoEliminadoEventHandler : INotificationHandl
     {
         try
         {
-            var jobId = notification.TraspasoProgramadoId.Value.ToString();
+            var jobId = notification.HangfireJobId;
 
             // Eliminar el job recurrente de Hangfire
             _recurringJobManager.RemoveIfExists(jobId);

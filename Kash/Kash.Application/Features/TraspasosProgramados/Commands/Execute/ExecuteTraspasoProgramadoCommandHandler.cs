@@ -17,15 +17,15 @@ namespace Kash.Application.Features.TraspasosProgramados.Commands.Execute;
 /// </summary>
 public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<ExecuteTraspasoProgramadoCommand>
 {
-    private readonly IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> _traspasoProgramadoReadRepository;
-    private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+    private readonly IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> _traspasoProgramadoReadRepository;
+    private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
     private readonly ILogger<ExecuteTraspasoProgramadoCommandHandler> _logger;
 
     public ExecuteTraspasoProgramadoCommandHandler(
-        IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> traspasoProgramadoReadRepository,
-        IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
+        IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> traspasoProgramadoReadRepository,
+        IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository,
         IMediator mediator,
         IEmailService emailService,
         ILogger<ExecuteTraspasoProgramadoCommandHandler> logger)
@@ -135,7 +135,7 @@ public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<Ex
                         <div style='background-color: #f5f5f5; padding: 15px; border-radius: 4px; margin: 20px 0;'>
                             <h3 style='margin-top: 0; color: #555;'>Detalles del Traspaso:</h3>
                             <ul style='list-style: none; padding: 0;'>
-                                <li><strong>Importe:</strong> ${traspaso.Importe:N2}</li>
+                                <li><strong>Importe:</strong> {traspaso.Importe:N2}€</li>
                                 <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                 <li><strong>Frecuencia:</strong> {traspaso.Frecuencia}</li>
                                 {(string.IsNullOrWhiteSpace(traspaso.Descripcion) ? "" : $"<li><strong>Descripción:</strong> {traspaso.Descripcion}</li>")}

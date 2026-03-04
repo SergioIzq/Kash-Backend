@@ -11,7 +11,7 @@ public sealed class GetRecentCuentasQueryHandler
     : GetRecentQueryHandler<Cuenta, CuentaDto, CuentaId, GetRecentCuentasQuery>
 {
     public GetRecentCuentasQueryHandler(
-   IReadRepositoryWithDto<Cuenta, CuentaDto, CuentaId> repository,
+   IReadRepository<Cuenta, CuentaDto, CuentaId> repository,
         ICacheService cacheService)
       : base(repository, cacheService)
     {

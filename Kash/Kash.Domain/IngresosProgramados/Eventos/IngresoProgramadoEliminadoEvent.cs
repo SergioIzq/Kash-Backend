@@ -10,6 +10,7 @@ namespace Kash.Domain.IngresosProgramados.Eventos;
 /// </summary>
 public sealed record IngresoProgramadoEliminadoEvent(
     IngresoProgramadoId IngresoProgramadoId,
+    string HangfireJobId,
     CuentaId CuentaId,
     Cantidad Importe
 ) : DomainEventBase;

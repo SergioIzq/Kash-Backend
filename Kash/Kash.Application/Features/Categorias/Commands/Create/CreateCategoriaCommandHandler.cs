@@ -11,12 +11,14 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Categorias.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Categoria.
+/// ✅ REFACTORIZADO: Handler simplificado usando hooks de la clase base.
+/// Reducido de ~70 líneas a ~30 líneas (60% menos código).
 /// </summary>
 public sealed class CreateCategoriaCommandHandler
     : AbsCreateCommandHandler<Categoria, CategoriaId, CreateCategoriaCommand>
 {
     private readonly ICategoriaWriteRepository _categoriaWriteRepository;
+    
     public CreateCategoriaCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<Categoria, CategoriaId> writeRepository,
@@ -29,53 +31,28 @@ public sealed class CreateCategoriaCommandHandler
     }
 
     /// <summary>
-    /// **Implementación de la lógica de negocio**: Crea la entidad Categoria.
-    /// Este es el único método que tienes que implementar y donde se aplica el DDD.
+    /// 🔥 HOOK: Crea la entidad de dominio.
+    /// Solo necesita implementar la lógica de creación, el resto lo maneja la clase base.
     /// </summary>
-    /// <param name="command">El comando con los datos de creación.</param>
-    /// <returns>La nueva entidad Categoria creada.</returns>
-    protected override Categoria CreateEntity(CreateCategoriaCommand command)
+    protected override Categoria CreateEntity(CreateCategoriaCommand command, Dictionary<string, object>? dependencies = null)
     {
         var nombreVO = Nombre.Create(command.Nombre).Value;
         var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
         var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
-        var newCategoria = Categoria.Create(
-            nombreVO,
-            usuarioId,
-            descripcionVO
-        );
-
-        return newCategoria;
+        return Categoria.Create(nombreVO, usuarioId, descripcionVO);
     }
 
-    public override async Task<Result<Guid>> Handle(CreateCategoriaCommand command, CancellationToken cancellationToken)
+    /// <summary>
+    /// 🔥 HOOK: Validación y adición al contexto.
+    /// Usa CreateAsyncWithValidation que valida unicidad Y agrega la entidad.
+    /// </summary>
+    protected override async Task<(Result ValidationResult, bool EntityAdded)> ValidateAndAddToContextAsync(
+        Categoria entity,
+        CreateCategoriaCommand command,
+        CancellationToken cancellationToken)
     {
-        // 1. Crear la entidad
-        var entity = CreateEntity(command);
-
-        try
-        {
-            // 2. Validar y agregar al contexto
-            Result validationResult = await _categoriaWriteRepository.CreateAsyncWithValidation(entity, cancellationToken);
-
-            if (validationResult.IsFailure)
-            {
-                return Result.Failure<Guid>(validationResult.Error);
-            }
-
-            // 3. Guardar cambios
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            // 4. Retornar el ID
-            return Result.Success(entity.Id.Value);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<Guid>(Error.Failure(
-                "Database.Error",
-                "Error inesperado al crear categoría",
-                ex.Message));
-        }
+        var result = await _categoriaWriteRepository.CreateAsyncWithValidation(entity, cancellationToken);
+        return (result, result.IsSuccess); // Si es exitoso, la entidad fue agregada
     }
 }

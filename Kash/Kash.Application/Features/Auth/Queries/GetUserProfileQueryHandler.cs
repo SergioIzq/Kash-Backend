@@ -9,9 +9,9 @@ namespace Kash.Application.Features.Auth.Queries
 {
     public sealed class GetUserProfileQueryHandler : IQueryHandler<GetUserProfileQuery, UsuarioDto>
     {
-        private readonly IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
+        private readonly IReadRepository<Usuario, UsuarioDto, UsuarioId> _usuarioReadRepository;
 
-        public GetUserProfileQueryHandler(IReadRepositoryWithDto<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository)
+        public GetUserProfileQueryHandler(IReadRepository<Usuario, UsuarioDto, UsuarioId> usuarioReadRepository)
         {
             _usuarioReadRepository = usuarioReadRepository;
         }

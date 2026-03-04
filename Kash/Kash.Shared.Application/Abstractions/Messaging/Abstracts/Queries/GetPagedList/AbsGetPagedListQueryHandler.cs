@@ -22,12 +22,12 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         where TDto : class
         where TId : IGuidValueObject
     {
-        // 🔥 ÚNICO REPOSITORIO: Solo usamos IReadRepositoryWithDto
-        protected readonly IReadRepositoryWithDto<TEntity, TDto, TId> _dtoRepository;
+        // 🔥 ÚNICO REPOSITORIO: Solo usamos IReadRepository
+        protected readonly IReadRepository<TEntity, TDto, TId> _dtoRepository;
 
         // 🔥 Constructor simplificado
         public GetPagedListQueryHandler(
-            IReadRepositoryWithDto<TEntity, TDto, TId> dtoRepository,
+            IReadRepository<TEntity, TDto, TId> dtoRepository,
             ICacheService cacheService)
             : base(cacheService)
         {

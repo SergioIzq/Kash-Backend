@@ -12,7 +12,7 @@ public sealed class GetTraspasosProgramadosPagedListQueryHandler
     : GetPagedListQueryHandler<TraspasoProgramado, TraspasoProgramadoId, TraspasoProgramadoDto, GetTraspasosProgramadosPagedListQuery>
 {
     public GetTraspasosProgramadosPagedListQueryHandler(
-        IReadRepositoryWithDto<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> repository,
+        IReadRepository<TraspasoProgramado, TraspasoProgramadoDto, TraspasoProgramadoId> repository,
         ICacheService cacheService)
     : base(repository, cacheService)
     {

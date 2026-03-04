@@ -11,7 +11,7 @@ public sealed class GetRecentConceptosQueryHandler
     : GetRecentQueryHandler<Concepto, ConceptoDto, ConceptoId, GetRecentConceptosQuery>
 {
     public GetRecentConceptosQueryHandler(
-         IReadRepositoryWithDto<Concepto, ConceptoDto, ConceptoId> repository,
+         IReadRepository<Concepto, ConceptoDto, ConceptoId> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

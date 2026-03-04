@@ -14,7 +14,7 @@ public sealed class SearchClientesQueryHandler
     : SearchForAutocompleteQueryHandler<Cliente, ClienteDto, SearchClientesQuery, ClienteId>
 {
     public SearchClientesQueryHandler(
-        IReadRepositoryWithDto<Cliente, ClienteDto, ClienteId> repository,
+        IReadRepository<Cliente, ClienteDto, ClienteId> repository,
    ICacheService cacheService)
   : base(repository, cacheService)
     {

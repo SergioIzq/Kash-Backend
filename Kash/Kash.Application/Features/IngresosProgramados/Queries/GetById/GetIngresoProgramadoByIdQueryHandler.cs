@@ -11,7 +11,7 @@ public sealed class GetIngresoProgramadoByIdQueryHandler
     : GetByIdQueryHandler<IngresoProgramado, IngresoProgramadoId, IngresoProgramadoDto, GetIngresoProgramadoByIdQuery>
 {
     public GetIngresoProgramadoByIdQueryHandler(
-  IReadRepositoryWithDto<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> repository,
+  IReadRepository<IngresoProgramado, IngresoProgramadoDto, IngresoProgramadoId> repository,
     ICacheService cacheService)
         : base(repository, cacheService)
     {

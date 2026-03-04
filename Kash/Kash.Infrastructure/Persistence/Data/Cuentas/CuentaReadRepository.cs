@@ -10,72 +10,38 @@ namespace Kash.Infrastructure.Persistence.Data.Cuentas;
 public class CuentaReadRepository : AbsReadRepository<Cuenta, CuentaDto, CuentaId>, ICuentaReadRepository
 {
     public CuentaReadRepository(IDbConnectionFactory dbConnectionFactory)
-        : base(dbConnectionFactory, "cuentas")
+        : base(dbConnectionFactory)
     {
     }
 
     /// <summary>
-    /// 🔥 Query específico para Cuenta con todas sus columnas.
+    /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
     /// </summary>
-    protected override string BuildGetByIdQuery()
+    protected override ReadRepositoryConfiguration ConfigureRepository()
     {
-        return @"
-   SELECT 
-          id as Id,
-       nombre as Nombre,
-saldo as Saldo,
-              id_usuario as UsuarioId,
-         fecha_creacion as FechaCreacion
-      FROM cuentas 
-      WHERE id = @id";
-    }
-
-    /// <summary>
-    /// 🔥 Query para obtener todas las cuentas.
-    /// </summary>
-    protected override string BuildGetAllQuery()
-    {
-        return @"
-      SELECT 
-         id as Id,
-     nombre as Nombre,
-saldo as Saldo,
-       id_usuario as UsuarioId,
-     fecha_creacion as FechaCreacion
- FROM cuentas";
-    }
-
-    /// <summary>
-    /// 🔥 ORDER BY por nombre ascendente.
-    /// </summary>
-    protected override string GetDefaultOrderBy()
-    {
-        return "ORDER BY nombre ASC";
-    }
-
-    /// <summary>
-    /// 🔥 NUEVO: Define las columnas por las que se puede ordenar.
-    /// </summary>
-    protected override Dictionary<string, string> GetSortableColumns()
-    {
-        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Nombre", "nombre" },
-            { "FechaCreacion", "fecha_creacion" },
-            {"Saldo", "saldo" }
-      };
-    }
-
-    /// <summary>
-    /// 🔥 NUEVO: Define las columnas en las que se puede buscar.
-    /// </summary>
-    protected override List<string> GetSearchableColumns()
-    {
-        return new List<string>
-   {
-     "nombre",
-     "saldo"
-      };
+        return ReadRepositoryConfiguration.Simple(
+            tableName: "cuentas",
+            selectColumns: new List<string>
+            {
+                "id as Id",
+                "nombre as Nombre",
+                "saldo as Saldo",
+                "id_usuario as UsuarioId",
+                "fecha_creacion as FechaCreacion"
+            },
+            searchableColumns: new List<string>
+            {
+                "nombre",
+                "saldo"
+            },
+            sortableColumns: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Nombre", "nombre" },
+                { "FechaCreacion", "fecha_creacion" },
+                { "Saldo", "saldo" }
+            },
+            defaultOrderBy: "nombre ASC"
+        );
     }
 
     public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)

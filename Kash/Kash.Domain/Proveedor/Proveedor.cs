@@ -23,9 +23,9 @@ public sealed class Proveedor : AbsEntity<ProveedorId>
     public UsuarioId UsuarioId { get; private set; }
 
 
-    public static Proveedor Create(Guid id, Nombre nombre, UsuarioId usuarioId)
+    public static Proveedor Create(Nombre nombre, UsuarioId usuarioId)
     {
-        var proveedor = new Proveedor(ProveedorId.Create(id).Value, nombre, usuarioId);
+        var proveedor = new Proveedor(ProveedorId.Create(Guid.NewGuid()).Value, nombre, usuarioId);
 
         return proveedor;
     }

@@ -9,6 +9,7 @@ namespace Kash.Domain.TraspasosProgramados.Eventos;
 /// Permite cancelar el job de Hangfire correspondiente.
 /// </summary>
 public sealed record TraspasoProgramadoEliminadoEvent(
+    string HangfireJobId,
     TraspasoProgramadoId TraspasoProgramadoId,
     CuentaId CuentaOrigenId,
     CuentaId CuentaDestinoId,

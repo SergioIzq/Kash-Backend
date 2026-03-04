@@ -6,7 +6,7 @@ public readonly record struct Frecuencia
 {
     public string Value { get; init; }
 
-    private static readonly string[] AllowedFrequencies = new[] { "Diaria", "Semanal", "Mensual", "Anual" };
+    private static readonly string[] AllowedFrequencies = new[] { "Diario", "Semanal", "Mensual", "Anual" };
 
     [Obsolete("No usar directamente. Utiliza Frecuencia.Create() para validación o Frecuencia.CreateFromDatabase() desde infraestructura.", error: true)]
     public Frecuencia()

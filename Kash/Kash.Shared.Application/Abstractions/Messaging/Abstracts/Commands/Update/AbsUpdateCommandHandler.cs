@@ -9,9 +9,9 @@ using MediatR;
 namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 
 /// <summary>
-/// Handler genérico para actualizar entidades.
-/// 🔥 MODIFICADO: Ahora devuelve Result<Guid> y maneja validaciones de dominio con Result en lugar de excepciones.
-/// 🔥 ROLLBACK AUTOMÁTICO: Si ApplyChanges falla, se hace rollback de la transacción.
+/// Handler genérico MEJORADO para actualizar entidades con patrón Template Method.
+/// 🔥 REFACTORIZADO: Proporciona hooks para diferentes estrategias de actualización.
+/// 🎯 OBJETIVO: Reducir el código duplicado en los handlers concretos.
 /// </summary>
 public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     : AbsCommandHandler<TEntity, TId>, IRequestHandler<TCommand, Result<Guid>>
@@ -29,50 +29,154 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     {
     }
 
-    /// <summary>
-    /// Método abstracto para que el hijo aplique los cambios.
-    /// 🔥 CAMBIO IMPORTANTE: Ahora devuelve Result en lugar de void.
-    /// </summary>
-    protected abstract void ApplyChanges(TEntity entity, TCommand command);
+    #region Template Method Pattern - Hooks para personalizar
 
+    /// <summary>
+    /// 🔥 HOOK 1: Validación pre-actualización (opcional).
+    /// Override para validar existencia de entidades relacionadas, reglas de negocio, etc.
+    /// Se ejecuta ANTES de obtener la entidad de la BD.
+    /// Por defecto no hace nada (Result.Success).
+    /// </summary>
+    protected virtual Task<Result> ValidateBeforeUpdateAsync(TCommand command, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Result.Success());
+    }
+
+    /// <summary>
+    /// 🔥 HOOK 2: Preparación de dependencias (opcional).
+    /// Override para buscar/validar entidades relacionadas de forma asíncrona.
+    /// Retorna un diccionario con las entidades preparadas o información necesaria.
+    /// Por defecto retorna diccionario vacío.
+    /// </summary>
+    protected virtual Task<Result<Dictionary<string, object>>> PrepareDependenciesAsync(
+        TCommand command,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Result.Success(new Dictionary<string, object>()));
+    }
+
+    /// <summary>
+    /// 🔥 HOOK 2.5: Persistir dependencias antes de actualizar la entidad principal (opcional).
+    /// Override si las entidades relacionadas deben guardarse ANTES de actualizar la entidad principal.
+    /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
+    /// Por defecto no hace nada (false).
+    /// </summary>
+    protected virtual bool ShouldPersistDependenciesFirst()
+    {
+        return false; // Por defecto NO persiste las dependencias primero
+    }
+
+    /// <summary>
+    /// 🔥 HOOK 3: Aplicar cambios a la entidad (REQUERIDO).
+    /// Método abstracto que DEBE implementarse en cada handler concreto.
+    /// Recibe la entidad cargada de la BD, el command y opcionalmente las dependencias preparadas.
+    /// </summary>
+    protected abstract void ApplyChanges(TEntity entity, TCommand command, Dictionary<string, object>? dependencies = null);
+
+    /// <summary>
+    /// 🔥 HOOK 4: Validación y actualización con repositorio específico (opcional).
+    /// Override para validaciones que requieren la entidad ya modificada (ej: validaciones de unicidad).
+    /// Si este método actualiza la entidad en el contexto (usando UpdateAsync con validación),
+    /// debe retornar Result con IsSuccess = true y un flag para evitar doble Update.
+    /// Por defecto no hace nada (Result.Success, false).
+    /// </summary>
+    protected virtual async Task<(Result ValidationResult, bool EntityUpdated)> ValidateAndUpdateInContextAsync(
+        TEntity entity,
+        TCommand command,
+        CancellationToken cancellationToken)
+    {
+        return (Result.Success(), false); // Por defecto no hace nada
+    }
+
+    /// <summary>
+    /// 🔥 HOOK 5: Acciones post-actualización (opcional).
+    /// Override para ejecutar lógica adicional después de guardar (ej: invalidar cache, enviar eventos).
+    /// Por defecto no hace nada.
+    /// </summary>
+    protected virtual Task OnEntityUpdatedAsync(TEntity entity, Guid entityId, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Template Method - Flujo Principal
+
+    /// <summary>
+    /// 🎯 FLUJO PRINCIPAL: Template Method que orquesta el proceso de actualización.
+    /// Este método NO debe ser sobrescrito en la mayoría de casos.
+    /// Usa los hooks para personalizar el comportamiento.
+    /// </summary>
     public virtual async Task<Result<Guid>> Handle(TCommand command, CancellationToken cancellationToken)
     {
-        // 1. Obtener la entidad (Tracking activado para Update)
-        var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
-
-        if (entity is null)
-        {
-            return Result.Failure<Guid>(Error.NotFound($"{typeof(TEntity).Name} con ID '{command.Id}' no encontrada."));
-        }
-
-        // 2. 🔥 NUEVO: Aplicar cambios con Result (sin try-catch, sin excepciones)
-        ApplyChanges(entity, command);
-
-        // 3. Marcar la entidad como modificada (Entity Framework la rastrea automáticamente)
-        _writeRepository.Update(entity);
-
-        // 4. 🔥 Persistencia con rollback automático si falla
         try
         {
-            var result = await UpdateAsync(entity, cancellationToken);
-
-            if (result.IsFailure)
+            // 1. 🔍 Validación pre-actualización
+            var validationResult = await ValidateBeforeUpdateAsync(command, cancellationToken);
+            if (validationResult.IsFailure)
             {
-                // Si UpdateAsync falla, el UnitOfWork hará rollback automáticamente
-                return result;
+                return Result.Failure<Guid>(validationResult.Error);
             }
 
-            // 5. Retornar el ID si todo fue exitoso
-            return result;
+            // 2. 🛠️ Preparación de dependencias (validar/buscar entidades relacionadas)
+            var dependenciesResult = await PrepareDependenciesAsync(command, cancellationToken);
+            if (dependenciesResult.IsFailure)
+            {
+                return Result.Failure<Guid>(dependenciesResult.Error);
+            }
+
+            // 2.5 🔥 NUEVO: Guardar dependencias PRIMERO si es necesario (evita problemas de concurrencia)
+            if (ShouldPersistDependenciesFirst())
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
+            // 3. 📦 Obtener la entidad (con tracking para Update)
+            var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
+            if (entity is null)
+            {
+                return Result.Failure<Guid>(Error.NotFound(
+                    $"{typeof(TEntity).Name} con ID '{command.Id}' no encontrada."));
+            }
+
+            // 4. 🏗️ Aplicar cambios a la entidad
+            ApplyChanges(entity, command, dependenciesResult.Value);
+
+            // 5. ✅ Validación post-actualización y actualización en contexto
+            var validationTuple = await ValidateAndUpdateInContextAsync(entity, command, cancellationToken);
+            if (validationTuple.ValidationResult.IsFailure)
+            {
+                return Result.Failure<Guid>(validationTuple.ValidationResult.Error);
+            }
+
+            // 6. 💾 Marcar como modificado si no se hizo en el paso anterior
+            if (!validationTuple.EntityUpdated)
+            {
+                _writeRepository.Update(entity);
+            }
+
+            // Guardar cambios (solo la entidad principal si ya guardamos las dependencias)
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // 7. 🎉 Acciones post-actualización
+            await OnEntityUpdatedAsync(entity, entity.Id.Value, cancellationToken);
+
+            return Result.Success(entity.Id.Value);
+        }
+        catch (ArgumentException ex)
+        {
+            // Captura de errores de validación de Value Objects
+            return Result.Failure<Guid>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {
-            // 🔥 Capturar errores de BD (violación de constraint, timeout, etc.)
-            // El UnitOfWork hará rollback automáticamente
+            // Captura de errores inesperados
             return Result.Failure<Guid>(Error.Failure(
-                "Database.Error",
-                "Error de base de datos",
+                "Error.Unexpected",
+                "Error inesperado al actualizar la entidad",
                 ex.Message));
         }
     }
+
+    #endregion
 }
