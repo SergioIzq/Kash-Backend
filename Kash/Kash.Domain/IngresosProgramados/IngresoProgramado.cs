@@ -171,6 +171,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
         // 🔥 Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new IngresoProgramadoEliminadoEvent(
             Id,
+            HangfireJobId,
             CuentaId,
             Importe));
     }

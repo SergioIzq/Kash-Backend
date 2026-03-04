@@ -139,7 +139,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
                         <div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #4caf50;'>
                             <h3 style='margin-top: 0; color: #555;'>Detalles del Ingreso:</h3>
                             <ul style='list-style: none; padding: 0;'>
-                                <li><strong>Importe:</strong> ${ingreso.Importe:N2}</li>
+                                <li><strong>Importe:</strong> {ingreso.Importe:N2}€</li>
                                 <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                 <li><strong>Frecuencia:</strong> {ingreso.Frecuencia}</li>
                                 {(string.IsNullOrWhiteSpace(ingreso.Descripcion) ? "" : $"<li><strong>Descripción:</strong> {ingreso.Descripcion}</li>")}

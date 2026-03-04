@@ -24,6 +24,7 @@ public sealed record UpdateGastoProgramadoCommand : AbsUpdateCommand<GastoProgra
     public Guid? PersonaId { get; init; }     // 🔥 Opcional
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
+    public required Guid UsuarioId { get; init; }
 
     // 🔥 Nombres opcionales para auto-creación
     public string? CategoriaNombre { get; init; }

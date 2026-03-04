@@ -139,7 +139,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
                         <div style='background-color: #fff3e0; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #f44336;'>
                             <h3 style='margin-top: 0; color: #555;'>Detalles del Gasto:</h3>
                             <ul style='list-style: none; padding: 0;'>
-                                <li><strong>Importe:</strong> ${gasto.Importe:N2}</li>
+                                <li><strong>Importe:</strong> {gasto.Importe:N2}€</li>
                                 <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                 <li><strong>Frecuencia:</strong> {gasto.Frecuencia}</li>
                                 {(string.IsNullOrWhiteSpace(gasto.Descripcion) ? "" : $"<li><strong>Descripción:</strong> {gasto.Descripcion}</li>")}

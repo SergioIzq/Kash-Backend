@@ -1,9 +1,11 @@
 ﻿using Kash.Application.Features.GastosProgramados.Commands;
 using Kash.Application.Features.GastosProgramados.Queries;
+using Kash.Domain;
 using Kash.NuevaApi.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,9 +65,7 @@ public class GastosProgramadosController : AbsController
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
-        {
             return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
 
         // 2. Crear comando con el ID del usuario inyectado
         var command = new CreateGastoProgramadoCommand
@@ -84,7 +84,8 @@ public class GastosProgramadosController : AbsController
             CategoriaId = request.CategoriaId,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(command);
@@ -100,6 +101,11 @@ public class GastosProgramadosController : AbsController
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoProgramadoRequest request)
     {
+        var usuarioId = GetCurrentUserId();
+
+        if (usuarioId is null)
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+
         var command = new UpdateGastoProgramadoCommand
         {
             Id = id,
@@ -117,7 +123,8 @@ public class GastosProgramadosController : AbsController
             CategoriaId = request.CategoriaId,
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
-            FormaPagoId = request.FormaPagoId
+            FormaPagoId = request.FormaPagoId,
+            UsuarioId = usuarioId.Value
         };
 
         var result = await _sender.Send(command);

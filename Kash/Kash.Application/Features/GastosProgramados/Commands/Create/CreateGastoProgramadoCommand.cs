@@ -15,6 +15,7 @@ public sealed record CreateGastoProgramadoCommand : AbsCreateCommand<GastoProgra
     public required DateTime? FechaEjecucion { get; init; }
     public string? Descripcion { get; init; }
     public bool Activo { get; set; } = true;
+    public required Guid UsuarioId { get; init; }
 
     // IDs de entidades relacionadas
     public required Guid CategoriaId { get; init; }
