@@ -25,12 +25,12 @@ namespace Kash.Shared.Application.Mappings
                 .Map(dest => dest.CategoriaNombre, src => src.Concepto.Categoria!.Nombre.Value)
 
                 // --- Proveedor (ID + Nombre desde navegación) ---
-                .Map(dest => dest.ClienteId, src => src.ClienteId.Value)
-                .Map(dest => dest.ClienteNombre, src => src.Cliente.Nombre.Value)
+                .Map(dest => dest.ClienteId, src => src.ClienteId!.Value)
+                .Map(dest => dest.ClienteNombre, src => src.Cliente!.Nombre.Value)
 
                 // --- Persona (ID + Nombre desde navegación) ---
-                .Map(dest => dest.PersonaId, src => src.PersonaId.Value)
-                .Map(dest => dest.PersonaNombre, src => src.Persona.Nombre.Value)
+                .Map(dest => dest.PersonaId, src => src.PersonaId!.Value)
+                .Map(dest => dest.PersonaNombre, src => src.Persona!.Nombre.Value)
 
                 // --- Cuenta (ID + Nombre desde navegación) ---
                 .Map(dest => dest.CuentaId, src => src.CuentaId.Value)
