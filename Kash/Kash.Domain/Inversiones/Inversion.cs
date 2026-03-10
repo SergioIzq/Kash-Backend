@@ -25,31 +25,29 @@ public sealed class Inversion : AbsEntity<InversionId>
         string? descripcion,
         string? plataforma) : base(id)
     {
-        Nombre       = nombre;
-        Ticker       = ticker;
-        Tipo         = tipo;
-        Cantidad     = cantidad;
+        Nombre = nombre;
+        Ticker = ticker;
+        Tipo = tipo;
+        Cantidad = cantidad;
         PrecioCompra = precioCompra;
-        Moneda       = moneda;
-        FechaCompra  = fechaCompra;
-        UsuarioId    = usuarioId;
-        Descripcion  = descripcion;
-        Plataforma   = plataforma;
-        CreadoEn     = DateTime.UtcNow;
+        Moneda = moneda;
+        FechaCompra = fechaCompra;
+        UsuarioId = usuarioId;
+        Descripcion = descripcion;
+        Plataforma = plataforma;
     }
 
-    public string       Nombre        { get; private set; } = string.Empty;
-    public string       Ticker        { get; private set; } = string.Empty;
-    public TipoInversion Tipo         { get; private set; }
-    public decimal      Cantidad      { get; private set; }
-    public decimal      PrecioCompra  { get; private set; }
-    public string       Moneda        { get; private set; } = string.Empty;
-    public DateTime     FechaCompra   { get; private set; }
-    public string?      Descripcion   { get; private set; }
-    public string?      Plataforma    { get; private set; }
-    public UsuarioId    UsuarioId     { get; private set; }
-    public DateTime     CreadoEn      { get; private set; }
-    public DateTime?    ActualizadoEn { get; private set; }
+    public string Nombre { get; private set; } = string.Empty;
+    public string Ticker { get; private set; } = string.Empty;
+    public TipoInversion Tipo { get; private set; }
+    public decimal Cantidad { get; private set; }
+    public decimal PrecioCompra { get; private set; }
+    public string Moneda { get; private set; } = string.Empty;
+    public DateTime FechaCompra { get; private set; }
+    public string? Descripcion { get; private set; }
+    public string? Plataforma { get; private set; }
+    public UsuarioId UsuarioId { get; private set; }
+    public DateTime? ActualizadoEn { get; private set; }
 
     // ──────────────────────────────────────────────────────────
     // Factory
@@ -115,15 +113,15 @@ public sealed class Inversion : AbsEntity<InversionId>
         if (tipo != TipoInversion.MercadoPrivado && string.IsNullOrWhiteSpace(ticker))
             return Result.Failure(InversionErrors.TickerRequerido);
 
-        Nombre        = nombre.Trim();
-        Ticker        = ticker.Trim();
-        Tipo          = tipo;
-        Cantidad      = cantidad;
-        PrecioCompra  = precioCompra;
-        Moneda        = moneda.Trim().ToUpperInvariant();
-        FechaCompra   = fechaCompra.Date;
-        Descripcion   = descripcion?.Trim();
-        Plataforma    = plataforma?.Trim();
+        Nombre = nombre.Trim();
+        Ticker = ticker.Trim();
+        Tipo = tipo;
+        Cantidad = cantidad;
+        PrecioCompra = precioCompra;
+        Moneda = moneda.Trim().ToUpperInvariant();
+        FechaCompra = fechaCompra.Date;
+        Descripcion = descripcion?.Trim();
+        Plataforma = plataforma?.Trim();
         ActualizadoEn = DateTime.UtcNow;
 
         return Result.Success();

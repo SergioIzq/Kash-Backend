@@ -1,4 +1,5 @@
-﻿using Kash.Shared.Application.Interfaces;
+﻿using Kash.Application.Features.Inversiones.Commands.Import.Parsers;
+using Kash.Shared.Application.Interfaces;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -19,6 +20,14 @@ namespace Kash.Application
 
             var config = TypeAdapterConfig.GlobalSettings;
             config.Scan(typeof(DependencyInyection).Assembly);
+
+            // 🔥 Parsers de importación de inversiones
+            services.AddScoped<GenericCsvParser>();
+            services.AddScoped<TradeRepublicCsvParser>();
+            services.AddScoped<TradeRepublicPdfParser>();
+            services.AddScoped<DegiroCsvParser>();
+            services.AddScoped<InteractiveBrokersCsvParser>();
+            services.AddScoped<BinanceCsvParser>();
 
             // 🔥 Registrar servicios automáticamente por marker interface
             services.RegisterMarkedServices(typeof(DependencyInyection).Assembly);

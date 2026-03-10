@@ -1,6 +1,6 @@
 namespace Kash.Domain;
 
-// Interfaz de marcador - la implementación en Infrastructure usa IReadRepository genérico
+// Interfaz de marcador - la implementación real está en Kash.Application.Interfaces.Repositories
 public interface IInversionReadRepository
 {
 }

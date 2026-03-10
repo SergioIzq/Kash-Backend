@@ -1,4 +1,5 @@
 using Kash.Application.Features.Inversiones.Commands;
+using Kash.Application.Features.Inversiones.Commands.Import;
 using Kash.Application.Features.Inversiones.Queries;
 using Kash.NuevaApi.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results;
@@ -128,6 +129,29 @@ public class InversionesController : AbsController
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteInversionCommand(id);
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// POST /api/inversiones/importar
+    /// Importa inversiones desde un extracto CSV o PDF.
+    /// Formatos: generic | trade_republic | trade_republic_pdf | degiro | interactive_brokers | binance
+    /// </summary>
+    [HttpPost("importar")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> ImportarExtracto(
+        [FromForm] string brokerFormat,
+        IFormFile file)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("Archivo vacío.");
+
+        using var stream = file.OpenReadStream();
+        var bytes = new byte[file.Length];
+        _ = await stream.ReadAsync(bytes);
+
+        var command = new ImportarInversionesCommand(bytes, brokerFormat);
         var result = await _sender.Send(command);
         return HandleResult(result);
     }

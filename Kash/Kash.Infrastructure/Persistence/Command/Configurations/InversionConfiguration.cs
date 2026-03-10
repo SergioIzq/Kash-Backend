@@ -76,15 +76,15 @@ public class InversionConfiguration : IEntityTypeConfiguration<Inversion>
             .HasColumnType("varchar(100)")
             .IsRequired(false);
 
-        builder.Property(e => e.CreadoEn)
-            .HasColumnName("creado_en")
-            .HasColumnType("datetime")
-            .IsRequired();
-
         builder.Property(e => e.ActualizadoEn)
             .HasColumnName("actualizado_en")
             .HasColumnType("datetime")
             .IsRequired(false);
+
+        builder.Property(e => e.FechaCreacion)
+            .HasColumnName("fecha_creacion")
+            .HasColumnType("datetime")
+            .IsRequired();
 
         // Índice compuesto para queries paginadas por usuario + fecha
         builder.HasIndex(e => new { e.UsuarioId, e.FechaCompra })
