@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Kash.Shared.Application\Kash.Shared.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
+  </ItemGroup>
+
 </Project>

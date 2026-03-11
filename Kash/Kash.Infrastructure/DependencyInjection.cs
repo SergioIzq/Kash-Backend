@@ -116,6 +116,10 @@ namespace Kash.Infrastructure
           .AsImplementedInterfaces()
                      .WithScopedLifetime());
 
+            // 🔥 HttpClient para resolución ISIN → Ticker (Yahoo Finance)
+            services.AddHttpClient("YahooFinance", c =>
+                c.BaseAddress = new Uri("https://query1.finance.yahoo.com"));
+
             // 9️⃣ Warmup
             services.AddHostedService<DatabaseWarmupService>();
 
