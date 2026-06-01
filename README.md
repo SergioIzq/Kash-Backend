@@ -20,7 +20,7 @@ Este es el backend de la aplicación de gestión económica personal/profesional
 ## 🌐 Complemento del Frontend
 
 Este backend da soporte a la interfaz alojada en:  
-👉 [https://ahorroland.sergioizq.es](https://ahorroland.sergioizq.es)
+👉 [https://kash.sergioizq.com](https://kash.sergioizq.com)
 
 ---
 
@@ -80,7 +80,7 @@ El backend expone una API RESTful que cubre los siguientes módulos:
 ## 📌 Notas
 
 - Este backend requiere de un **frontend** para la interacción del usuario. El frontend está disponible en:  
-  👉 [https://ahorroland.sergioizq.es](https://ahorroland.sergioizq.es)
+  👉 [https://kash.sergioizq.com](https://kash.sergioizq.com)
 - La **autenticación** se maneja a través de JWT, por lo que es necesario un token válido para acceder a los endpoints protegidos.
 - **CORS** está habilitado para permitir que el frontend y el backend se comuniquen sin problemas de restricciones de origen cruzado.
 
