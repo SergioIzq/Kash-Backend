@@ -2,12 +2,12 @@
 
 <div align="center">
 
-![CI/CD Pipeline](https://github.com/SergioIzq/AhorroLand-Backend/workflows/CI%2FCD%20Backend%20-%20Docker%20Build%20%26%20Push/badge.svg)
-![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/ahorroland-backend?sort=semver&logo=docker)
-![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/ahorroland-backend/latest)
-![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/ahorroland-backend)
+![CI/CD Pipeline](https://github.com/SergioIzq/Kash-Backend/workflows/CI%2FCD%20Backend%20-%20Docker%20Build%20%26%20Push/badge.svg)
+![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/kash-backend?sort=semver&logo=docker)
+![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/kash-backend/latest)
+![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/kash-backend)
 ![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
-![License](https://img.shields.io/github/license/SergioIzq/AhorroLand-Backend)
+![License](https://img.shields.io/github/license/SergioIzq/Kash-Backend)
 
 </div>
 
