@@ -1,4 +1,5 @@
 ﻿using Kash.Application.Features.Inversiones.Commands.Import.Parsers;
+using Kash.Application.Features.Movimientos.Commands.Import.Parsers;
 using Kash.Shared.Application.Interfaces;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,10 @@ namespace Kash.Application
             services.AddScoped<DegiroCsvParser>();
             services.AddScoped<InteractiveBrokersCsvParser>();
             services.AddScoped<BinanceCsvParser>();
+
+            // 🔥 Parsers de importación de movimientos bancarios (gastos/ingresos, cualquier banco)
+            services.AddScoped<GenericBankCsvParser>();
+            services.AddScoped<GenericBankPdfParser>();
 
             // 🔥 Registrar servicios automáticamente por marker interface
             services.RegisterMarkedServices(typeof(DependencyInyection).Assembly);

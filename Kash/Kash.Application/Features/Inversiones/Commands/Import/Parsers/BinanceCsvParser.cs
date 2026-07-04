@@ -23,19 +23,19 @@ public sealed class BinanceCsvParser : IInversionParser
 
     public Task<ParseResult> ParseAsync(byte[] content, CancellationToken cancellationToken = default)
     {
-        var rows   = new List<InversionImportDto>();
+        var rows = new List<InversionImportDto>();
         var errors = new List<ImportErrorLinea>();
-        var text   = System.Text.Encoding.UTF8.GetString(content);
+        var text = System.Text.Encoding.UTF8.GetString(content);
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            Delimiter         = ParserHelpers.DetectDelimiter(text),
-            HasHeaderRecord   = true,
+            Delimiter = ParserHelpers.DetectDelimiter(text),
+            HasHeaderRecord = true,
             MissingFieldFound = null
         };
 
         using var reader = new StringReader(text);
-        using var csv    = new CsvReader(reader, config);
+        using var csv = new CsvReader(reader, config);
 
         csv.Read();
         csv.ReadHeader();
@@ -82,7 +82,7 @@ public sealed class BinanceCsvParser : IInversionParser
                     throw new FormatException("Cantidad invalida o cero");
 
                 var cryptoSymbol = executedMatch.Groups[2].Value;
-                var ticker       = $"{cryptoSymbol}-USD";
+                var ticker = $"{cryptoSymbol}-USD";
 
                 // Importe para extraer la moneda (ej: "65.00 USDT")
                 if (!csv.TryGetField("Amount", out string amountStr) &&
@@ -90,7 +90,7 @@ public sealed class BinanceCsvParser : IInversionParser
                     amountStr = string.Empty;
 
                 var monedaRaw = CryptoAmountRegex.Match(amountStr).Groups[2].Value;
-                var moneda    = monedaRaw switch { "USDT" => "USD", "" => "USD", _ => monedaRaw };
+                var moneda = monedaRaw switch { "USDT" => "USD", "" => "USD", _ => monedaRaw };
 
                 // Fecha
                 if (!csv.TryGetField("Date(UTC)", out string dateStr) &&
