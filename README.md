@@ -6,7 +6,7 @@
 ![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/kash-backend?sort=semver&logo=docker)
 ![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/kash-backend/latest)
 ![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/kash-backend)
-![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
+![.NET Version](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![License](https://img.shields.io/github/license/SergioIzq/Kash-Backend)
 
 </div>
