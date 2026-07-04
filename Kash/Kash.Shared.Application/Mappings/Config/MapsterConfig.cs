@@ -39,6 +39,7 @@ public static class MapsterConfig
         config.NewConfig<CuentaId, Guid>().MapWith(src => src.Value);
         config.NewConfig<FormaPagoId, Guid>().MapWith(src => src.Value);
         config.NewConfig<CategoriaId, Guid>().MapWith(src => src.Value);
+        config.NewConfig<ReglaCategorizacionId, Guid>().MapWith(src => src.Value);
 
         // --- Valores de Dominio ---
         config.NewConfig<Cantidad, decimal>().MapWith(src => src.Valor);
