@@ -28,7 +28,7 @@ public class TraspasosProgramadosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -72,7 +72,7 @@ public class TraspasosProgramadosController : AbsController
             Importe = request.Importe,
             FechaEjecucion = request.FechaEjecucion,
             Frecuencia = request.Frecuencia,
-            UsuarioId = usuarioId.Value, // 👈 Seguridad: ID del token
+            UsuarioId = usuarioId.Value, // Seguridad: ID del token
             Descripcion = request.Descripcion
         };
 

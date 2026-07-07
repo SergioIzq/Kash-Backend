@@ -18,7 +18,7 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(e => e.Id)
             .HasColumnName("id")
             .HasColumnType("binary(16)") // O binary(16) según tu preferencia en MySQL
-            .ValueGeneratedNever()     // ✅ Recomendado: La app genera el GUID
+            .ValueGeneratedNever()     // Recomendado: La app genera el GUID
             .HasConversion(
                 id => id.Value,
                 value => UsuarioId.CreateFromDatabase(value) // Usar CreateFromDatabase para evitar validación

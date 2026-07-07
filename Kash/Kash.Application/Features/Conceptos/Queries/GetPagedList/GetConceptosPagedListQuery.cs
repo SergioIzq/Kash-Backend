@@ -11,7 +11,7 @@ public sealed record GetConceptosPagedListQuery : AbsGetPagedListQuery<Concepto,
         string? searchTerm = null,
         string? sortColumn = null,
         string? sortOrder = null)
-        // 🔥 FIX: Si es null, enviamos "" (cadena vacía)
+        // FIX: Si es null, enviamos "" (cadena vacía)
         : base(page, pageSize, searchTerm ?? "", sortColumn ?? "", sortOrder ?? "")
     {
     }

@@ -20,12 +20,12 @@ public sealed record CreateGastoProgramadoCommand : AbsCreateCommand<GastoProgra
     // IDs de entidades relacionadas
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
-    public Guid? ProveedorId { get; init; }  // 🔥 Opcional
-    public Guid? PersonaId { get; init; }     // 🔥 Opcional
+    public Guid? ProveedorId { get; init; }  // Opcional
+    public Guid? PersonaId { get; init; }     // Opcional
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
 
-    // 🔥 Nombres opcionales para auto-creación
+    // Nombres opcionales para auto-creación
     /// <summary>
     /// Nombre de la categoría. Si CategoriaId no existe y se proporciona este valor,
     /// se creará automáticamente la categoría.

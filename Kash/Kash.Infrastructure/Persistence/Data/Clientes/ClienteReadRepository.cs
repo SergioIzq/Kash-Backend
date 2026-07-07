@@ -9,7 +9,7 @@ namespace Kash.Infrastructure.Persistence.Data.Clientes
 {
     /// <summary>
     /// Repositorio de lectura optimizado para Clientes.
-    /// ✅ Incluye filtro por usuario para aprovechar índices de base de datos.
+    /// Incluye filtro por usuario para aprovechar índices de base de datos.
     /// </summary>
     public class ClienteReadRepository : AbsReadRepository<Cliente, ClienteDto, ClienteId>, IClienteReadRepository
     {
@@ -19,7 +19,7 @@ namespace Kash.Infrastructure.Persistence.Data.Clientes
         }
 
         /// <summary>
-        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+        /// ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
         protected override ReadRepositoryConfiguration ConfigureRepository()
         {

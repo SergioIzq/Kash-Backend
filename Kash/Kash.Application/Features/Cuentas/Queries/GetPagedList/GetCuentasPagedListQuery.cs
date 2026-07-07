@@ -11,7 +11,7 @@ public sealed record GetCuentasPagedListQuery : AbsGetPagedListQuery<Cuenta, Cue
         string? searchTerm = null,
         string? sortColumn = null,
         string? sortOrder = null)
-        // 🔥 FIX: Si es null, enviamos "" (cadena vacía)
+        // FIX: Si es null, enviamos "" (cadena vacía)
         : base(page, pageSize, searchTerm ?? "", sortColumn ?? "", sortOrder ?? "")
     {
     }

@@ -28,7 +28,7 @@ public class IngresosProgramadosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)

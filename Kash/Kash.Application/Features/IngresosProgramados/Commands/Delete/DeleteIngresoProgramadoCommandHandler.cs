@@ -10,7 +10,7 @@ namespace Kash.Application.Features.IngresosProgramados.Commands;
 
 /// <summary>
 /// Manejador concreto para eliminar un IngresoProgramado.
-/// 🔥 Sobrescribe LoadEntityForDeletionAsync para cargar la entidad y disparar el evento MarkAsDeleted.
+/// Sobrescribe LoadEntityForDeletionAsync para cargar la entidad y disparar el evento MarkAsDeleted.
 /// </summary>
 public sealed class DeleteIngresoProgramadoCommandHandler
     : DeleteCommandHandler<IngresoProgramado, IngresoProgramadoId, DeleteIngresoProgramadoCommand>
@@ -25,7 +25,7 @@ public sealed class DeleteIngresoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 OVERRIDE: Cargamos la entidad real para poder disparar el evento de dominio.
+    /// OVERRIDE: Cargamos la entidad real para poder disparar el evento de dominio.
     /// </summary>
     protected override async Task<IngresoProgramado?> LoadEntityForDeletionAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -37,7 +37,7 @@ public sealed class DeleteIngresoProgramadoCommandHandler
             return null;
         }
 
-        // 2. 🔥 Marcar como eliminado y disparar evento de dominio
+        // 2. Marcar como eliminado y disparar evento de dominio
         ingreso.MarkAsDeleted();
 
         return ingreso;

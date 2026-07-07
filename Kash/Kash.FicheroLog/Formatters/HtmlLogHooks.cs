@@ -5,7 +5,7 @@ namespace Kash.FicheroLog.Formatters;
 
 /// <summary>
 /// Hooks del ciclo de vida del archivo de log HTML.
-/// 🔥 NOTA: El archivo HTML no se cierra explícitamente porque Serilog no provee un hook para eso.
+/// NOTA: El archivo HTML no se cierra explícitamente porque Serilog no provee un hook para eso.
 /// Los navegadores modernos tolerarán el HTML sin etiquetas de cierre al final.
 /// </summary>
 public class HtmlLogHooks : FileLifecycleHooks

@@ -73,7 +73,7 @@ public class MovimientosController : AbsController
         return HandleResult(result);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers 
 
     private (ColumnMapping? map, IActionResult? error) ParseMapping(string mapping, IFormFile file)
     {

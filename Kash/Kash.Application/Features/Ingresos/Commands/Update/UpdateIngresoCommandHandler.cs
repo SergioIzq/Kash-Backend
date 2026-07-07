@@ -12,10 +12,10 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Ingresos.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler con auto-creación de entidades relacionadas.
+/// REFACTORIZADO: Handler con auto-creación de entidades relacionadas.
 /// Reducido de ~120 líneas a ~110 líneas.
-/// 🔥 Si Categoria/Cliente/Persona/Concepto/Cuenta/FormaPago no existen, los crea automáticamente.
-/// 🔥 Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
+/// Si Categoria/Cliente/Persona/Concepto/Cuenta/FormaPago no existen, los crea automáticamente.
+/// Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
 /// </summary>
 public sealed class UpdateIngresoCommandHandler
     : AbsUpdateCommandHandler<Ingreso, IngresoId, IngresoDto, UpdateIngresoCommand>
@@ -53,7 +53,7 @@ public sealed class UpdateIngresoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 1: Buscar o crear entidades relacionadas (Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago).
+    /// HOOK 1: Buscar o crear entidades relacionadas (Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago).
     /// Ya no necesitamos ValidateBeforeUpdateAsync porque todas las entidades se auto-crean.
     /// ORDEN IMPORTANTE: Categoría PRIMERO, luego Concepto con esa CategoríaId.
     /// </summary>
@@ -119,16 +119,16 @@ public sealed class UpdateIngresoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de actualizar el Ingreso.
+    /// HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de actualizar el Ingreso.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// </summary>
     protected override bool ShouldPersistDependenciesFirst()
     {
-        return true; // ✅ ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
+        return true; // ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Aplica los cambios del comando a la entidad.
+    /// HOOK 2: Aplica los cambios del comando a la entidad.
     /// Usa las dependencias preparadas (que pueden haber sido creadas).
     /// </summary>
     protected override void ApplyChanges(

@@ -22,7 +22,7 @@ public sealed class GetTraspasosProgramadosPagedListQueryHandler
     GetTraspasosProgramadosPagedListQuery query,
     CancellationToken cancellationToken)
     {
-        // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro
+        // Si tenemos UsuarioId, usar el método optimizado con filtro
         if (query.UsuarioId.HasValue)
         {
             return await _dtoRepository.GetPagedReadModelsByUserAsync(

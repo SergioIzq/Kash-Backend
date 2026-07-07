@@ -11,7 +11,7 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.TraspasosProgramados.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler para traspasos programados usando hooks de la clase base.
+/// REFACTORIZADO: Handler para traspasos programados usando hooks de la clase base.
 /// Reducido de ~120 líneas a ~80 líneas (33% menos código).
 /// </summary>
 public sealed class CreateTraspasoProgramadoCommandHandler
@@ -34,7 +34,7 @@ public sealed class CreateTraspasoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 1: Validación pre-creación.
+    /// HOOK 1: Validación pre-creación.
     /// Valida existencia de entidades relacionadas en paralelo.
     /// </summary>
     protected override async Task<Result> ValidateBeforeCreateAsync(
@@ -61,7 +61,7 @@ public sealed class CreateTraspasoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Preparación de dependencias.
+    /// HOOK 2: Preparación de dependencias.
     /// Genera el HangfireJobId antes de crear la entidad.
     /// </summary>
     protected override Task<Result<Dictionary<string, object>>> PrepareDependenciesAsync(
@@ -77,7 +77,7 @@ public sealed class CreateTraspasoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 3: Crea la entidad de dominio.
+    /// HOOK 3: Crea la entidad de dominio.
     /// </summary>
     protected override TraspasoProgramado CreateEntity(
         CreateTraspasoProgramadoCommand command,

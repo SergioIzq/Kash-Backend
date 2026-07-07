@@ -24,7 +24,7 @@ public abstract class SearchForAutocompleteQueryHandler<TEntity, TDto, TQuery, T
         _repository = repository;
     }
 
-    // 🔥 1. Hook virtual para filtros personalizados (igual que en GetRecent)
+    // 1. Hook virtual para filtros personalizados (igual que en GetRecent)
     protected virtual Dictionary<string, object>? GetCustomFilters(TQuery query)
     {
         return null;
@@ -43,10 +43,10 @@ public abstract class SearchForAutocompleteQueryHandler<TEntity, TDto, TQuery, T
                 Error.Validation("El ID de usuario es requerido para la búsqueda."));
         }
 
-        // 🔥 2. Obtener filtros personalizados
+        // 2. Obtener filtros personalizados
         var extraFilters = GetCustomFilters(query);
 
-        // 🔥 3. Pasar extraFilters al repositorio
+        // 3. Pasar extraFilters al repositorio
         var results = await _repository.SearchForAutocompleteAsync(
             query.UsuarioId.Value,
             query.SearchTerm,

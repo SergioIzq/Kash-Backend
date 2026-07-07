@@ -23,19 +23,19 @@ public readonly record struct Email
 
     public static Result<Email> Create(string value)
     {
-        // 🔑 Regla de Negocio: No puede ser nulo o vacío
+        // Regla de Negocio: No puede ser nulo o vacío
         if (string.IsNullOrWhiteSpace(value))
         {
             return Result.Failure<Email>(Error.Validation("El correo electrónico no puede estar vacío."));
         }
 
-        // 🔑 Regla de Negocio: Validar formato del email
+        // Regla de Negocio: Validar formato del email
         if (!EmailRegex.IsMatch(value))
         {
             return Result.Failure<Email>(Error.Validation($"La dirección de correo '{value}' no tiene un formato válido."));
         }
 
-        // 🔑 Regla de Negocio: Normalizar el correo a minúsculas
+        // Regla de Negocio: Normalizar el correo a minúsculas
         return Result.Success(new Email(value.ToLowerInvariant()));
     }
 

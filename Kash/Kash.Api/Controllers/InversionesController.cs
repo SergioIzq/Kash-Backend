@@ -157,9 +157,9 @@ public class InversionesController : AbsController
     }
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // Request DTOs (entrada del frontend)
-// ──────────────────────────────────────────────────────────
+// 
 
 /// <summary>
 /// Body para POST /api/inversiones.

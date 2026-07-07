@@ -1,4 +1,4 @@
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Kash.Application.Features.Inversiones.Commands.Import.Models;
 using Kash.Application.Interfaces;
@@ -49,47 +49,47 @@ public sealed class DegiroCsvParser : IInversionParser
             try
             {
                 // Numero de acciones: espanol, ingles
-                if (!csv.TryGetField("Numero", out string numeroStr) &&
+                if (!csv.TryGetField("Numero", out string? numeroStr) &&
                     !csv.TryGetField("Shares", out numeroStr) &&
                     !csv.TryGetField("Quantity", out numeroStr))
                     throw new FormatException("Falta la columna Numero/Shares/Quantity");
 
-                var numeroLimpio = numeroStr.Replace(".", "").Replace(",", ".");
+                var numeroLimpio = numeroStr!.Replace(".", "").Replace(",", ".");
                 if (!decimal.TryParse(numeroLimpio, NumberStyles.Any, CultureInfo.InvariantCulture, out var cantidad) || cantidad <= 0)
                     continue; // Ventas o filas de liquidez: ignorar silenciosamente
 
                 // Nombre del activo
-                if (!csv.TryGetField("Producto", out string nombre) && !csv.TryGetField("Product", out nombre))
+                if (!csv.TryGetField("Producto", out string? nombre) && !csv.TryGetField("Product", out nombre))
                     throw new FormatException("Falta la columna Producto/Product");
 
                 // ISIN
                 var isin = csv.GetField("ISIN") ?? throw new FormatException("Falta la columna ISIN");
 
                 // Precio
-                if (!csv.TryGetField("Precio", out string precioStr) && !csv.TryGetField("Price", out precioStr))
+                if (!csv.TryGetField("Precio", out string? precioStr) && !csv.TryGetField("Price", out precioStr))
                     throw new FormatException("Falta la columna Precio/Price");
 
-                var precioLimpio = precioStr.Replace(".", "").Replace(",", ".");
+                var precioLimpio = precioStr!.Replace(".", "").Replace(",", ".");
                 if (!decimal.TryParse(precioLimpio, NumberStyles.Any, CultureInfo.InvariantCulture, out var precio) || precio <= 0)
                     throw new FormatException("Precio de compra invalido");
 
                 // Moneda
-                if (!csv.TryGetField("Divisa local", out string moneda) &&
+                if (!csv.TryGetField("Divisa local", out string? moneda) &&
                     !csv.TryGetField("Local value currency", out moneda) &&
                     !csv.TryGetField("Currency", out moneda))
                     throw new FormatException("Falta la columna de moneda");
 
                 // Fecha
-                if (!csv.TryGetField("Fecha", out string fechaStr) && !csv.TryGetField("Date", out fechaStr))
+                if (!csv.TryGetField("Fecha", out string? fechaStr) && !csv.TryGetField("Date", out fechaStr))
                     throw new FormatException("Falta la columna Fecha/Date");
 
                 if (!DateOnly.TryParseExact(fechaStr, FormatosFecha, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fecha))
                     throw new FormatException("Fecha con formato incorrecto");
 
                 var ticker = await _isinResolver.ResolveAsync(isin, cancellationToken);
-                var tipo   = ParserHelpers.InferirTipo(isin, nombre);
+                var tipo   = ParserHelpers.InferirTipo(isin, nombre!);
 
-                rows.Add(new InversionImportDto(nombre, ticker, tipo, cantidad, precio, moneda, fecha, null, "DEGIRO"));
+                rows.Add(new InversionImportDto(nombre!, ticker, tipo, cantidad, precio, moneda!, fecha, null, "DEGIRO"));
             }
             catch (Exception ex)
             {

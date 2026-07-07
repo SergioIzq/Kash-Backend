@@ -22,7 +22,7 @@ public readonly record struct ConfirmationToken
 
     public static Result<ConfirmationToken> Create(string value)
     {
-        // 🔑 Regla de Negocio: El token debe tener la longitud esperada.
+        // Regla de Negocio: El token debe tener la longitud esperada.
         if (string.IsNullOrWhiteSpace(value) || value.Length != TokenLength)
         {
             return Result.Failure<ConfirmationToken>(Error.Validation($"El token debe tener exactamente {TokenLength} caracteres."));

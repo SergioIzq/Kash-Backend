@@ -20,7 +20,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
 
-// 🔥 CONFIGURACIÓN SERILOG
+// CONFIGURACIÓN SERILOG
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -55,7 +55,7 @@ try
 
     builder.Host.UseSerilog();
 
-    // 🔥 KESTREL (HTTP/3)
+    // KESTREL (HTTP/3)
     builder.WebHost.ConfigureKestrel(options =>
     {
         options.Limits.MaxConcurrentConnections = 10000;
@@ -70,7 +70,7 @@ try
         });
     });
 
-    // 🌐 CORS
+    // CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("LocalhostPolicy", policy =>
@@ -107,7 +107,7 @@ try
         });
     });
 
-    // 🆕 JSON Options
+    // JSON Options
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
         options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -127,7 +127,7 @@ try
             options.JsonSerializerOptions.TypeInfoResolverChain.Add(AppJsonSerializerContext.Default);
         });
 
-    // 🔧 Validación de Modelos
+    // Validación de Modelos
     builder.Services.Configure<ApiBehaviorOptions>(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
@@ -144,7 +144,7 @@ try
         };
     });
 
-    // 📄 SWAGGER
+    // SWAGGER
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -168,7 +168,7 @@ try
         options.DescribeAllParametersInCamelCase();
     });
 
-    // 🔥 COMPRESIÓN
+    // COMPRESIÓN
     builder.Services.AddResponseCompression(options =>
     {
         options.EnableForHttps = true;
@@ -178,7 +178,7 @@ try
 
     // ... (Configuraciones de Brotli y Gzip igual que tenías)
 
-    // 🍪 Cookies
+    // Cookies
     builder.Services.Configure<CookiePolicyOptions>(options =>
     {
         options.CheckConsentNeeded = context => false;
@@ -199,7 +199,7 @@ try
     builder.Services.AddSharedApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    // 🔥 HANGFIRE
+    // HANGFIRE
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddHangfire(config => config
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -217,7 +217,7 @@ try
     // ... (Redis y ObjectPool igual que tenías) ...
     builder.Services.AddDistributedMemoryCache(); // Simplificado para que no falle si no hay Redis
 
-    // 🔐 JWT AUTH
+    // JWT AUTH
     var jwtKey = builder.Configuration["JwtSettings:SecretKey"] ?? "CLAVE_DEFAULT_INSEGURA_PARA_DEV_CAMBIAME";
     var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "Kash";
     var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "Kash";
@@ -242,7 +242,7 @@ try
         };
         options.RequireHttpsMetadata = false; // Permitir http en dev
 
-        // 🔥 FIX: Leer token desde Cookie O Header Authorization
+        // FIX: Leer token desde Cookie O Header Authorization
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -281,7 +281,7 @@ try
 
     app.UseSerilogRequestLogging();
     
-    // 🔥 Middleware de manejo de excepciones y resultados (PRIMERO)
+    // Middleware de manejo de excepciones y resultados (PRIMERO)
     app.UseKashExceptionHandling();
     
     app.UseRateLimiter();
@@ -292,17 +292,17 @@ try
     app.UseStaticFiles(); // Importante para Swagger UI (CSS/JS)
     app.UseCookiePolicy();
     
-    // 🔥 Compresión después del middleware de no-caché
+    // Compresión después del middleware de no-caché
     app.UseResponseCompression();
 
-    // 🔥 SWAGGER (Corregido)
+    // SWAGGER (Corregido)
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "Kash API v1");
-            // ❌ COMENTADO: Esto hacía que Swagger saliera en la raíz "/" y daba 404 en "/swagger"
+            // COMENTADO: Esto hacía que Swagger saliera en la raíz "/" y daba 404 en "/swagger"
             // options.RoutePrefix = string.Empty; 
 
             // Si comentas la línea de arriba, Swagger estará en: http://localhost:5131/swagger
@@ -336,7 +336,7 @@ finally
 }
 
 
-// 🆕 .NET 10: Source Generator Context optimizado para JSON
+// .NET 10: Source Generator Context optimizado para JSON
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,

@@ -1,19 +1,19 @@
-using Hangfire;
+ï»¿using Hangfire;
 using Kash.Shared.Application.Abstractions.Servicies;
 using System.Linq.Expressions;
 
 namespace Kash.Infrastructure.Services.Scheduling;
 
 /// <summary>
-/// Implementación del servicio de programación de trabajos usando Hangfire.
-/// Gestiona la creación, actualización y eliminación de jobs recurrentes.
+/// Implementaciï¿½n del servicio de programaciï¿½n de trabajos usando Hangfire.
+/// Gestiona la creaciï¿½n, actualizaciï¿½n y eliminaciï¿½n de jobs recurrentes.
 /// </summary>
 public sealed class JobSchedulingService : IJobSchedulingService
 {
     /// <summary>
-    /// Genera un identificador único para un trabajo programado.
+    /// Genera un identificador ï¿½nico para un trabajo programado.
     /// </summary>
-    /// <returns>Un string único basado en GUID.</returns>
+    /// <returns>Un string ï¿½nico basado en GUID.</returns>
     public string GenerateJobId()
     {
         return Guid.NewGuid().ToString();
@@ -22,10 +22,10 @@ public sealed class JobSchedulingService : IJobSchedulingService
     /// <summary>
     /// Programa un trabajo recurrente en Hangfire.
     /// </summary>
-    /// <param name="jobId">Identificador único del trabajo</param>
-    /// <param name="fechaInicio">Fecha de inicio (no usada en Hangfire recurrente, pero útil para logs)</param>
+    /// <param name="jobId">Identificador ï¿½nico del trabajo</param>
+    /// <param name="fechaInicio">Fecha de inicio (no usada en Hangfire recurrente, pero ï¿½til para logs)</param>
     /// <param name="frecuencia">Frecuencia en formato cron (ej: "0 0 * * *" para diario a medianoche)</param>
-    /// <param name="methodCall">Expresión del método a ejecutar</param>
+    /// <param name="methodCall">Expresiï¿½n del mï¿½todo a ejecutar</param>
     public Task ScheduleRecurringJobAsync(
         string jobId,
         DateTime fechaInicio,
@@ -57,7 +57,7 @@ public sealed class JobSchedulingService : IJobSchedulingService
 
     /// <summary>
     /// Actualiza un trabajo recurrente (elimina y recrea).
-    /// En Hangfire, AddOrUpdate ya actualiza, pero este método es explícito.
+    /// En Hangfire, AddOrUpdate ya actualiza, pero este mï¿½todo es explï¿½cito.
     /// </summary>
     public async Task UpdateRecurringJobAsync(
         string jobId,
@@ -75,7 +75,7 @@ public sealed class JobSchedulingService : IJobSchedulingService
     /// <summary>
     /// Verifica si existe un trabajo recurrente en Hangfire.
     /// Nota: Hangfire no proporciona una API directa para verificar existencia.
-    /// Este método intenta triggear el job para verificar si existe.
+    /// Este mï¿½todo intenta triggear el job para verificar si existe.
     /// </summary>
     /// <param name="jobId">Identificador del trabajo</param>
     /// <returns>True si el job existe, false en caso contrario</returns>
@@ -84,7 +84,7 @@ public sealed class JobSchedulingService : IJobSchedulingService
         try
         {
             // Intenta triggear el job de forma inmediata para verificar que existe
-            // Si no existe, lanzará una excepción
+            // Si no existe, lanzaruna excepcin
             RecurringJob.TriggerJob(jobId);
             return true;
         }

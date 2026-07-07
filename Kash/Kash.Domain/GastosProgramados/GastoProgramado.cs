@@ -84,7 +84,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
             usuarioId,
             descripcion);
 
-        // 🔥 LANZAR EVENTO DE DOMINIO
+        // LANZAR EVENTO DE DOMINIO
         gasto.AddDomainEvent(new GastoProgramadoCreadoEvent(
             gasto.Id.Value,
             frecuencia,
@@ -99,7 +99,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     /// </summary>
     public Result Reprogramar(DateTime nuevaFecha, Frecuencia nuevaFrecuencia)
     {
-        // ⭐ Aplica reglas de negocio aquí (ej: la nueva fecha debe ser futura)
+        // Aplica reglas de negocio aquí (ej: la nueva fecha debe ser futura)
         if (nuevaFecha < DateTime.Today)
         {
             return Result.Failure(Error.Validation("La reprogramación debe ser para una fecha futura."));
@@ -150,7 +150,7 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
     /// </summary>
     public void Desactivar()
     {
-        // ⭐ Aplica reglas de negocio aquí (ej: solo si no está ya ejecutado)
+        // Aplica reglas de negocio aquí (ej: solo si no está ya ejecutado)
         Activo = false;
         // Opcional: Levantar un evento de dominio
     }
@@ -165,11 +165,11 @@ public sealed class GastoProgramado : AbsEntity<GastoProgramadoId>
 
     /// <summary>
     /// Marca el gasto programado como eliminado y lanza el evento de dominio.
-    /// 🔥 Dispara GastoProgramadoEliminadoEvent.
+    /// Dispara GastoProgramadoEliminadoEvent.
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina
+        // Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new GastoProgramadoEliminadoEvent(
             HangfireJobId,
             Id,

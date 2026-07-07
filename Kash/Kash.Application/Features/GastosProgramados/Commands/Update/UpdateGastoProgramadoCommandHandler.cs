@@ -12,10 +12,10 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.GastosProgramados.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler con auto-creación de entidades relacionadas.
-/// 🔥 Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
-/// 🔥 Proveedor y Persona son OPCIONALES.
-/// 🔥 Reprograma el job en Hangfire si cambia la frecuencia o fecha.
+/// REFACTORIZADO: Handler con auto-creación de entidades relacionadas.
+/// Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
+/// Proveedor y Persona son OPCIONALES.
+/// Reprograma el job en Hangfire si cambia la frecuencia o fecha.
 /// </summary>
 public sealed class UpdateGastoProgramadoCommandHandler
     : AbsUpdateCommandHandler<GastoProgramado, GastoProgramadoId, GastoProgramadoDto, UpdateGastoProgramadoCommand>
@@ -55,7 +55,7 @@ public sealed class UpdateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 1: Preparación de dependencias.
+    /// HOOK 1: Preparación de dependencias.
     /// Busca o crea entidades relacionadas.
     /// ORDEN IMPORTANTE: Categoría PRIMERO, luego Concepto con esa CategoríaId.
     /// </summary>
@@ -121,16 +121,16 @@ public sealed class UpdateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Indica que las dependencias deben guardarse ANTES de actualizar el GastoProgramado.
+    /// HOOK 2: Indica que las dependencias deben guardarse ANTES de actualizar el GastoProgramado.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// </summary>
     protected override bool ShouldPersistDependenciesFirst()
     {
-        return true; // ✅ ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
+        return true; // ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
     }
 
     /// <summary>
-    /// 🔥 HOOK 3: Aplica los cambios a la entidad.
+    /// HOOK 3: Aplica los cambios a la entidad.
     /// Usa las dependencias preparadas (que pueden haber sido creadas).
     /// </summary>
     protected override void ApplyChanges(
@@ -180,7 +180,7 @@ public sealed class UpdateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 4: Acciones post-actualización.
+    /// HOOK 4: Acciones post-actualización.
     /// Reprograma el job en Hangfire si cambia la frecuencia o está activo.
     /// </summary>
     protected override async Task OnEntityUpdatedAsync(

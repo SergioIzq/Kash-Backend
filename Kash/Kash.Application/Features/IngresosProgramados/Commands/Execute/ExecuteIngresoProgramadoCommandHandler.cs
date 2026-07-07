@@ -14,7 +14,7 @@ namespace Kash.Application.Features.IngresosProgramados.Commands.Execute;
 
 /// <summary>
 /// Handler que ejecuta la lógica de negocio cuando Hangfire activa el job de un IngresoProgramado.
-/// 🔥 NUEVO: Envía email de notificación al usuario después de ejecutar.
+/// NUEVO: Envía email de notificación al usuario después de ejecutar.
 /// </summary>
 public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<ExecuteIngresoProgramadoCommand>
 {
@@ -57,7 +57,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
                 return Result.Failure(Error.NotFound($"IngresoProgramado con ID {request.hangfireId} no encontrado"));
             }
 
-            // 🔥 VALIDACIÓN: Si está inactivo, no ejecutar
+            // VALIDACIÓN: Si está inactivo, no ejecutar
             if (!ingresoProgramado.Activo)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
@@ -91,7 +91,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
                     _logger.LogInformation("Ingreso creado exitosamente desde IngresoProgramado {IngresoProgramadoId}", request.hangfireId);
                 }
 
-                // 🔥 NUEVO: Enviar email de notificación al usuario
+                // NUEVO: Enviar email de notificación al usuario
                 await EnviarEmailNotificacionAsync(ingresoProgramado, cancellationToken);
             }
             else
@@ -110,7 +110,7 @@ public sealed class ExecuteIngresoProgramadoCommandHandler : ICommandHandler<Exe
     }
 
     /// <summary>
-    /// 🔥 NUEVO: Envía un email al usuario notificando que se ejecutó el ingreso programado.
+    /// NUEVO: Envía un email al usuario notificando que se ejecutó el ingreso programado.
     /// </summary>
     private async Task EnviarEmailNotificacionAsync(IngresoProgramadoDto ingreso, CancellationToken cancellationToken)
     {

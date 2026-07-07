@@ -17,7 +17,7 @@ public sealed class SearchConceptosQueryHandler
     {
     }
 
-    // 🔥 Sobrescribimos el Hook para inyectar el filtro de categoría
+    // Sobrescribimos el Hook para inyectar el filtro de categoría
     protected override Dictionary<string, object>? GetCustomFilters(SearchConceptosQuery query)
     {
         if (string.IsNullOrEmpty(query.CategoriaId))

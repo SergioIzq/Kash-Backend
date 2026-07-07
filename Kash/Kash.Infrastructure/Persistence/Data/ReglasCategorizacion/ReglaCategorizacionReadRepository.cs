@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Kash.Application.Interfaces.Repositories;
 using Kash.Domain;
 using Kash.Infrastructure.Persistence.Query;
@@ -16,7 +16,7 @@ namespace Kash.Infrastructure.Persistence.Data.ReglasCategorizacion
         }
 
         /// <summary>
-        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+        /// ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
         protected override ReadRepositoryConfiguration ConfigureRepository()
         {

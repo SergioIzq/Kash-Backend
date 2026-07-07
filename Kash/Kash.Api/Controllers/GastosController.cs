@@ -28,7 +28,7 @@ public class GastosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -145,8 +145,8 @@ public record CreateGastoRequest(
     Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
-                    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    Guid UsuarioId, // CORREGIDO: Faltaba coma
+                    // NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
     string? CategoriaNombre = null,
     string? ProveedorNombre = null,

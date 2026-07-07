@@ -32,7 +32,7 @@ public sealed class GetRecentConceptosQueryHandler
         };
     }
 
-    // 🔥 Sobrescribimos para que la caché sea única por categoría
+    // Sobrescribimos para que la caché sea única por categoría
     protected override string GetCacheKeySuffix(GetRecentConceptosQuery query)
     {
         return string.IsNullOrEmpty(query.CategoriaId)

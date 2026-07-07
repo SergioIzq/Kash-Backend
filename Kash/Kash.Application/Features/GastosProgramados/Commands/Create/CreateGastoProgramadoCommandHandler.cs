@@ -12,11 +12,11 @@ using MediatR;
 namespace Kash.Application.Features.GastosProgramados.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler para gastos programados con auto-creación de entidades.
+/// REFACTORIZADO: Handler para gastos programados con auto-creación de entidades.
 /// Reducido de ~120 líneas a ~110 líneas.
-/// 🔥 Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
-/// 🔥 Proveedor y Persona son OPCIONALES.
-/// 🔥 Programa el job en Hangfire después de persistir.
+/// Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
+/// Proveedor y Persona son OPCIONALES.
+/// Programa el job en Hangfire después de persistir.
 /// </summary>
 public sealed class CreateGastoProgramadoCommandHandler
     : AbsCreateCommandHandler<GastoProgramado, GastoProgramadoId, CreateGastoProgramadoCommand>
@@ -59,7 +59,7 @@ public sealed class CreateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 1: Preparación de dependencias.
+    /// HOOK 1: Preparación de dependencias.
     /// Busca o crea entidades relacionadas + genera HangfireJobId.
     /// ORDEN IMPORTANTE: Categoría PRIMERO, luego Concepto con esa CategoríaId.
     /// </summary>
@@ -134,16 +134,16 @@ public sealed class CreateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Indica que las dependencias deben guardarse ANTES de crear el GastoProgramado.
+    /// HOOK 2: Indica que las dependencias deben guardarse ANTES de crear el GastoProgramado.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// </summary>
     protected override bool ShouldPersistDependenciesFirst()
     {
-        return true; // ✅ ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
+        return true; // ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
     }
 
     /// <summary>
-    /// 🔥 HOOK 3: Crea la entidad de dominio con las dependencias preparadas.
+    /// HOOK 3: Crea la entidad de dominio con las dependencias preparadas.
     /// </summary>
     protected override GastoProgramado CreateEntity(
         CreateGastoProgramadoCommand command,
@@ -184,7 +184,7 @@ public sealed class CreateGastoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK 4: Acciones post-persistencia.
+    /// HOOK 4: Acciones post-persistencia.
     /// Programa el job recurrente en Hangfire DESPUÉS de guardar exitosamente.
     /// </summary>
     protected override async Task OnEntityCreatedAsync(
@@ -229,7 +229,7 @@ public sealed class CreateGastoProgramadoCommandHandler
     /// <summary>
     /// Método que ejecutará Hangfire periódicamente.
     /// Envía el comando ExecuteIngresoProgramadoCommand a través de MediatR.
-    /// 🔥 IMPORTANTE: Debe ser PUBLIC para que Hangfire pueda invocarlo.
+    /// IMPORTANTE: Debe ser PUBLIC para que Hangfire pueda invocarlo.
     /// </summary>
     public async Task ExecuteGastoProgramadoAsync(Guid hangfireId)
     {

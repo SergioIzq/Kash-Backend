@@ -15,7 +15,7 @@ namespace Kash.Infrastructure.Persistence.Data.Conceptos
         }
 
         /// <summary>
-        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+        /// ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
         protected override ReadRepositoryConfiguration ConfigureRepository()
         {

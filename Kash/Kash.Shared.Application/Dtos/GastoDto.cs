@@ -13,8 +13,8 @@
         // Relaciones (Flattened)
         public Guid ConceptoId { get; init; }
         public string ConceptoNombre { get; init; } = string.Empty;
-        public Guid? CategoriaId { get; init; } // 🔥 NULLABLE: CategoriaId viene del Concepto (LEFT JOIN)
-        public string? CategoriaNombre { get; init; } // 🔥 NULLABLE: puede ser null si no hay categoría
+        public Guid? CategoriaId { get; init; } // NULLABLE: CategoriaId viene del Concepto (LEFT JOIN)
+        public string? CategoriaNombre { get; init; } // NULLABLE: puede ser null si no hay categoría
 
         public Guid ProveedorId { get; init; }
         public string ProveedorNombre { get; init; } = string.Empty;

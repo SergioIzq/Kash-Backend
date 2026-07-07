@@ -5,7 +5,7 @@ namespace Kash.Shared.Domain.Abstractions;
 public abstract class AbsEntity<TId> : IHasDomainEvents
     where TId : IGuidValueObject
 {
-    // 🔥 OPTIMIZACIÓN: Usar List con capacidad inicial para evitar resizes
+    // OPTIMIZACIÓN: Usar List con capacidad inicial para evitar resizes
     private List<IDomainEvent>? _domainEvents;
 
     protected AbsEntity(TId id)
@@ -23,14 +23,14 @@ public abstract class AbsEntity<TId> : IHasDomainEvents
 
     protected void AddDomainEvent(IDomainEvent domainEvent)
     {
-        // 🔥 OPTIMIZACIÓN: Lazy initialization - solo crear lista cuando sea necesario
+        // OPTIMIZACIÓN: Lazy initialization - solo crear lista cuando sea necesario
         _domainEvents ??= new List<IDomainEvent>(capacity: 2); // La mayoría de entidades tendrán 1-2 eventos
         _domainEvents.Add(domainEvent);
     }
 
     public void ClearDomainEvents()
     {
-        // 🔥 OPTIMIZACIÓN: Reusar la lista en lugar de crear nueva
+        // OPTIMIZACIÓN: Reusar la lista en lugar de crear nueva
         _domainEvents?.Clear();
     }
 }

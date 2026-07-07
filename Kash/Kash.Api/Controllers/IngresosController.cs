@@ -28,7 +28,7 @@ public class IngresosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -74,7 +74,7 @@ public class IngresosController : AbsController
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
             UsuarioId = userId,
-            // 🔥 NUEVO: Pasar nombres para auto-creación
+            // NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,
             CuentaNombre = request.CuentaNombre,
@@ -114,7 +114,7 @@ public class IngresosController : AbsController
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
             UsuarioId = userId,
-            // 🔥 NUEVO: Pasar nombres para auto-creación
+            // NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,
             ClienteNombre = request.ClienteNombre,
@@ -147,8 +147,8 @@ public record CreateIngresoRequest(
     Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
-    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    Guid UsuarioId, // CORREGIDO: Faltaba coma
+    // NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
     string? CategoriaNombre = null,
     string? ClienteNombre = null,

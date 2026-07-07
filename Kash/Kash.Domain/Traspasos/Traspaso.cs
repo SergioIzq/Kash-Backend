@@ -53,7 +53,7 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
     Descripcion? descripcion
     )
     {
-        // ⭐ Única validación de dominio intrínseca del Traspaso:
+        // Única validación de dominio intrínseca del Traspaso:
         if (cuentaOrigen.Equals(cuentaDestino))
         {
             throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
@@ -68,7 +68,7 @@ public sealed class Traspaso : AbsEntity<TraspasoId>
            usuarioId,
         descripcion);
 
-        // 🔥 Lanzar evento de dominio cuando se crea un traspaso
+        // Lanzar evento de dominio cuando se crea un traspaso
         traspaso.AddDomainEvent(new TraspasoCreadoEvent(
       traspaso.Id,
             cuentaOrigen,
@@ -86,13 +86,13 @@ cuentaDestino,
         Descripcion? descripcion,
         bool activo)
     {
-        // ⭐ Validación de dominio
+        // Validación de dominio
         if (cuentaOrigen.Equals(cuentaDestino))
         {
             throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
         }
 
-        // 🔥 Guardar valores anteriores para el evento
+        // Guardar valores anteriores para el evento
         var cuentaOrigenAnterior = CuentaOrigenId;
         var cuentaDestinoAnterior = CuentaDestinoId;
         var importeAnterior = Importe;
@@ -102,7 +102,7 @@ cuentaDestino,
         Importe = importe;
         Fecha = fecha;
         Descripcion = descripcion;
-        // 🔥 Lanzar evento solo si cambió alguna cuenta o el importe
+        // Lanzar evento solo si cambió alguna cuenta o el importe
         if (!cuentaOrigenAnterior.Equals(cuentaOrigen) ||
             !cuentaDestinoAnterior.Equals(cuentaDestino) ||
             !importeAnterior.Equals(importe))
@@ -123,7 +123,7 @@ cuentaDestino,
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina un traspaso
+        // Lanzar evento de dominio cuando se elimina un traspaso
         AddDomainEvent(new TraspasoEliminadoEvent(
           Id,
         CuentaOrigenId,

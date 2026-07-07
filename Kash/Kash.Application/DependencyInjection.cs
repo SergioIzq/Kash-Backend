@@ -8,7 +8,7 @@ using System.Reflection;
 namespace Kash.Application
 {
     /// <summary>
-    /// ✅ Inyección de dependencias automática usando Marker Interfaces.
+    /// Inyección de dependencias automática usando Marker Interfaces.
     /// Registra automáticamente servicios marcados con IApplicationService, ITransientService, ISingletonService
     /// </summary>
     public static class DependencyInyection
@@ -22,7 +22,7 @@ namespace Kash.Application
             var config = TypeAdapterConfig.GlobalSettings;
             config.Scan(typeof(DependencyInyection).Assembly);
 
-            // 🔥 Parsers de importación de inversiones
+            // Parsers de importación de inversiones
             services.AddScoped<GenericCsvParser>();
             services.AddScoped<TradeRepublicCsvParser>();
             services.AddScoped<TradeRepublicPdfParser>();
@@ -30,11 +30,11 @@ namespace Kash.Application
             services.AddScoped<InteractiveBrokersCsvParser>();
             services.AddScoped<BinanceCsvParser>();
 
-            // 🔥 Parsers de importación de movimientos bancarios (gastos/ingresos, cualquier banco)
+            // Parsers de importación de movimientos bancarios (gastos/ingresos, cualquier banco)
             services.AddScoped<GenericBankCsvParser>();
             services.AddScoped<GenericBankPdfParser>();
 
-            // 🔥 Registrar servicios automáticamente por marker interface
+            // Registrar servicios automáticamente por marker interface
             services.RegisterMarkedServices(typeof(DependencyInyection).Assembly);
 
             return services;
@@ -48,7 +48,7 @@ namespace Kash.Application
             // Obtener todos los tipos del ensamblado
             var types = assembly.GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract)
-                .Where(t => !IsMediatRRequestOrHandler(t)) // 🔥 Excluir queries/commands/handlers de MediatR
+                .Where(t => !IsMediatRRequestOrHandler(t)) // Excluir queries/commands/handlers de MediatR
                 .ToList();
 
             foreach (var implementationType in types)
@@ -82,7 +82,7 @@ namespace Kash.Application
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Verifica si un tipo es una Query/Command/Handler de MediatR
+        /// NUEVO: Verifica si un tipo es una Query/Command/Handler de MediatR
         /// </summary>
         private static bool IsMediatRRequestOrHandler(Type type)
         {
@@ -107,7 +107,7 @@ namespace Kash.Application
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Verifica si una interfaz es de MediatR
+        /// NUEVO: Verifica si una interfaz es de MediatR
         /// </summary>
         private static bool IsMediatRInterface(Type type)
         {

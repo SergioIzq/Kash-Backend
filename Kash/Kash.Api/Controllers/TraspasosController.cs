@@ -28,7 +28,7 @@ public class TraspasosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -64,7 +64,7 @@ public class TraspasosController : AbsController
         {
             CuentaOrigenId = request.CuentaOrigenId,
             CuentaDestinoId = request.CuentaDestinoId,
-            UsuarioId = usuarioId, // 👈 Seguridad: Usar ID validado
+            UsuarioId = usuarioId, // Seguridad: Usar ID validado
             Importe = request.Importe,
             Fecha = request.Fecha,
             Descripcion = request.Descripcion

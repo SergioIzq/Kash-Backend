@@ -41,7 +41,7 @@ SaveChangesCompletedEventData eventData,
     {
         var entitiesWithEvents = new List<(object entity, List<IDomainEvent> events)>();
 
-        // 🔥 FIX: Iterar sobre TODAS las entidades tracked, no solo AbsEntity<IGuidValueObject>
+        // FIX: Iterar sobre TODAS las entidades tracked, no solo AbsEntity<IGuidValueObject>
         foreach (var entry in context.ChangeTracker.Entries())
         {
             // Verificar si la entidad tiene la propiedad DomainEvents

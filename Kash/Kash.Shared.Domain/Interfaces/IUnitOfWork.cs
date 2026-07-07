@@ -2,7 +2,7 @@
 
 /// <summary>
 /// Patrón Unit of Work con gestión de transacciones.
-/// 🔥 ROLLBACK AUTOMÁTICO: Si SaveChangesAsync falla, la transacción se revierte automáticamente.
+/// ROLLBACK AUTOMÁTICO: Si SaveChangesAsync falla, la transacción se revierte automáticamente.
 /// </summary>
 public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {

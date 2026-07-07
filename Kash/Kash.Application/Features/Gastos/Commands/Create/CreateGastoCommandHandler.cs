@@ -10,10 +10,10 @@ using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler que usa los hooks de la clase base.
+/// REFACTORIZADO: Handler que usa los hooks de la clase base.
 /// Reducido de ~120 líneas a ~100 líneas (17% menos código).
-/// 🔥 Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
-/// 🔥 Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
+/// Auto-crea: Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago si no existen.
+/// Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
 /// </summary>
 public sealed class CreateGastoCommandHandler
     : AbsCreateCommandHandler<Gasto, GastoId, CreateGastoCommand>
@@ -50,7 +50,7 @@ public sealed class CreateGastoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Prepara las dependencias (Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago).
+    /// HOOK: Prepara las dependencias (Categoria, Concepto, Proveedor, Persona, Cuenta, FormaPago).
     /// Busca o crea las entidades relacionadas de forma asíncrona.
     /// ORDEN IMPORTANTE: Categoría PRIMERO, luego Concepto con esa CategoríaId.
     /// </summary>
@@ -116,16 +116,16 @@ public sealed class CreateGastoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de crear el Gasto.
+    /// HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de crear el Gasto.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// </summary>
     protected override bool ShouldPersistDependenciesFirst()
     {
-        return true; // ✅ ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
+        return true; // ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
     }
 
     /// <summary>
-    /// 🔥 HOOK: Crea la entidad de dominio con las dependencias preparadas.
+    /// HOOK: Crea la entidad de dominio con las dependencias preparadas.
     /// </summary>
     protected override Gasto CreateEntity(CreateGastoCommand command, Dictionary<string, object>? dependencies = null)
     {

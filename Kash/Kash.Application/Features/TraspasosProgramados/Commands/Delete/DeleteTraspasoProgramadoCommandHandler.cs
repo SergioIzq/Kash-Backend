@@ -10,7 +10,7 @@ namespace Kash.Application.Features.TraspasosProgramados.Commands;
 
 /// <summary>
 /// Manejador concreto para eliminar un TraspasoProgramado.
-/// 🔥 Sobrescribe LoadEntityForDeletionAsync para cargar la entidad y disparar el evento MarkAsDeleted.
+/// Sobrescribe LoadEntityForDeletionAsync para cargar la entidad y disparar el evento MarkAsDeleted.
 /// </summary>
 public sealed class DeleteTraspasoProgramadoCommandHandler
     : DeleteCommandHandler<TraspasoProgramado, TraspasoProgramadoId, DeleteTraspasoProgramadoCommand>
@@ -26,7 +26,7 @@ public sealed class DeleteTraspasoProgramadoCommandHandler
     }
 
     /// <summary>
-    /// 🔥 OVERRIDE: Cargamos la entidad real para poder disparar el evento de dominio.
+    /// OVERRIDE: Cargamos la entidad real para poder disparar el evento de dominio.
     /// </summary>
     protected override async Task<TraspasoProgramado?> LoadEntityForDeletionAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -38,7 +38,7 @@ public sealed class DeleteTraspasoProgramadoCommandHandler
             return null;
         }
 
-        // 2. 🔥 Marcar como eliminado y disparar evento de dominio
+        // 2. Marcar como eliminado y disparar evento de dominio
         traspaso.MarkAsDeleted();
 
         return traspaso;

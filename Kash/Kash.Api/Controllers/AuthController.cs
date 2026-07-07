@@ -7,7 +7,7 @@ using Kash.Application.Features.Auth.Commands.ResetPassword;
 using Kash.Application.Features.Auth.Commands.UpdateUserProfile;
 using Kash.Application.Features.Auth.Commands.UploadAvatar;
 using Kash.Application.Features.Auth.Queries;
-using Kash.Api.Controllers.Base; // ✅ Usamos tu controlador base
+using Kash.Api.Controllers.Base; // Usamos tu controlador base
 using Kash.Api.Extensions; // Para cookies si las usas como extensiones
 using Kash.Shared.Domain.Abstractions.Results; // Para Result
 using MediatR;
@@ -18,7 +18,7 @@ namespace Kash.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : AbsController // ✅ Heredamos de AbsController
+public class AuthController : AbsController // Heredamos de AbsController
 {
     private readonly IWebHostEnvironment _environment;
 

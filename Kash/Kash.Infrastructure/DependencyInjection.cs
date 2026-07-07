@@ -43,7 +43,7 @@ namespace Kash.Infrastructure
                    mySqlOptions.CommandTimeout(30);
                    mySqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
                })
-   .AddInterceptors(interceptor); // ✅ Ahora sí funciona
+   .AddInterceptors(interceptor); // Ahora sí funciona
 
       // Configuración de ambiente
       if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
@@ -57,7 +57,7 @@ namespace Kash.Infrastructure
       }
   });
 
-            // 🔥 NUEVO: Registrar MediatR handlers desde Infrastructure (Event Handlers)
+            // NUEVO: Registrar MediatR handlers desde Infrastructure (Event Handlers)
             services.AddMediatR(cfg =>
              cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
                     );
@@ -70,10 +70,10 @@ namespace Kash.Infrastructure
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // 🔥 Servicio de caché
+            // Servicio de caché
             services.AddScoped<ICacheService, DistributedCacheService>();
 
-            // 🔥 Registro de IFileStorageService (Faltaba antes)
+            // Registro de IFileStorageService (Faltaba antes)
             services.AddHttpContextAccessor();
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
@@ -114,7 +114,7 @@ namespace Kash.Infrastructure
           .AsImplementedInterfaces()
                      .WithScopedLifetime());
 
-            // 🔥 HttpClient para resolución ISIN → Ticker (Yahoo Finance)
+            // HttpClient para resolución ISIN → Ticker (Yahoo Finance)
             services.AddHttpClient("YahooFinance", c =>
                 c.BaseAddress = new Uri("https://query1.finance.yahoo.com"));
 
