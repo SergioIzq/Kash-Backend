@@ -2,13 +2,13 @@
 using Kash.Application.Features.Clientes.Queries;
 using Kash.Application.Features.Clientes.Queries.Recent;
 using Kash.Application.Features.Clientes.Queries.Search;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]

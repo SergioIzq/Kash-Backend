@@ -85,9 +85,7 @@ namespace Kash.Infrastructure
             services.AddHostedService<EmailBackgroundSender>();
 
             // 6️⃣ Repositorios Manuales (Dashboard)
-            services.AddScoped<DashboardRepository>();
-            services.AddScoped<ApplicationInterface.IDashboardRepository>(sp => sp.GetRequiredService<DashboardRepository>());
-            services.AddScoped<IDashboardRepository>(sp => sp.GetRequiredService<DashboardRepository>());
+            services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
 
             // 7️⃣ Scrutor: Repositorios Automáticos
             services.Scan(scan => scan

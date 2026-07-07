@@ -1,4 +1,4 @@
-namespace Kash.NuevaApi.Extensions;
+ï»¿namespace Kash.Api.Extensions;
 
 /// <summary>
 /// Extensiones para el manejo seguro de cookies en la API.
@@ -6,14 +6,14 @@ namespace Kash.NuevaApi.Extensions;
 public static class CookieExtensions
 {
     /// <summary>
-    /// Establece una cookie de autenticación (AccessToken) con configuración segura.
+    /// Establece una cookie de autenticaciï¿½n (AccessToken) con configuraciï¿½n segura.
     /// </summary>
     public static void SetAuthCookie(this HttpResponse response, string token, DateTime expiration, bool isDevelopment)
     {
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // No accesible desde JavaScript (XSS protection)
-            Secure = !isDevelopment, // Solo HTTPS en producción
+            Secure = !isDevelopment, // Solo HTTPS en producciï¿½n
             SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.Strict,
             Expires = expiration,
             Path = "/",
@@ -24,7 +24,7 @@ public static class CookieExtensions
     }
 
     /// <summary>
-    /// Establece una cookie de refresh token con configuración ultra segura.
+    /// Establece una cookie de refresh token con configuraciï¿½n ultra segura.
     /// </summary>
     public static void SetRefreshTokenCookie(this HttpResponse response, string refreshToken, DateTime expiration, bool isDevelopment)
     {
@@ -42,7 +42,7 @@ public static class CookieExtensions
     }
 
     /// <summary>
-    /// Elimina las cookies de autenticación (logout).
+    /// Elimina las cookies de autenticaciï¿½n (logout).
     /// </summary>
     public static void ClearAuthCookies(this HttpResponse response)
     {
@@ -80,7 +80,7 @@ public static class CookieExtensions
     }
 
     /// <summary>
-    /// Establece una cookie genérica con configuración personalizable.
+    /// Establece una cookie genï¿½rica con configuraciï¿½n personalizable.
     /// </summary>
     public static void SetCookie(
         this HttpResponse response,
@@ -117,7 +117,7 @@ public static class CookieExtensions
     }
 
     /// <summary>
-    /// Elimina una cookie específica.
+    /// Elimina una cookie especï¿½fica.
     /// </summary>
     public static void DeleteCookie(this HttpResponse response, string key)
     {

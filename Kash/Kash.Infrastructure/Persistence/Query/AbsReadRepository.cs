@@ -609,6 +609,9 @@ SELECT
         /// <summary>
         /// Construye filtros dinámicos para WHERE clause
         /// </summary>
+        private static readonly System.Text.RegularExpressions.Regex ValidColumnName =
+            new(@"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$", System.Text.RegularExpressions.RegexOptions.Compiled);
+
         protected string BuildDynamicFilters(Dictionary<string, object> filters, DynamicParameters parameters)
         {
             if (filters == null || filters.Count == 0) return string.Empty;
@@ -616,6 +619,13 @@ SELECT
             var conditions = new List<string>();
             foreach (var filter in filters)
             {
+                // El nombre de columna nunca se parametriza en SQL: lo validamos como identificador
+                // seguro (letras/números/guion bajo, con alias opcional) antes de interpolarlo.
+                if (!ValidColumnName.IsMatch(filter.Key))
+                {
+                    throw new ArgumentException($"Nombre de columna no válido en filtro dinámico: '{filter.Key}'.", nameof(filters));
+                }
+
                 // Generamos un nombre de parámetro único para evitar colisiones
                 var paramName = $"Filter_{filter.Key.Replace(".", "_")}";
                 conditions.Add($"{filter.Key} = @{paramName}");

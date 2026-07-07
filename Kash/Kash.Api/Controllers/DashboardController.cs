@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Dashboard.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Domain.Abstractions.Results; // Para Result y Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 /// <summary>
 /// Controller para el dashboard con métricas y resumen del usuario.

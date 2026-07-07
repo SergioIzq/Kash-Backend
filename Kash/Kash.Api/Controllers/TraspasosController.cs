@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Traspasos.Commands;
 using Kash.Application.Features.Traspasos.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]

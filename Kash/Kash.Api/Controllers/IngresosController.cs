@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Ingresos.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -57,7 +57,10 @@ public class IngresosController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoRequest request)
     {
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new CreateIngresoCommand
         {
@@ -70,7 +73,7 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value,
+            UsuarioId = userId,
             // 🔥 NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,
@@ -93,7 +96,10 @@ public class IngresosController : AbsController
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngresoRequest request)
     {
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new UpdateIngresoCommand
         {
@@ -107,7 +113,7 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value,
+            UsuarioId = userId,
             // 🔥 NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,

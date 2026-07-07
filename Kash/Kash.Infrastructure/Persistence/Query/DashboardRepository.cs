@@ -12,7 +12,7 @@ namespace Kash.Infrastructure.Persistence.Query;
 /// - Queries combinadas con múltiples resultsets
 /// - Índices optimizados en WHERE clauses
 /// </summary>
-public sealed class DashboardRepository : ApplicationInterface.IDashboardRepository, IDashboardRepository
+public sealed class DashboardRepository : ApplicationInterface.IDashboardRepository
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
 

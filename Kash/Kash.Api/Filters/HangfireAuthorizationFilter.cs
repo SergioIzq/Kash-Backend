@@ -1,11 +1,11 @@
-using Hangfire.Dashboard;
+ï»¿using Hangfire.Dashboard;
 
-namespace Kash.NuevaApi;
+namespace Kash.Api;
 
 /// <summary>
-/// Filtro de autorización para Hangfire Dashboard.
-/// En desarrollo permite acceso sin autenticación.
-/// En producción requiere autenticación.
+/// Filtro de autorizaciï¿½n para Hangfire Dashboard.
+/// En desarrollo permite acceso sin autenticaciï¿½n.
+/// En producciï¿½n requiere autenticaciï¿½n.
 /// </summary>
 public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
 {
@@ -17,9 +17,9 @@ public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
             return true;
         }
 
-        // En producción, siempre requerir autenticación
+        // En producciï¿½n, siempre requerir autenticaciï¿½n
         // Nota: En Hangfire con ASP.NET Core, el contexto no tiene acceso directo a HttpContext
-        // por lo que en producción se debe configurar autenticación a nivel de endpoint
+        // por lo que en producciï¿½n se debe configurar autenticaciï¿½n a nivel de endpoint
         return false;
     }
 }

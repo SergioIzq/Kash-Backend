@@ -1,12 +1,12 @@
-using Kash.Application.Features.ReglasCategorizacion.Commands;
+﻿using Kash.Application.Features.ReglasCategorizacion.Commands;
 using Kash.Application.Features.ReglasCategorizacion.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 /// <summary>
 /// CRUD de reglas de auto-categorización, usadas al previsualizar/importar extractos bancarios

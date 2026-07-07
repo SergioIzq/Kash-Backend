@@ -29,6 +29,7 @@ public sealed class CreateGastoProgramadoCommandHandler
     private readonly IFormaPagoFinderOrCreatorService _formaPagoFinderService;
     private readonly IJobSchedulingService _jobSchedulingService;
     private readonly IMediator _mediator;
+    private readonly IEntityDependencyOrchestrator _dependencyOrchestrator;
 
     public CreateGastoProgramadoCommandHandler(
         IUnitOfWork unitOfWork,
@@ -42,7 +43,8 @@ public sealed class CreateGastoProgramadoCommandHandler
         ICuentaFinderOrCreatorService cuentaFinderService,
         IFormaPagoFinderOrCreatorService formaPagoFinderService,
         IJobSchedulingService jobSchedulingService,
-        IMediator mediator)
+        IMediator mediator,
+        IEntityDependencyOrchestrator dependencyOrchestrator)
     : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _categoriaFinderService = categoriaFinderService;
@@ -53,6 +55,7 @@ public sealed class CreateGastoProgramadoCommandHandler
         _formaPagoFinderService = formaPagoFinderService;
         _jobSchedulingService = jobSchedulingService;
         _mediator = mediator;
+        _dependencyOrchestrator = dependencyOrchestrator;
     }
 
     /// <summary>
@@ -64,107 +67,70 @@ public sealed class CreateGastoProgramadoCommandHandler
         CreateGastoProgramadoCommand command,
         CancellationToken cancellationToken)
     {
-        var dependencies = new Dictionary<string, object>();
+        var usuarioId = _userContext.UserId ?? throw new InvalidOperationException("Usuario no autenticado");
 
-        try
+        var steps = new List<DependencyStep>
         {
-            var usuarioId = _userContext.UserId ?? throw new InvalidOperationException("Usuario no autenticado");
+            new(
+                Key: "CategoriaId",
+                Id: command.CategoriaId,
+                Nombre: command.CategoriaNombre,
+                FindOrCreateAsync: _categoriaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => CategoriaId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Categoría para crear el concepto."),
 
-            // 0. 🔥 CATEGORÍA: Buscar o crear PRIMERO (obligatoria para Concepto)
-            var categoriaGuid = await _categoriaFinderService.FindOrCreateAsync(
-                command.CategoriaId,
-                command.CategoriaNombre,
-                usuarioId,
-                cancellationToken: cancellationToken);
+            new(
+                Key: "ConceptoId",
+                Id: command.ConceptoId,
+                Nombre: command.ConceptoNombre,
+                FindOrCreateAsync: _conceptoFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => ConceptoId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere un Concepto para crear el gasto programado.",
+                AdditionalData: resolved => new Dictionary<string, object> { { "CategoriaId", resolved["CategoriaId"] } }),
 
-            if (categoriaGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Categoría para crear el concepto."));
-            }
+            new(
+                Key: "ProveedorId",
+                Id: command.ProveedorId,
+                Nombre: command.ProveedorNombre,
+                FindOrCreateAsync: _proveedorFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => ProveedorId.Create(id).Value,
+                Required: false),
 
-            var categoriaId = CategoriaId.Create(categoriaGuid.Value).Value;
-            dependencies["CategoriaId"] = categoriaId;
+            new(
+                Key: "PersonaId",
+                Id: command.PersonaId,
+                Nombre: command.PersonaNombre,
+                FindOrCreateAsync: _personaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => PersonaId.Create(id).Value,
+                Required: false),
 
-            // 1. 🔥 CONCEPTO: Buscar o crear con la CategoríaId (obligatorio)
-            var conceptoGuid = await _conceptoFinderService.FindOrCreateAsync(
-                command.ConceptoId,
-                command.ConceptoNombre,
-                usuarioId,
-                new Dictionary<string, object> { { "CategoriaId", categoriaId.Value } },
-                cancellationToken);
+            new(
+                Key: "CuentaId",
+                Id: command.CuentaId,
+                Nombre: command.CuentaNombre,
+                FindOrCreateAsync: _cuentaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => CuentaId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Cuenta para crear el gasto programado."),
 
-            if (conceptoGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere un Concepto para crear el gasto programado."));
-            }
+            new(
+                Key: "FormaPagoId",
+                Id: command.FormaPagoId,
+                Nombre: command.FormaPagoNombre,
+                FindOrCreateAsync: _formaPagoFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => FormaPagoId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Forma de Pago para crear el gasto programado."),
+        };
 
-            dependencies["ConceptoId"] = ConceptoId.Create(conceptoGuid.Value).Value;
-
-            // 2. 🔥 PROVEEDOR: Buscar o crear (OPCIONAL)
-            var proveedorGuid = await _proveedorFinderService.FindOrCreateAsync(
-                command.ProveedorId,
-                command.ProveedorNombre,
-                usuarioId,
-                cancellationToken: cancellationToken);
-
-            if (proveedorGuid.HasValue)
-            {
-                dependencies["ProveedorId"] = ProveedorId.Create(proveedorGuid.Value).Value;
-            }
-
-            // 3. 🔥 PERSONA: Buscar o crear (OPCIONAL)
-            var personaGuid = await _personaFinderService.FindOrCreateAsync(
-                command.PersonaId,
-                command.PersonaNombre,
-                usuarioId,
-                cancellationToken: cancellationToken);
-
-            if (personaGuid.HasValue)
-            {
-                dependencies["PersonaId"] = PersonaId.Create(personaGuid.Value).Value;
-            }
-
-            // 4. 🔥 CUENTA: Buscar o crear (obligatorio)
-            var cuentaGuid = await _cuentaFinderService.FindOrCreateAsync(
-                command.CuentaId,
-                command.CuentaNombre,
-                usuarioId,
-                cancellationToken: cancellationToken);
-
-            if (cuentaGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Cuenta para crear el gasto programado."));
-            }
-
-            dependencies["CuentaId"] = CuentaId.Create(cuentaGuid.Value).Value;
-
-            // 5. 🔥 FORMA DE PAGO: Buscar o crear (obligatorio)
-            var formaPagoGuid = await _formaPagoFinderService.FindOrCreateAsync(
-                command.FormaPagoId,
-                command.FormaPagoNombre,
-                usuarioId,
-                cancellationToken: cancellationToken);
-
-            if (formaPagoGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Forma de Pago para crear el gasto programado."));
-            }
-
-            dependencies["FormaPagoId"] = FormaPagoId.Create(formaPagoGuid.Value).Value;
-
-            // 6. 🔥 HANGFIRE JOB ID: Generar para la programación
-            dependencies["HangfireJobId"] = _jobSchedulingService.GenerateJobId();
-
-            return Result.Success(dependencies);
-        }
-        catch (ArgumentException ex)
+        var dependenciesResult = await _dependencyOrchestrator.ResolveAsync(usuarioId, steps, cancellationToken);
+        if (dependenciesResult.IsFailure)
         {
-            return Result.Failure<Dictionary<string, object>>(Error.Validation(ex.Message));
+            return dependenciesResult;
         }
+
+        // El HangfireJobId no es una dependencia buscable: se genera aparte de la orquestación.
+        dependenciesResult.Value["HangfireJobId"] = _jobSchedulingService.GenerateJobId();
+
+        return dependenciesResult;
     }
 
     /// <summary>
@@ -194,7 +160,7 @@ public sealed class CreateGastoProgramadoCommandHandler
         var formaPagoId = (FormaPagoId)dependencies["FormaPagoId"];
 
         // Proveedor y Persona: Si no existen en dependencies, crear IDs vacíos
-        var proveedorId = dependencies.ContainsKey("proveedorId") ? (ProveedorId?)dependencies["ProveedorId"] : null;
+        var proveedorId = dependencies.ContainsKey("ProveedorId") ? (ProveedorId?)dependencies["ProveedorId"] : null;
         var personaId = dependencies.ContainsKey("PersonaId") ? (PersonaId?)dependencies["PersonaId"] : null;
         var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
