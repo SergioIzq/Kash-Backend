@@ -13,7 +13,7 @@ namespace Kash.Application.Features.GastosProgramados.Commands.Execute;
 
 /// <summary>
 /// Handler que ejecuta la lógica de negocio cuando Hangfire activa el job de un GastoProgramado.
-/// 🔥 NUEVO: Envía email de notificación al usuario después de ejecutar.
+/// NUEVO: Envía email de notificación al usuario después de ejecutar.
 /// </summary>
 public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<ExecuteGastoProgramadoCommand>
 {
@@ -57,7 +57,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
                 return Result.Failure(Error.NotFound($"GastoProgramado con ID {request.GastoProgramadoId} no encontrado"));
             }
 
-            // 🔥 VALIDACIÓN: Si está inactivo, no ejecutar
+            // VALIDACIÓN: Si está inactivo, no ejecutar
             if (!gastoProgramado.Activo)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
@@ -91,7 +91,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
                     _logger.LogInformation("Gasto creado exitosamente desde GastoProgramado {GastoProgramadoId}", request.GastoProgramadoId);
                 }
 
-                // 🔥 NUEVO: Enviar email de notificación al usuario
+                // NUEVO: Enviar email de notificación al usuario
                 await EnviarEmailNotificacionAsync(gastoProgramado, cancellationToken);
             }
             else
@@ -110,7 +110,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
     }
 
     /// <summary>
-    /// 🔥 NUEVO: Envía un email al usuario notificando que se ejecutó el gasto programado.
+    /// NUEVO: Envía un email al usuario notificando que se ejecutó el gasto programado.
     /// </summary>
     private async Task EnviarEmailNotificacionAsync(GastoProgramadoDto gasto, CancellationToken cancellationToken)
     {

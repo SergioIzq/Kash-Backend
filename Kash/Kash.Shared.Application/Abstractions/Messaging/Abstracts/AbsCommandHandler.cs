@@ -12,7 +12,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts;
 /// <summary>
 /// Proporciona métodos base para manejar comandos de escritura (CRUD: C, U, D) de forma asíncrona.
 /// Utiliza IWriteRepository e IUnitOfWork para asegurar la segregación de responsabilidades.
-/// 🔥 Sistema de versionado de caché para invalidación eficiente de listas.
+/// Sistema de versionado de caché para invalidación eficiente de listas.
 /// </summary>
 /// <typeparam name="TEntity">El tipo de entidad que el command handler manipula, debe heredar de AbsEntity.</typeparam>
 public abstract class AbsCommandHandler<TEntity, TId> : IAbsCommandHandlerBase<TEntity, TId>
@@ -61,7 +61,7 @@ ILogger? logger = null)
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 🔥 Invalidar caché con sistema de versionado
+        // Invalidar caché con sistema de versionado
         await InvalidateCacheAsync(entity.Id.Value);
 
         return Result.Success(entity.Id.Value);
@@ -78,7 +78,7 @@ ILogger? logger = null)
         _writeRepository.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 🔥 Invalidar caché con sistema de versionado
+        // Invalidar caché con sistema de versionado
         await InvalidateCacheAsync(entity.Id.Value);
 
         return Result.Success(entity.Id.Value);
@@ -95,14 +95,14 @@ ILogger? logger = null)
         _writeRepository.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 🔥 Invalidar caché con sistema de versionado
+        // Invalidar caché con sistema de versionado
         await InvalidateCacheAsync(entity.Id.Value);
 
         return Result.Success();
     }
 
     /// <summary>
-    /// 🔥 MEJORADO: Invalida caché usando sistema de versionado por usuario.
+    /// MEJORADO: Invalida caché usando sistema de versionado por usuario.
     /// Invalida: caché individual de la entidad + versión de lista del usuario.
     /// El sistema de versionado garantiza que todas las listas se recalculen automáticamente.
     /// </summary>
@@ -116,7 +116,7 @@ ILogger? logger = null)
 
         _logger?.LogInformation("🗑️ Caché individual invalidado: {CacheKey}", individualKey);
 
-        // 2. 🔥 Invalidar versión de lista del usuario
+        // 2. Invalidar versión de lista del usuario
         // Al eliminar la versión, todas las peticiones futuras generarán una nueva versión
         // y por tanto buscarán claves de caché nuevas (que no existen), forzando recalcular
         if (_userContext.UserId.HasValue)

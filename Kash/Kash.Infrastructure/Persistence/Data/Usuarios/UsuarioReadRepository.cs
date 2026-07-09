@@ -26,7 +26,7 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
     }
 
     /// <summary>
-    /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+    /// ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
     /// </summary>
     protected override ReadRepositoryConfiguration ConfigureRepository()
     {
@@ -119,7 +119,7 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
         var email = Email.Create((string)row.correo).Value;
         var password = PasswordHash.Create((string)row.contrasena).Value;
 
-        // 🔧 CORRECCIÓN 1: Cast explícito a (ConfirmationToken?)null
+        // CORRECCIÓN 1: Cast explícito a (ConfirmationToken?)null
         // C# necesita saber qué tipo de "null" es para el operador ternario.
         var tokenConf = row.token_confirmacion != null
             ? ConfirmationToken.Create((string)row.token_confirmacion).Value

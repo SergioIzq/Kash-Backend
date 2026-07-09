@@ -48,7 +48,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
         frecuencia => frecuencia.Value,
      value => Frecuencia.CreateFromDatabase(value));
 
-            // ✅ Activo
+            // Activo
             builder.Property(e => e.Activo)
             .HasColumnName("activo")
           .IsRequired();

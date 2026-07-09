@@ -1,13 +1,13 @@
-using Kash.Application.Features.Inversiones.Commands;
+﻿using Kash.Application.Features.Inversiones.Commands;
 using Kash.Application.Features.Inversiones.Commands.Import;
 using Kash.Application.Features.Inversiones.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -157,9 +157,9 @@ public class InversionesController : AbsController
     }
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // Request DTOs (entrada del frontend)
-// ──────────────────────────────────────────────────────────
+// 
 
 /// <summary>
 /// Body para POST /api/inversiones.

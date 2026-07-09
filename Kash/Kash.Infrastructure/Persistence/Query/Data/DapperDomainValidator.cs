@@ -11,7 +11,7 @@ public class DapperDomainValidator : IDomainValidator
 {
     private readonly IDbConnectionFactory _connectionFactory;
 
-    // ✅ CAMBIO 1: Inyectamos el Factory, no la conexión directa
+    // CAMBIO 1: Inyectamos el Factory, no la conexión directa
     public DapperDomainValidator(IDbConnectionFactory connectionFactory)
     {
         _connectionFactory = connectionFactory;
@@ -21,7 +21,7 @@ public class DapperDomainValidator : IDomainValidator
         where TEntity : AbsEntity<TId>
         where TId : IGuidValueObject
     {
-        // ✅ CAMBIO 2: Creamos la conexión bajo demanda (Pattern Factory)
+        // CAMBIO 2: Creamos la conexión bajo demanda (Pattern Factory)
         using var connection = _connectionFactory.CreateConnection();
 
         // Dapper abre la conexión automáticamente si está cerrada, 
@@ -31,7 +31,7 @@ public class DapperDomainValidator : IDomainValidator
         // 1. Obtener tabla
         var tableName = GetTableName<TEntity>();
 
-        // ✅ CAMBIO 3 (Optimización): 
+        // CAMBIO 3 (Optimización): 
         // Como TId implementa IGuidValueObject, no necesitamos Reflection lento.
         // Accedemos directamente a la propiedad definida en la interfaz.
         var realIdValue = id.Value;

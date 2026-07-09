@@ -44,7 +44,7 @@ public interface ICacheService
     Task<bool> ExistsAsync(string key);
 
     /// <summary>
-    /// 🔥 NUEVO: Invalida todas las claves que coincidan con un patrón.
+    /// NUEVO: Invalida todas las claves que coincidan con un patrón.
     /// Útil para invalidar todas las paginaciones/búsquedas de una entidad.
     /// </summary>
     /// <param name="pattern">Patrón de búsqueda (ej: "Gasto:*")</param>

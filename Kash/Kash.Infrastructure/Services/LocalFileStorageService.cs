@@ -1,6 +1,6 @@
 ﻿using Kash.Shared.Application.Servicies; // Tu interfaz
-using Microsoft.AspNetCore.Hosting; // ✅ Para IWebHostEnvironment
-using Microsoft.AspNetCore.Http;    // ✅ Para IHttpContextAccessor
+using Microsoft.AspNetCore.Hosting; // Para IWebHostEnvironment
+using Microsoft.AspNetCore.Http;    // Para IHttpContextAccessor
 
 namespace Kash.Infrastructure.Services;
 

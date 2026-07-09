@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Gastos.Commands;
 using Kash.Application.Features.Gastos.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -28,7 +28,7 @@ public class GastosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -57,7 +57,10 @@ public class GastosController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateGastoRequest request)
     {
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new CreateGastoCommand
         {
@@ -76,7 +79,7 @@ public class GastosController : AbsController
             CuentaNombre = request.CuentaNombre,
             FormaPagoNombre = request.FormaPagoNombre,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value
+            UsuarioId = userId
         };
 
         var result = await _sender.Send(command);
@@ -92,10 +95,10 @@ public class GastosController : AbsController
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoRequest request)
     {
-        // Nota: En Updates, generalmente no permitimos cambiar el UsuarioId (seguridad),
-        // por lo que usamos el del request si viene, pero el Handler debería validar la propiedad.
-        // Opcionalmente podrías forzar: command.UsuarioId = GetCurrentUserId();
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new UpdateGastoCommand
         {
@@ -115,7 +118,7 @@ public class GastosController : AbsController
             CuentaNombre = request.CuentaNombre,
             FormaPagoNombre = request.FormaPagoNombre,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value
+            UsuarioId = userId
         };
 
         var result = await _sender.Send(command);
@@ -142,8 +145,8 @@ public record CreateGastoRequest(
     Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
-                    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    Guid UsuarioId, // CORREGIDO: Faltaba coma
+                    // NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
     string? CategoriaNombre = null,
     string? ProveedorNombre = null,

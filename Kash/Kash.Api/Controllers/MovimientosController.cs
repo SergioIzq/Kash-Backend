@@ -1,15 +1,15 @@
-using Kash.Application.Features.Movimientos.Commands.Confirm;
+﻿using Kash.Application.Features.Movimientos.Commands.Confirm;
 using Kash.Application.Features.Movimientos.Commands.Import;
 using Kash.Application.Features.Movimientos.Commands.Import.Models;
 using Kash.Application.Features.Movimientos.Commands.Preview;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -73,7 +73,7 @@ public class MovimientosController : AbsController
         return HandleResult(result);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers 
 
     private (ColumnMapping? map, IActionResult? error) ParseMapping(string mapping, IFormFile file)
     {

@@ -20,13 +20,13 @@ public sealed record UpdateGastoProgramadoCommand : AbsUpdateCommand<GastoProgra
     // IDs de entidades relacionadas
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
-    public Guid? ProveedorId { get; init; }   // 🔥 Opcional
-    public Guid? PersonaId { get; init; }     // 🔥 Opcional
+    public Guid? ProveedorId { get; init; }   // Opcional
+    public Guid? PersonaId { get; init; }     // Opcional
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
 
-    // 🔥 Nombres opcionales para auto-creación
+    // Nombres opcionales para auto-creación
     public string? CategoriaNombre { get; init; }
     public string? ConceptoNombre { get; init; }
     public string? ProveedorNombre { get; init; }

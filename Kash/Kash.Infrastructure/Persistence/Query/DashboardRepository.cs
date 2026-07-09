@@ -7,12 +7,12 @@ namespace Kash.Infrastructure.Persistence.Query;
 
 /// <summary>
 /// Implementación OPTIMIZADA del repositorio de dashboard con ejecución paralela de queries.
-/// 🚀 Reducción de tiempo de respuesta de ~2000ms a ~300ms mediante:
+/// Reducción de tiempo de respuesta de ~2000ms a ~300ms mediante:
 /// - Queries paralelas con Task.WhenAll
 /// - Queries combinadas con múltiples resultsets
 /// - Índices optimizados en WHERE clauses
 /// </summary>
-public sealed class DashboardRepository : ApplicationInterface.IDashboardRepository, IDashboardRepository
+public sealed class DashboardRepository : ApplicationInterface.IDashboardRepository
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
 
@@ -59,7 +59,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
         var filtroCuenta = cuentaId.HasValue ? "AND cta.id = @CuentaId" : "";
         var filtroCategoria = categoriaId.HasValue ? "AND cat.id = @CategoriaId" : "";
 
-        // 🚀 OPTIMIZACIÓN 1: Query combinada para Balance, Ingresos y Gastos del mes actual
+        // OPTIMIZACIÓN 1: Query combinada para Balance, Ingresos y Gastos del mes actual
         var sqlMetricasPrincipales = $@"
             -- Balance total de cuentas
             SELECT COALESCE(SUM(saldo), 0) as BalanceTotal
@@ -115,8 +115,8 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
             {filtroCuenta}
             {filtroCategoria};";
 
-        // 🚀 OPTIMIZACIÓN 2: Ejecutar queries paralelas usando Task.WhenAll
-        // 🔥 FIX: Cada query usa su propia conexión para evitar "Connection must be Open"
+        // OPTIMIZACIÓN 2: Ejecutar queries paralelas usando Task.WhenAll
+        // FIX: Cada query usa su propia conexión para evitar "Connection must be Open"
         var parametros = new
         {
             UsuarioId = usuarioId,
@@ -190,7 +190,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
         var ingresosMesAnterior = metricasPrincipales[3];
         var gastosMesAnterior = metricasPrincipales[4];
 
-        // 🔥 Recalcular porcentajes (crear nuevos objetos porque es un record)
+        // Recalcular porcentajes (crear nuevos objetos porque es un record)
         var topCategorias = topCategoriasRaw.Select(cat => new CategoriaGastoDto
         {
             CategoriaId = cat.CategoriaId,
@@ -248,7 +248,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
     }
 
     /// <summary>
-    /// 🚀 Ejecuta múltiples queries y devuelve los resultados escalares en un array.
+    /// Ejecuta múltiples queries y devuelve los resultados escalares en un array.
     /// </summary>
     private async Task<decimal[]> ExecutarMultipleQueriesAsync(
         System.Data.IDbConnection connection,
@@ -267,7 +267,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
     }
 
     /// <summary>
-    /// 🚀 Obtiene el resumen de cuentas (query independiente para paralelización).
+    /// Obtiene el resumen de cuentas (query independiente para paralelización).
     /// </summary>
     private async Task<List<CuentaResumenDto>> ObtenerCuentasAsync(
         System.Data.IDbConnection connection,
@@ -289,7 +289,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
     }
 
     /// <summary>
-    /// 🚀 Obtiene top 5 categorías (query independiente para paralelización).
+    /// Obtiene top 5 categorías (query independiente para paralelización).
     /// </summary>
     private async Task<List<CategoriaGastoDto>> ObtenerTopCategoriasAsync(
         System.Data.IDbConnection connection,
@@ -329,7 +329,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
     }
 
     /// <summary>
-    /// 🚀 Obtiene últimos 10 movimientos (query combinada optimizada).
+    /// Obtiene últimos 10 movimientos (query combinada optimizada).
     /// </summary>
     private async Task<List<MovimientoResumenDto>> ObtenerUltimosMovimientosAsync(
         System.Data.IDbConnection connection,
@@ -391,7 +391,7 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
     }
 
     /// <summary>
-    /// 🚀 Obtiene histórico de 6 meses con query optimizada (una sola consulta con GROUP BY).
+    /// Obtiene histórico de 6 meses con query optimizada (una sola consulta con GROUP BY).
     /// </summary>
     private async Task<List<HistoricoMensualDto>> ObtenerHistoricoUltimos6MesesAsync(
         System.Data.IDbConnection connection,

@@ -23,7 +23,7 @@ public sealed record CreateGastoCommand : AbsCreateCommand<Gasto, GastoId>
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
 
-    // 🔥 Nombres opcionales para auto-creación
+    // Nombres opcionales para auto-creación
     /// <summary>
     /// Nombre de la categoría. Si CategoriaId no existe y se proporciona este valor,
     /// se creará automáticamente la categoría.

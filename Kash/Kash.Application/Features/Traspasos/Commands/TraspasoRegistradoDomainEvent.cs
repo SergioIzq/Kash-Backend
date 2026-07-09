@@ -4,10 +4,10 @@ using Kash.Domain.Traspasos.Eventos;
 using Kash.Shared.Domain.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
-// ⭐ Este Event Handler maneja la lógica de actualización de saldos.
+// Este Event Handler maneja la lógica de actualización de saldos.
 public sealed class ActualizarSaldosCuentaOnTraspasoRegistrado : IDomainEventHandler<TraspasoRegistradoDomainEvent>
 {
-    // ⭐ Usamos SOLO el WriteRepository para cargar entidades con tracking
+    // Usamos SOLO el WriteRepository para cargar entidades con tracking
     private readonly IWriteRepository<Cuenta, CuentaId> _cuentaWriteRepo;
 
     public ActualizarSaldosCuentaOnTraspasoRegistrado(
@@ -48,7 +48,7 @@ public sealed class ActualizarSaldosCuentaOnTraspasoRegistrado : IDomainEventHan
         }
     }
 
-    // ⭐ Helper para simplificar Task.WhenAll y el manejo de resultados
+    // Helper para simplificar Task.WhenAll y el manejo de resultados
     private static async Task<(T? Result1, T? Result2)> GetParallelResultsAsync<T>(
         Task<T?> task1, Task<T?> task2) where T : class
     {

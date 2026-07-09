@@ -7,7 +7,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 
 /// <summary>
 /// Comando base genérico para operaciones de Actualización.
-/// 🔥 MODIFICADO: Ahora devuelve Result<Guid> en lugar de Result<TDto>.
+/// MODIFICADO: Ahora devuelve Result<Guid> en lugar de Result<TDto>.
 /// </summary>
 /// <typeparam name="TEntity">La Entidad de Dominio que se va a actualizar.</typeparam>
 /// <typeparam name="TId">El tipo del ID de la entidad.</typeparam>

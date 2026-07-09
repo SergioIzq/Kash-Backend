@@ -1,4 +1,4 @@
-using Kash.Domain;
+ï»¿using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging;
 using Kash.Shared.Application.Interfaces;
 using Kash.Shared.Domain.Abstractions.Errors;
@@ -35,16 +35,16 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, LoginRes
 
         if (usuario is null)
         {
-            // SEGURIDAD: Decimos "Credenciales inválidas" para no revelar que el email no existe.
+            // SEGURIDAD: Decimos "Credenciales invï¿½lidas" para no revelar que el email no existe.
             return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
         }
 
-        // 4. Verificar contraseña
+        // 4. Verificar contraseï¿½a
         var isPasswordValid = _passwordHasher.VerifyPassword(request.Contrasena, usuario.ContrasenaHash.Value);
 
         if (!isPasswordValid)
         {
-            // Mismo error que arriba. El atacante no sabe si falló el email o el pass.
+            // Mismo error que arriba. El atacante no sabe si fallel email o el pass.
             return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
         }
 

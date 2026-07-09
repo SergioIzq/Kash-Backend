@@ -53,14 +53,14 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
 
             builder.Property(e => e.ProveedorId)
                 .HasColumnName("id_proveedor")
-                .IsRequired(false) // ✅ NULLABLE: Permite valores NULL en la BD
+                .IsRequired(false) // NULLABLE: Permite valores NULL en la BD
                 .HasConversion(
                     proveedorId => proveedorId.HasValue ? proveedorId.Value.Value : (Guid?)null,
                     value => value.HasValue ? ProveedorId.CreateFromDatabase(value.Value) : null);
 
             builder.Property(e => e.PersonaId)
                 .HasColumnName("id_persona")
-                .IsRequired(false) // ✅ NULLABLE: Permite valores NULL en la BD
+                .IsRequired(false) // NULLABLE: Permite valores NULL en la BD
                 .HasConversion(
                     personaId => personaId.HasValue ? personaId.Value.Value : (Guid?)null,
                     value => value.HasValue ? PersonaId.CreateFromDatabase(value.Value) : null);

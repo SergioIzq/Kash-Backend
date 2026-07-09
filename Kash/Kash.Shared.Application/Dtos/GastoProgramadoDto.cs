@@ -7,7 +7,7 @@
         public DateTime FechaEjecucion { get; init; }
         public string? Descripcion { get; init; }
 
-        // ⭐ PROPIEDADES FALTANTES AÑADIDAS
+        // PROPIEDADES FALTANTES AÑADIDAS
         public string Frecuencia { get; init; } = string.Empty;
         public bool Activo { get; init; }
         public string HangfireJobId { get; init; } = string.Empty;

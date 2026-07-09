@@ -51,7 +51,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     conceptoId => conceptoId.Value,
                     value => ConceptoId.CreateFromDatabase(value));
 
-            // 🔥 NULLABLE: ClienteId es opcional
+            // NULLABLE: ClienteId es opcional
             builder.Property(e => e.ClienteId)
                 .HasColumnName("id_cliente")
                 .IsRequired(false);
@@ -61,7 +61,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     clienteId => clienteId.HasValue ? clienteId.Value.Value : null,
                     value => value.HasValue ? ClienteId.CreateFromDatabase(value.Value) : null);
 
-            // 🔥 NULLABLE: PersonaId es opcional
+            // NULLABLE: PersonaId es opcional
             builder.Property(e => e.PersonaId)
                 .HasColumnName("id_persona")
                 .IsRequired(false);
@@ -104,19 +104,19 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                 .HasForeignKey(e => e.ConceptoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 🔥 NULLABLE: Cliente es opcional - relación nullable
+            // NULLABLE: Cliente es opcional - relación nullable
             builder.HasOne(e => e.Cliente)
                 .WithMany()
                 .HasForeignKey(e => e.ClienteId)
-                .OnDelete(DeleteBehavior.SetNull) // ✅ SetNull en lugar de Cascade para FK nullable
-                .IsRequired(false); // ✅ Relación opcional
+                .OnDelete(DeleteBehavior.SetNull) // SetNull en lugar de Cascade para FK nullable
+                .IsRequired(false); // Relación opcional
 
-            // 🔥 NULLABLE: Persona es opcional - relación nullable
+            // NULLABLE: Persona es opcional - relación nullable
             builder.HasOne(e => e.Persona)
                 .WithMany()
                 .HasForeignKey(e => e.PersonaId)
-                .OnDelete(DeleteBehavior.SetNull) // ✅ SetNull en lugar de Cascade para FK nullable
-                .IsRequired(false); // ✅ Relación opcional
+                .OnDelete(DeleteBehavior.SetNull) // SetNull en lugar de Cascade para FK nullable
+                .IsRequired(false); // Relación opcional
 
             builder.HasOne(e => e.Cuenta)
                 .WithMany()

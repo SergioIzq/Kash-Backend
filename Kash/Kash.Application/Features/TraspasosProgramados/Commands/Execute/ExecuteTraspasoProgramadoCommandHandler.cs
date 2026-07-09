@@ -13,7 +13,7 @@ namespace Kash.Application.Features.TraspasosProgramados.Commands.Execute;
 
 /// <summary>
 /// Handler que ejecuta la lógica de negocio cuando Hangfire activa el job de un TraspasoProgramado.
-/// 🔥 NUEVO: Envía email de notificación al usuario después de ejecutar.
+/// NUEVO: Envía email de notificación al usuario después de ejecutar.
 /// </summary>
 public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<ExecuteTraspasoProgramadoCommand>
 {
@@ -57,7 +57,7 @@ public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<Ex
                 return Result.Failure(Error.NotFound($"TraspasoProgramado con ID {request.TraspasoProgramadoId} no encontrado"));
             }
 
-            // 🔥 VALIDACIÓN: Si está inactivo, no ejecutar
+            // VALIDACIÓN: Si está inactivo, no ejecutar
             if (!traspasoProgramado.Activo)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
@@ -87,7 +87,7 @@ public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<Ex
                     _logger.LogInformation("Traspaso creado exitosamente desde TraspasoProgramado {TraspasoProgramadoId}", request.TraspasoProgramadoId);
                 }
 
-                // 🔥 NUEVO: Enviar email de notificación al usuario
+                // NUEVO: Enviar email de notificación al usuario
                 await EnviarEmailNotificacionAsync(traspasoProgramado, cancellationToken);
             }
             else
@@ -106,7 +106,7 @@ public sealed class ExecuteTraspasoProgramadoCommandHandler : ICommandHandler<Ex
     }
 
     /// <summary>
-    /// 🔥 NUEVO: Envía un email al usuario notificando que se ejecutó el traspaso programado.
+    /// NUEVO: Envía un email al usuario notificando que se ejecutó el traspaso programado.
     /// </summary>
     private async Task EnviarEmailNotificacionAsync(TraspasoProgramadoDto traspaso, CancellationToken cancellationToken)
     {

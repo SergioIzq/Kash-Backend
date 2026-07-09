@@ -11,7 +11,7 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Traspasos.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler simplificado usando hooks de la clase base.
+/// REFACTORIZADO: Handler simplificado usando hooks de la clase base.
 /// Reducido de ~100 líneas a ~50 líneas (50% menos código).
 /// </summary>
 public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Traspaso, TraspasoId, CreateTraspasoCommand>
@@ -30,7 +30,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
     }
 
     /// <summary>
-    /// 🔥 HOOK 1: Validación pre-creación.
+    /// HOOK 1: Validación pre-creación.
     /// Valida existencia de cuentas en paralelo + regla de negocio (origen != destino).
     /// </summary>
     protected override async Task<Result> ValidateBeforeCreateAsync(
@@ -63,7 +63,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Crea la entidad de dominio.
+    /// HOOK 2: Crea la entidad de dominio.
     /// Solo necesita implementar la lógica de creación, el resto lo maneja la clase base.
     /// </summary>
     protected override Traspaso CreateEntity(

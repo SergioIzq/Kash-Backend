@@ -10,10 +10,10 @@ using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler que usa los hooks de la clase base.
+/// REFACTORIZADO: Handler que usa los hooks de la clase base.
 /// Reducido de ~120 líneas a ~100 líneas (17% menos código).
-/// 🔥 Auto-crea: Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago si no existen.
-/// 🔥 Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
+/// Auto-crea: Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago si no existen.
+/// Categoría se crea PRIMERO, luego Concepto con esa CategoríaId.
 /// </summary>
 public sealed class CreateIngresoCommandHandler
     : AbsCreateCommandHandler<Ingreso, IngresoId, CreateIngresoCommand>
@@ -24,6 +24,7 @@ public sealed class CreateIngresoCommandHandler
     private readonly IPersonaFinderOrCreatorService _personaFinderService;
     private readonly ICuentaFinderOrCreatorService _cuentaFinderService;
     private readonly IFormaPagoFinderOrCreatorService _formaPagoFinderService;
+    private readonly IEntityDependencyOrchestrator _dependencyOrchestrator;
 
     public CreateIngresoCommandHandler(
         IUnitOfWork unitOfWork,
@@ -35,7 +36,8 @@ public sealed class CreateIngresoCommandHandler
         IClienteFinderOrCreatorService clienteFinderService,
         IPersonaFinderOrCreatorService personaFinderService,
         ICuentaFinderOrCreatorService cuentaFinderService,
-        IFormaPagoFinderOrCreatorService formaPagoFinderService)
+        IFormaPagoFinderOrCreatorService formaPagoFinderService,
+        IEntityDependencyOrchestrator dependencyOrchestrator)
     : base(unitOfWork, writeRepository, cacheService, userContext)
     {
         _categoriaFinderService = categoriaFinderService;
@@ -44,128 +46,86 @@ public sealed class CreateIngresoCommandHandler
         _personaFinderService = personaFinderService;
         _cuentaFinderService = cuentaFinderService;
         _formaPagoFinderService = formaPagoFinderService;
+        _dependencyOrchestrator = dependencyOrchestrator;
     }
 
     /// <summary>
-    /// 🔥 HOOK: Prepara las dependencias (Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago).
+    /// HOOK: Prepara las dependencias (Categoria, Concepto, Cliente, Persona, Cuenta, FormaPago).
     /// Busca o crea las entidades relacionadas de forma asíncrona.
     /// ORDEN IMPORTANTE: Categoría PRIMERO, luego Concepto con esa CategoríaId.
     /// </summary>
-    protected override async Task<Result<Dictionary<string, object>>> PrepareDependenciesAsync(
+    protected override Task<Result<Dictionary<string, object>>> PrepareDependenciesAsync(
         CreateIngresoCommand command,
         CancellationToken cancellationToken)
     {
-        var dependencies = new Dictionary<string, object>();
+        var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
 
-        try
+        var steps = new List<DependencyStep>
         {
-            var usuarioId = UsuarioId.Create(command.UsuarioId).Value;
+            new(
+                Key: "CategoriaId",
+                Id: command.CategoriaId,
+                Nombre: command.CategoriaNombre,
+                FindOrCreateAsync: _categoriaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => CategoriaId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Categoría para crear el concepto."),
 
-            // 0. 🔥 CATEGORÍA: Buscar o crear PRIMERO (obligatoria para Concepto)
-            var categoriaGuid = await _categoriaFinderService.FindOrCreateAsync(
-                command.CategoriaId,
-                command.CategoriaNombre,
-                usuarioId.Value,
-                cancellationToken: cancellationToken);
+            new(
+                Key: "ConceptoId",
+                Id: command.ConceptoId,
+                Nombre: command.ConceptoNombre,
+                FindOrCreateAsync: _conceptoFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => ConceptoId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere un Concepto para crear el ingreso.",
+                AdditionalData: resolved => new Dictionary<string, object> { { "CategoriaId", resolved["CategoriaId"] } }),
 
-            if (categoriaGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Categoría para crear el concepto."));
-            }
+            new(
+                Key: "ClienteId",
+                Id: command.ClienteId,
+                Nombre: command.ClienteNombre,
+                FindOrCreateAsync: _clienteFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => ClienteId.Create(id).Value,
+                Required: false),
 
-            var categoriaId = CategoriaId.Create(categoriaGuid.Value).Value;
-            dependencies["CategoriaId"] = categoriaId;
+            new(
+                Key: "PersonaId",
+                Id: command.PersonaId,
+                Nombre: command.PersonaNombre,
+                FindOrCreateAsync: _personaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => PersonaId.Create(id).Value,
+                Required: false),
 
-            // 1. 🔥 CONCEPTO: Buscar o crear con la CategoríaId (obligatorio)
-            var conceptoGuid = await _conceptoFinderService.FindOrCreateAsync(
-                command.ConceptoId,
-                command.ConceptoNombre,
-                usuarioId.Value,
-                new Dictionary<string, object> { { "CategoriaId", categoriaId.Value } },
-                cancellationToken);
+            new(
+                Key: "CuentaId",
+                Id: command.CuentaId,
+                Nombre: command.CuentaNombre,
+                FindOrCreateAsync: _cuentaFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => CuentaId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Cuenta para crear el ingreso."),
 
-            if (conceptoGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere un Concepto para crear el ingreso."));
-            }
+            new(
+                Key: "FormaPagoId",
+                Id: command.FormaPagoId,
+                Nombre: command.FormaPagoNombre,
+                FindOrCreateAsync: _formaPagoFinderService.FindOrCreateAsync,
+                ToDependencyValue: id => FormaPagoId.Create(id).Value,
+                RequiredErrorMessage: "Se requiere una Forma de Pago para crear el ingreso."),
+        };
 
-            dependencies["ConceptoId"] = ConceptoId.Create(conceptoGuid.Value).Value;
-
-            // 2. 🔥 CLIENTE: Buscar o crear (opcional)
-            var clienteGuid = await _clienteFinderService.FindOrCreateAsync(
-                command.ClienteId,
-                command.ClienteNombre,
-                usuarioId.Value,
-                cancellationToken: cancellationToken);
-
-            if (clienteGuid.HasValue)
-            {
-                dependencies["ClienteId"] = ClienteId.Create(clienteGuid.Value).Value;
-            }
-
-            // 3. 🔥 PERSONA: Buscar o crear (opcional)
-            var personaGuid = await _personaFinderService.FindOrCreateAsync(
-                command.PersonaId,
-                command.PersonaNombre,
-                usuarioId.Value,
-                cancellationToken: cancellationToken);
-
-            if (personaGuid.HasValue)
-            {
-                dependencies["PersonaId"] = PersonaId.Create(personaGuid.Value).Value;
-            }
-
-            // 4. 🔥 CUENTA: Buscar o crear (obligatorio)
-            var cuentaGuid = await _cuentaFinderService.FindOrCreateAsync(
-                command.CuentaId,
-                command.CuentaNombre,
-                usuarioId.Value,
-                cancellationToken: cancellationToken);
-
-            if (cuentaGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Cuenta para crear el ingreso."));
-            }
-
-            dependencies["CuentaId"] = CuentaId.Create(cuentaGuid.Value).Value;
-
-            // 5. 🔥 FORMA DE PAGO: Buscar o crear (obligatorio)
-            var formaPagoGuid = await _formaPagoFinderService.FindOrCreateAsync(
-                command.FormaPagoId,
-                command.FormaPagoNombre,
-                usuarioId.Value,
-                cancellationToken: cancellationToken);
-
-            if (formaPagoGuid == null)
-            {
-                return Result.Failure<Dictionary<string, object>>(Error.Validation(
-                    "Se requiere una Forma de Pago para crear el ingreso."));
-            }
-
-            dependencies["FormaPagoId"] = FormaPagoId.Create(formaPagoGuid.Value).Value;
-
-            return Result.Success(dependencies);
-        }
-        catch (ArgumentException ex)
-        {
-            return Result.Failure<Dictionary<string, object>>(Error.Validation(ex.Message));
-        }
+        return _dependencyOrchestrator.ResolveAsync(usuarioId.Value, steps, cancellationToken);
     }
 
     /// <summary>
-    /// 🔥 HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de crear el Ingreso.
+    /// HOOK NUEVO: Indica que las dependencias deben guardarse ANTES de crear el Ingreso.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// </summary>
     protected override bool ShouldPersistDependenciesFirst()
     {
-        return true; // ✅ ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
+        return true; // ACTIVAR persistencia previa para evitar DbUpdateConcurrencyException
     }
 
     /// <summary>
-    /// 🔥 HOOK: Crea la entidad de dominio con las dependencias preparadas.
+    /// HOOK: Crea la entidad de dominio con las dependencias preparadas.
     /// </summary>
     protected override Ingreso CreateEntity(CreateIngresoCommand command, Dictionary<string, object>? dependencies = null)
     {

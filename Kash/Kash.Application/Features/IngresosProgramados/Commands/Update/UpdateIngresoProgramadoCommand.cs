@@ -21,12 +21,12 @@ public sealed record UpdateIngresoProgramadoCommand : AbsUpdateCommand<IngresoPr
     public required Guid CategoriaId { get; init; }
     public required Guid ConceptoId { get; init; }
     public required Guid UsuarioId { get; init; }
-    public Guid? ClienteId { get; init; }     // 🔥 Opcional
-    public Guid? PersonaId { get; init; }     // 🔥 Opcional
+    public Guid? ClienteId { get; init; }     // Opcional
+    public Guid? PersonaId { get; init; }     // Opcional
     public required Guid CuentaId { get; init; }
     public required Guid FormaPagoId { get; init; }
 
-    // 🔥 Nombres opcionales para auto-creación
+    // Nombres opcionales para auto-creación
     public string? CategoriaNombre { get; init; }
     public string? ConceptoNombre { get; init; }
     public string? ClienteNombre { get; init; }

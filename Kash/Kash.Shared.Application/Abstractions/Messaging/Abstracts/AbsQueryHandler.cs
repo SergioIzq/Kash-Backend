@@ -7,8 +7,8 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts;
 
 /// <summary>
 /// Proporciona métodos base para manejar consultas de solo lectura (Queries).
-/// ✅ OPTIMIZADO: Usa DTOs directamente desde IReadRepository.
-/// 🔥 SIMPLIFICADO: Solo proporciona el cache service, los handlers concretos inyectan sus repositorios.
+/// OPTIMIZADO: Usa DTOs directamente desde IReadRepository.
+/// SIMPLIFICADO: Solo proporciona el cache service, los handlers concretos inyectan sus repositorios.
 /// </summary>
 public abstract class AbsQueryHandler<TEntity, TId> : IQueryHandlerBase<TEntity, TId>
     where TEntity : AbsEntity<TId>

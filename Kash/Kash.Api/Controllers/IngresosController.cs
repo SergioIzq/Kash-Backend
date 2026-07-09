@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Ingresos.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -28,7 +28,7 @@ public class IngresosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -57,7 +57,10 @@ public class IngresosController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoRequest request)
     {
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new CreateIngresoCommand
         {
@@ -70,8 +73,8 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value,
-            // 🔥 NUEVO: Pasar nombres para auto-creación
+            UsuarioId = userId,
+            // NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,
             CuentaNombre = request.CuentaNombre,
@@ -93,7 +96,10 @@ public class IngresosController : AbsController
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngresoRequest request)
     {
-        var userId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var userId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new UpdateIngresoCommand
         {
@@ -107,8 +113,8 @@ public class IngresosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = userId!.Value,
-            // 🔥 NUEVO: Pasar nombres para auto-creación
+            UsuarioId = userId,
+            // NUEVO: Pasar nombres para auto-creación
             ConceptoNombre = request.ConceptoNombre,
             CategoriaNombre = request.CategoriaNombre,
             ClienteNombre = request.ClienteNombre,
@@ -141,8 +147,8 @@ public record CreateIngresoRequest(
     Guid? PersonaId,
     Guid CuentaId,
     Guid FormaPagoId,
-    Guid UsuarioId, // 🔥 CORREGIDO: Faltaba coma
-    // 🔥 NUEVO: Nombres opcionales para auto-creación de entidades
+    Guid UsuarioId, // CORREGIDO: Faltaba coma
+    // NUEVO: Nombres opcionales para auto-creación de entidades
     string? ConceptoNombre = null,
     string? CategoriaNombre = null,
     string? ClienteNombre = null,

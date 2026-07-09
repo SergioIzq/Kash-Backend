@@ -11,7 +11,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
     {
         public void Configure(EntityTypeBuilder<Cliente> builder)
         {
-            builder.ToTable("clientes"); // ✅ Nombre correcto de tabla (plural)
+            builder.ToTable("clientes"); // Nombre correcto de tabla (plural)
             builder.Property(e => e.Id)
                            .HasColumnName("id")
                            .IsRequired()
@@ -21,7 +21,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                                 value => ClienteId.CreateFromDatabase(value)
                            );
 
-            // 🔧 FIX CRÍTICO: Configurar conversiones de Value Objects
+            // FIX CRÍTICO: Configurar conversiones de Value Objects
             builder.Property(e => e.Nombre)
                 .HasColumnName("nombre")
                 .HasColumnType("varchar")
@@ -32,7 +32,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     value => Nombre.CreateFromDatabase(value));         // DB -> Value Object
 
             builder.Property(e => e.UsuarioId)
-                .HasColumnName("id_usuario") // ✅ Nombre consistente
+                .HasColumnName("id_usuario") // Nombre consistente
                 .IsRequired()
                 .HasConversion(
                     usuarioId => usuarioId.Value,        // Value Object -> DB
@@ -46,11 +46,11 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
             builder.Property(e => e.FechaCreacion)
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            // 🚀 OPTIMIZACIÓN: Índice compuesto para filtros por usuario
+            // OPTIMIZACIÓN: Índice compuesto para filtros por usuario
             builder.HasIndex(e => new { e.UsuarioId, e.FechaCreacion })
                 .HasDatabaseName("idx_clientes_usuario_fecha");
 
-            // 🚀 OPTIMIZACIÓN: Índice para búsquedas por nombre
+            // OPTIMIZACIÓN: Índice para búsquedas por nombre
             builder.HasIndex(e => new { e.UsuarioId, e.Nombre })
                 .HasDatabaseName("idx_clientes_usuario_nombre");
         }

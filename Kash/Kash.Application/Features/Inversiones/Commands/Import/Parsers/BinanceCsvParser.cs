@@ -1,4 +1,4 @@
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Kash.Application.Features.Inversiones.Commands.Import.Models;
 using System.Globalization;
@@ -48,32 +48,32 @@ public sealed class BinanceCsvParser : IInversionParser
             try
             {
                 // Lado de la operacion: solo compras
-                if (!csv.TryGetField("Side", out string side) &&
+                if (!csv.TryGetField("Side", out string? side) &&
                     !csv.TryGetField("Lado", out side))
                     throw new FormatException("Falta la columna Side/Lado");
 
-                if (!side.Equals("BUY", StringComparison.OrdinalIgnoreCase) &&
+                if (!side!.Equals("BUY", StringComparison.OrdinalIgnoreCase) &&
                     !side.Equals("COMPRA", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 // Par de trading (ej: BTCUSDT)
-                if (!csv.TryGetField("Pair", out string pair) && !csv.TryGetField("Par", out pair))
+                if (!csv.TryGetField("Pair", out string? pair) && !csv.TryGetField("Par", out pair))
                     throw new FormatException("Falta la columna Pair/Par");
 
                 // Precio
-                if (!csv.TryGetField("Price", out string priceStr) && !csv.TryGetField("Precio", out priceStr))
+                if (!csv.TryGetField("Price", out string? priceStr) && !csv.TryGetField("Precio", out priceStr))
                     throw new FormatException("Falta la columna Price/Precio");
 
-                var precioLimpio = priceStr.Replace(".", "").Replace(",", ".");
+                var precioLimpio = priceStr!.Replace(".", "").Replace(",", ".");
                 if (!decimal.TryParse(precioLimpio, NumberStyles.Any, CultureInfo.InvariantCulture, out var precio) || precio <= 0)
                     throw new FormatException("Precio de compra invalido");
 
                 // Ejecutado (ej: "0.001 BTC" o "0.001BTC")
-                if (!csv.TryGetField("Executed", out string executedStr) &&
+                if (!csv.TryGetField("Executed", out string? executedStr) &&
                     !csv.TryGetField("Ejecutado", out executedStr))
                     throw new FormatException("Falta la columna Executed/Ejecutado");
 
-                var executedMatch = CryptoAmountRegex.Match(executedStr);
+                var executedMatch = CryptoAmountRegex.Match(executedStr!);
                 if (!executedMatch.Success)
                     throw new FormatException("Cantidad invalida o cero");
 
@@ -85,15 +85,15 @@ public sealed class BinanceCsvParser : IInversionParser
                 var ticker = $"{cryptoSymbol}-USD";
 
                 // Importe para extraer la moneda (ej: "65.00 USDT")
-                if (!csv.TryGetField("Amount", out string amountStr) &&
+                if (!csv.TryGetField("Amount", out string? amountStr) &&
                     !csv.TryGetField("Importe", out amountStr))
                     amountStr = string.Empty;
 
-                var monedaRaw = CryptoAmountRegex.Match(amountStr).Groups[2].Value;
+                var monedaRaw = CryptoAmountRegex.Match(amountStr!).Groups[2].Value;
                 var moneda = monedaRaw switch { "USDT" => "USD", "" => "USD", _ => monedaRaw };
 
                 // Fecha
-                if (!csv.TryGetField("Date(UTC)", out string dateStr) &&
+                if (!csv.TryGetField("Date(UTC)", out string? dateStr) &&
                     !csv.TryGetField("Fecha(UTC)", out dateStr) &&
                     !csv.TryGetField("Date", out dateStr) &&
                     !csv.TryGetField("Fecha", out dateStr))
@@ -103,7 +103,7 @@ public sealed class BinanceCsvParser : IInversionParser
                     throw new FormatException("Fecha con formato incorrecto");
 
                 var fecha = DateOnly.FromDateTime(dateTime);
-                rows.Add(new InversionImportDto(pair, ticker, "cripto", cantidad, precio, moneda, fecha, null, "Binance"));
+                rows.Add(new InversionImportDto(pair!, ticker, "cripto", cantidad, precio, moneda, fecha, null, "Binance"));
             }
             catch (Exception ex)
             {

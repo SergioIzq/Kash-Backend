@@ -35,7 +35,7 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
             ? (Descripcion?)null
             : new Descripcion(command.Descripcion);
 
-        // 🔥 Llamar al método Update de la entidad que dispara el evento
+        // Llamar al método Update de la entidad que dispara el evento
         var result = entity.Update(
             cuentaOrigenId,
             cuentaDestinoId,

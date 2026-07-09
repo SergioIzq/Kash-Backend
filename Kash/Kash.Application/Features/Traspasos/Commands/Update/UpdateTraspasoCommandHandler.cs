@@ -33,7 +33,7 @@ public sealed class UpdateTraspasoCommandHandler
         var fecha = FechaRegistro.Create(command.FechaEjecucion).Value;
         var descripcion = new Descripcion(command.Descripcion);
 
-        // 🔥 Llamar al método Update de la entidad que dispara el evento
+        // Llamar al método Update de la entidad que dispara el evento
         entity.Update(
       cuentaOrigenId,
         cuentaDestinoId,

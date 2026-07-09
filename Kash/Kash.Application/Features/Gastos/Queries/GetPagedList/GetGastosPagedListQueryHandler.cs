@@ -23,7 +23,7 @@ public sealed class GetGastosPagedListQueryHandler
     }
 
     /// <summary>
-    /// 🚀 OPTIMIZADO: Usa método específico del repositorio con búsqueda y ordenamiento.
+    /// OPTIMIZADO: Usa método específico del repositorio con búsqueda y ordenamiento.
     /// Aprovecha el índice (id_usuario, fecha_creacion) reduciendo de 400ms a ~50ms.
     /// Junto con el cache, las requests repetidas bajan a ~5ms.
     /// </summary>
@@ -31,7 +31,7 @@ public sealed class GetGastosPagedListQueryHandler
         GetGastosPagedListQuery query,
         CancellationToken cancellationToken)
     {
-        // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro, búsqueda y ordenamiento
+        // Si tenemos UsuarioId, usar el método optimizado con filtro, búsqueda y ordenamiento
         if (query.UsuarioId.HasValue)
         {
             return await _dtoRepository.GetPagedReadModelsByUserAsync(

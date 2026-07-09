@@ -40,12 +40,12 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
 .HasColumnName("fecha_ejecucion")
    .IsRequired();
 
-            // ✅ Activo
+            // Activo
             builder.Property(e => e.Activo)
             .HasColumnName("activo")
           .IsRequired();
 
-            // ✅ HangfireJobId
+            // HangfireJobId
             builder.Property(e => e.HangfireJobId)
     .HasColumnName("hangfire_job_id")
   .HasColumnType("varchar(100)")

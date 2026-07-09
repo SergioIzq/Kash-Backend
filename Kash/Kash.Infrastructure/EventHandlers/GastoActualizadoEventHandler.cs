@@ -1,4 +1,4 @@
-using Kash.Domain;
+ï»¿using Kash.Domain;
 using Kash.Domain.Gastos.Eventos;
 using Kash.Shared.Domain.Interfaces;
 using Kash.Shared.Domain.Interfaces.Repositories;
@@ -32,17 +32,17 @@ public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoAct
     {
         try
         {
-            // Si la cuenta no cambió y el importe tampoco, no hacemos nada
+            // Si la cuenta no cambiy el importe tampoco, no hacemos nada
             if (notification.CuentaIdAnterior.Equals(notification.CuentaIdNueva) &&
                        notification.ImporteAnterior.Equals(notification.ImporteNuevo))
             {
                 return;
             }
 
-            // CASO 1: Cambió la cuenta (movimiento entre cuentas)
+            // CASO 1: Cambila cuenta (movimiento entre cuentas)
             if (!notification.CuentaIdAnterior.Equals(notification.CuentaIdNueva))
             {
-                // 1.1 Revertir en cuenta anterior (depositar lo que se había retirado)
+                // 1.1 Revertir en cuenta anterior (depositar lo que se habï¿½a retirado)
                 var cuentaAnterior = await _cuentaRepository.GetByIdAsync(notification.CuentaIdAnterior.Value, cancellationToken);
                 if (cuentaAnterior != null)
                 {
@@ -58,7 +58,7 @@ public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoAct
                     _cuentaRepository.Update(cuentaNueva);
                 }
             }
-            // CASO 2: Misma cuenta, pero cambió el importe
+            // CASO 2: Misma cuenta, pero cambiel importe
             else
             {
                 var cuenta = await _cuentaRepository.GetByIdAsync(notification.CuentaIdNueva.Value, cancellationToken);
@@ -75,7 +75,7 @@ public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoAct
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
-                   "Saldo actualizado por modificación de gasto {GastoId}: Cuenta anterior {CuentaAnterior} ({ImporteAnterior}) -> Cuenta nueva {CuentaNueva} ({ImporteNuevo})",
+                   "Saldo actualizado por modificaciï¿½n de gasto {GastoId}: Cuenta anterior {CuentaAnterior} ({ImporteAnterior}) -> Cuenta nueva {CuentaNueva} ({ImporteNuevo})",
          notification.GastoId,
                     notification.CuentaIdAnterior,
             notification.ImporteAnterior.Valor,
@@ -92,7 +92,7 @@ public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoAct
         catch (Exception ex)
         {
             _logger.LogError(ex,
-     "Error al actualizar saldo por modificación de gasto {GastoId}",
+     "Error al actualizar saldo por modificaciï¿½n de gasto {GastoId}",
               notification.GastoId);
             throw;
         }

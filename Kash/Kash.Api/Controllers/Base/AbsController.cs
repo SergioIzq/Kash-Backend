@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers.Base;
+namespace Kash.Api.Controllers.Base;
 
 [Authorize]
 [ApiController]
@@ -109,6 +109,24 @@ public abstract class AbsController : ControllerBase
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+    }
+
+    /// <summary>
+    /// Obtiene el Id del usuario autenticado. Si no está presente (p.ej. un token sin el claim
+    /// esperado, aunque haya pasado [Authorize]), retorna el 401 a devolver; en caso contrario, null.
+    /// Uso: if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+    /// </summary>
+    protected IActionResult? RequireCurrentUserId(out Guid usuarioId)
+    {
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId is null)
+        {
+            usuarioId = Guid.Empty;
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        }
+
+        usuarioId = currentUserId.Value;
+        return null;
     }
 
     protected void SetRefreshTokenCookie(string token, int expireDays = 7)

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+ï»¿using Microsoft.AspNetCore.Http;
 
 namespace Kash.Middleware;
 
@@ -13,8 +13,8 @@ public sealed class NoCacheMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Hook: Esto se ejecutará justo antes de enviar los headers a la red,
-        // pero DESPUÉS de que el controlador haya definido el Content-Type.
+        // Hook: Esto se ejecutarjusto antes de enviar los headers a la red,
+        // pero DESPUï¿½S de que el controlador haya definido el Content-Type.
         context.Response.OnStarting(() =>
         {
             if (IsApiResponse(context))

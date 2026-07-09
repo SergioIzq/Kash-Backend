@@ -11,7 +11,7 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Proveedores.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler simplificado usando hooks de la clase base.
+/// REFACTORIZADO: Handler simplificado usando hooks de la clase base.
 /// Reducido de ~70 líneas a ~30 líneas (60% menos código).
 /// </summary>
 public sealed class CreateProveedorCommandHandler
@@ -31,7 +31,7 @@ public sealed class CreateProveedorCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Crea la entidad de dominio.
+    /// HOOK: Crea la entidad de dominio.
     /// Solo necesita implementar la lógica de creación, el resto lo maneja la clase base.
     /// </summary>
     protected override Proveedor CreateEntity(CreateProveedorCommand command, Dictionary<string, object>? dependencies = null)
@@ -43,7 +43,7 @@ public sealed class CreateProveedorCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Validación y adición al contexto.
+    /// HOOK: Validación y adición al contexto.
     /// Usa CreateAsyncWithValidation que valida unicidad Y agrega la entidad.
     /// </summary>
     protected override async Task<(Result ValidationResult, bool EntityAdded)> ValidateAndAddToContextAsync(

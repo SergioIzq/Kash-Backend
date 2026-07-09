@@ -10,8 +10,8 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 
 /// <summary>
 /// Handler genérico MEJORADO para actualizar entidades con patrón Template Method.
-/// 🔥 REFACTORIZADO: Proporciona hooks para diferentes estrategias de actualización.
-/// 🎯 OBJETIVO: Reducir el código duplicado en los handlers concretos.
+/// REFACTORIZADO: Proporciona hooks para diferentes estrategias de actualización.
+/// OBJETIVO: Reducir el código duplicado en los handlers concretos.
 /// </summary>
 public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     : AbsCommandHandler<TEntity, TId>, IRequestHandler<TCommand, Result<Guid>>
@@ -32,7 +32,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     #region Template Method Pattern - Hooks para personalizar
 
     /// <summary>
-    /// 🔥 HOOK 1: Validación pre-actualización (opcional).
+    /// HOOK 1: Validación pre-actualización (opcional).
     /// Override para validar existencia de entidades relacionadas, reglas de negocio, etc.
     /// Se ejecuta ANTES de obtener la entidad de la BD.
     /// Por defecto no hace nada (Result.Success).
@@ -43,7 +43,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     }
 
     /// <summary>
-    /// 🔥 HOOK 2: Preparación de dependencias (opcional).
+    /// HOOK 2: Preparación de dependencias (opcional).
     /// Override para buscar/validar entidades relacionadas de forma asíncrona.
     /// Retorna un diccionario con las entidades preparadas o información necesaria.
     /// Por defecto retorna diccionario vacío.
@@ -56,7 +56,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     }
 
     /// <summary>
-    /// 🔥 HOOK 2.5: Persistir dependencias antes de actualizar la entidad principal (opcional).
+    /// HOOK 2.5: Persistir dependencias antes de actualizar la entidad principal (opcional).
     /// Override si las entidades relacionadas deben guardarse ANTES de actualizar la entidad principal.
     /// Esto evita problemas de concurrencia cuando se auto-crean múltiples entidades relacionadas.
     /// Por defecto no hace nada (false).
@@ -67,14 +67,14 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     }
 
     /// <summary>
-    /// 🔥 HOOK 3: Aplicar cambios a la entidad (REQUERIDO).
+    /// HOOK 3: Aplicar cambios a la entidad (REQUERIDO).
     /// Método abstracto que DEBE implementarse en cada handler concreto.
     /// Recibe la entidad cargada de la BD, el command y opcionalmente las dependencias preparadas.
     /// </summary>
     protected abstract void ApplyChanges(TEntity entity, TCommand command, Dictionary<string, object>? dependencies = null);
 
     /// <summary>
-    /// 🔥 HOOK 4: Validación y actualización con repositorio específico (opcional).
+    /// HOOK 4: Validación y actualización con repositorio específico (opcional).
     /// Override para validaciones que requieren la entidad ya modificada (ej: validaciones de unicidad).
     /// Si este método actualiza la entidad en el contexto (usando UpdateAsync con validación),
     /// debe retornar Result con IsSuccess = true y un flag para evitar doble Update.
@@ -89,7 +89,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     }
 
     /// <summary>
-    /// 🔥 HOOK 5: Acciones post-actualización (opcional).
+    /// HOOK 5: Acciones post-actualización (opcional).
     /// Override para ejecutar lógica adicional después de guardar (ej: invalidar cache, enviar eventos).
     /// Por defecto no hace nada.
     /// </summary>
@@ -103,7 +103,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     #region Template Method - Flujo Principal
 
     /// <summary>
-    /// 🎯 FLUJO PRINCIPAL: Template Method que orquesta el proceso de actualización.
+    /// FLUJO PRINCIPAL: Template Method que orquesta el proceso de actualización.
     /// Este método NO debe ser sobrescrito en la mayoría de casos.
     /// Usa los hooks para personalizar el comportamiento.
     /// </summary>
@@ -111,27 +111,27 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
     {
         try
         {
-            // 1. 🔍 Validación pre-actualización
+            // 1. Validación pre-actualización
             var validationResult = await ValidateBeforeUpdateAsync(command, cancellationToken);
             if (validationResult.IsFailure)
             {
                 return Result.Failure<Guid>(validationResult.Error);
             }
 
-            // 2. 🛠️ Preparación de dependencias (validar/buscar entidades relacionadas)
+            // 2. Preparación de dependencias (validar/buscar entidades relacionadas)
             var dependenciesResult = await PrepareDependenciesAsync(command, cancellationToken);
             if (dependenciesResult.IsFailure)
             {
                 return Result.Failure<Guid>(dependenciesResult.Error);
             }
 
-            // 2.5 🔥 NUEVO: Guardar dependencias PRIMERO si es necesario (evita problemas de concurrencia)
+            // 2.5 NUEVO: Guardar dependencias PRIMERO si es necesario (evita problemas de concurrencia)
             if (ShouldPersistDependenciesFirst())
             {
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
-            // 3. 📦 Obtener la entidad (con tracking para Update)
+            // 3. Obtener la entidad (con tracking para Update)
             var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
             if (entity is null)
             {
@@ -139,17 +139,17 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
                     $"{typeof(TEntity).Name} con ID '{command.Id}' no encontrada."));
             }
 
-            // 4. 🏗️ Aplicar cambios a la entidad
+            // 4. Aplicar cambios a la entidad
             ApplyChanges(entity, command, dependenciesResult.Value);
 
-            // 5. ✅ Validación post-actualización y actualización en contexto
+            // 5. Validación post-actualización y actualización en contexto
             var validationTuple = await ValidateAndUpdateInContextAsync(entity, command, cancellationToken);
             if (validationTuple.ValidationResult.IsFailure)
             {
                 return Result.Failure<Guid>(validationTuple.ValidationResult.Error);
             }
 
-            // 6. 💾 Marcar como modificado si no se hizo en el paso anterior
+            // 6. Marcar como modificado si no se hizo en el paso anterior
             if (!validationTuple.EntityUpdated)
             {
                 _writeRepository.Update(entity);
@@ -158,7 +158,7 @@ public abstract class AbsUpdateCommandHandler<TEntity, TId, TDto, TCommand>
             // Guardar cambios (solo la entidad principal si ya guardamos las dependencias)
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 7. 🎉 Acciones post-actualización
+            // 7. Acciones post-actualización
             await OnEntityUpdatedAsync(entity, entity.Id.Value, cancellationToken);
 
             return Result.Success(entity.Id.Value);

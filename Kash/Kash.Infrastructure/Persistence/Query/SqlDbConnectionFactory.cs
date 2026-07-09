@@ -13,7 +13,7 @@ public class SqlDbConnectionFactory : IDbConnectionFactory
         var baseConnectionString = configuration.GetConnectionString("DefaultConnection")
                             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        // 🚀 OPTIMIZACIÓN: Configurar pool de conexiones MySQL para mejor rendimiento
+        // OPTIMIZACIÓN: Configurar pool de conexiones MySQL para mejor rendimiento
         var builder = new MySqlConnectionStringBuilder(baseConnectionString)
         {
             // Pool de conexiones optimizado

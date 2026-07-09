@@ -4,20 +4,20 @@ namespace Kash.Infrastructure.Services.Scheduling;
 
 /// <summary>
 /// Servicio que convierte las reglas de frecuencia del dominio a expresiones CRON de Hangfire.
-/// ✅ OPTIMIZADO: Usa Span<char> y switch expression para máximo rendimiento.
+/// OPTIMIZADO: Usa Span<char> y switch expression para máximo rendimiento.
 /// </summary>
 public static class CronExpressionConverter
 {
     /// <summary>
     /// Convierte una Frecuencia y una fecha de ejecución en una expresión CRON.
-    /// 🔥 OPTIMIZACIÓN: Switch expression + stackalloc para zero allocations.
+    /// OPTIMIZACIÓN: Switch expression + stackalloc para zero allocations.
     /// </summary>
     public static string ConvertirFrecuenciaACron(Frecuencia frecuencia, DateTime fechaEjecucion)
     {
-        // 🔥 OPTIMIZACIÓN: Usar ReadOnlySpan para evitar allocations
+        // OPTIMIZACIÓN: Usar ReadOnlySpan para evitar allocations
         ReadOnlySpan<char> frecuenciaSpan = frecuencia.Value.AsSpan();
 
-        // 🔥 OPTIMIZACIÓN: Switch sobre spans (zero allocations)
+        // OPTIMIZACIÓN: Switch sobre spans (zero allocations)
         return frecuenciaSpan switch
         {
             _ when frecuenciaSpan.Equals("diaria", StringComparison.OrdinalIgnoreCase)
@@ -41,7 +41,7 @@ public static class CronExpressionConverter
         };
     }
 
-    // 🔥 OPTIMIZACIÓN: String interpolation optimizado por el compilador
+    // OPTIMIZACIÓN: String interpolation optimizado por el compilador
     private static string BuildDailyCron(DateTime fecha)
         => $"{fecha.Minute} {fecha.Hour} * * *";
 

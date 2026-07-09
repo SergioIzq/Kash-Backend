@@ -7,7 +7,7 @@ namespace Kash.Infrastructure.Persistence.Command;
 
 /// <summary>
 /// Unit of Work con gestión de transacciones y rollback automático.
-/// 🔥 COMPATIBLE CON MYSQL: Compatible con MySqlRetryingExecutionStrategy.
+/// COMPATIBLE CON MYSQL: Compatible con MySqlRetryingExecutionStrategy.
 /// </summary>
 public class UnitOfWork : IUnitOfWork
 {
@@ -37,7 +37,7 @@ public class UnitOfWork : IUnitOfWork
 
     /// <summary>
     /// Guarda los cambios con gestión automática de transacciones y rollback.
-    /// 🔥 FIX: Compatible con MySQL Retry Strategy.
+    /// FIX: Compatible con MySQL Retry Strategy.
     /// </summary>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -66,7 +66,7 @@ public class UnitOfWork : IUnitOfWork
                 // 3. Guardar todo junto en la BD
                 var result = await _context.SaveChangesAsync(cancellationToken);
 
-                // 4. 🔥 COMMIT: Solo si creamos la transacción aquí (es decir, es "local")
+                // 4. COMMIT: Solo si creamos la transacción aquí (es decir, es "local")
                 if (shouldCommitTransaction && _currentTransaction != null)
                 {
                     await _currentTransaction.CommitAsync(cancellationToken);
@@ -80,7 +80,7 @@ public class UnitOfWork : IUnitOfWork
             }
             catch (Exception)
             {
-                // 🔥 ROLLBACK AUTOMÁTICO
+                // ROLLBACK AUTOMÁTICO
                 // Nota: En muchas estrategias de reintento, el rollback es implícito si la conexión cae,
                 // pero mantenerlo explícito aquí asegura la limpieza en errores lógicos.
                 if (_currentTransaction != null && shouldCommitTransaction)

@@ -1,4 +1,4 @@
-using Kash.Shared.Domain.Abstractions;
+﻿using Kash.Shared.Domain.Abstractions;
 using Kash.Shared.Domain.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -49,9 +49,9 @@ public sealed class Inversion : AbsEntity<InversionId>
     public UsuarioId UsuarioId { get; private set; }
     public DateTime? ActualizadoEn { get; private set; }
 
-    // ──────────────────────────────────────────────────────────
+    // 
     // Factory
-    // ──────────────────────────────────────────────────────────
+    // 
 
     public static Result<Inversion> Create(
         string nombre,
@@ -89,9 +89,9 @@ public sealed class Inversion : AbsEntity<InversionId>
             plataforma?.Trim()));
     }
 
-    // ──────────────────────────────────────────────────────────
+    // 
     // Update
-    // ──────────────────────────────────────────────────────────
+    // 
 
     public Result Update(
         string nombre,
@@ -127,9 +127,9 @@ public sealed class Inversion : AbsEntity<InversionId>
         return Result.Success();
     }
 
-    // ──────────────────────────────────────────────────────────
+    // 
     // Invariants
-    // ──────────────────────────────────────────────────────────
+    // 
 
     private static Error? ValidateInvariants(
         string nombre,

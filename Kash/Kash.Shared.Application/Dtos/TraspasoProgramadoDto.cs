@@ -19,7 +19,7 @@
         public string CuentaDestinoNombre { get; init; } = string.Empty;
         public Guid UsuarioId { get; init; }
 
-        // ⭐ PROPIEDADES FALTANTES AÑADIDAS
+        // PROPIEDADES FALTANTES AÑADIDAS
         public string Frecuencia { get; init; } = string.Empty;
         public bool Activo { get; init; }
         public string HangfireJobId { get; init; } = string.Empty;

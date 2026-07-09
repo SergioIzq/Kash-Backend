@@ -22,13 +22,13 @@ public sealed class GetClientesPagedListQueryHandler
     }
 
     /// <summary>
-    /// 🚀 OPTIMIZADO: Usa método específico del repositorio que filtra por usuario.
+    /// OPTIMIZADO: Usa método específico del repositorio que filtra por usuario.
     /// </summary>
     protected override async Task<PagedList<ClienteDto>> ApplyFiltersAsync(
         GetClientesPagedListQuery query,
         CancellationToken cancellationToken)
     {
-        // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro
+        // Si tenemos UsuarioId, usar el método optimizado con filtro
         if (query.UsuarioId.HasValue)
         {
             return await _dtoRepository.GetPagedReadModelsByUserAsync(

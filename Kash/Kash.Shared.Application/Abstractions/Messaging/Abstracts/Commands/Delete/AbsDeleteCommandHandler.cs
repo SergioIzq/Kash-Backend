@@ -11,8 +11,8 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
 {
     /// <summary>
     /// Handler genérico para eliminar entidades.
-    /// ✅ OPTIMIZADO: Crea un stub de la entidad con solo el ID para DELETE directo.
-    /// 🔥 ROLLBACK AUTOMÁTICO: Si la eliminación falla, se hace rollback de la transacción.
+    /// OPTIMIZADO: Crea un stub de la entidad con solo el ID para DELETE directo.
+    /// ROLLBACK AUTOMÁTICO: Si la eliminación falla, se hace rollback de la transacción.
     /// </summary>
     public abstract class DeleteCommandHandler<TEntity, TId, TCommand>
         : AbsCommandHandler<TEntity, TId>, IRequestHandler<TCommand, Result>
@@ -33,7 +33,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
         {
             try
             {
-                // 🔥 Permitir que clases derivadas carguen la entidad real si necesitan eventos
+                // Permitir que clases derivadas carguen la entidad real si necesitan eventos
                 var entity = await LoadEntityForDeletionAsync(command.Id, cancellationToken);
 
                 if (entity == null)
@@ -42,7 +42,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
                         $"Entidad {typeof(TEntity).Name} con ID '{command.Id}' no encontrada para eliminación."));
                 }
 
-                // 🔥 NUEVO: Validar si la entidad puede ser eliminada (lógica de dominio)
+                // NUEVO: Validar si la entidad puede ser eliminada (lógica de dominio)
                 var canDeleteResult = CanDelete(entity);
 
                 if (canDeleteResult.IsFailure)
@@ -70,7 +70,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
             }
             catch (DbUpdateException ex)
             {
-                // 🔥 Capturar violaciones de foreign key u otros errores de BD
+                // Capturar violaciones de foreign key u otros errores de BD
                 // El UnitOfWork hará rollback automáticamente
                 var errorMessage = ex.InnerException?.Message ?? ex.Message;
                 return Result.Failure(Error.Conflict(
@@ -78,7 +78,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
             }
             catch (Exception ex)
             {
-                // 🔥 Capturar cualquier otro error inesperado
+                // Capturar cualquier otro error inesperado
                 // El UnitOfWork hará rollback automáticamente
                 return Result.Failure(Error.Failure(
                     "Database.Error",
@@ -88,7 +88,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands
         }
 
         /// <summary>
-        /// 🔥 NUEVO: Método virtual para validar si la entidad puede ser eliminada.
+        /// NUEVO: Método virtual para validar si la entidad puede ser eliminada.
         /// Override para implementar validaciones de negocio antes de eliminar.
         /// </summary>
         protected virtual Result CanDelete(TEntity entity)
