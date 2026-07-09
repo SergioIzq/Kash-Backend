@@ -15,7 +15,7 @@ namespace Kash.Infrastructure.Persistence.Data.IngresosProgramados
         }
 
         /// <summary>
-        /// 🔥 ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
+        /// ÚNICA CONFIGURACIÓN REQUERIDA: Define todas las características del repositorio.
         /// </summary>
         protected override ReadRepositoryConfiguration ConfigureRepository()
         {
@@ -89,7 +89,7 @@ LEFT JOIN formas_pago fp ON ip.id_forma_pago = fp.id",
 
         /// <summary>
         /// Busca un ingreso programado por su HangfireJobId y retorna su ID.
-        /// 🔥 Útil para ejecutar trabajos programados en Hangfire.
+        /// Útil para ejecutar trabajos programados en Hangfire.
         /// </summary>
         public async Task<Guid?> GetIdByHangfireJobIdAsync(
             string hangfireJobId,
@@ -112,7 +112,7 @@ LIMIT 1";
 
         /// <summary>
         /// Busca un ingreso programado completo por su HangfireJobId.
-        /// 🔥 Retorna el DTO completo con todas las relaciones.
+        /// Retorna el DTO completo con todas las relaciones.
         /// </summary>
         public async Task<IngresoProgramadoDto?> GetByHangfireJobIdAsync(
             string hangfireJobId,

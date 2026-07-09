@@ -19,8 +19,8 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         Cantidad importe,
         FechaRegistro fecha,
         ConceptoId conceptoId,
-        ClienteId? clienteId,      // 🔥 NULLABLE
-        PersonaId? personaId,      // 🔥 NULLABLE
+        ClienteId? clienteId,      // NULLABLE
+        PersonaId? personaId,      // NULLABLE
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         UsuarioId usuarioId,
@@ -42,15 +42,15 @@ public sealed class Ingreso : AbsEntity<IngresoId>
     public Descripcion? Descripcion { get; private set; }
 
     public ConceptoId ConceptoId { get; private set; }
-    public ClienteId? ClienteId { get; private set; }     // 🔥 NULLABLE
-    public PersonaId? PersonaId { get; private set; }     // 🔥 NULLABLE
+    public ClienteId? ClienteId { get; private set; }     // NULLABLE
+    public PersonaId? PersonaId { get; private set; }     // NULLABLE
     public CuentaId CuentaId { get; private set; }
     public FormaPagoId FormaPagoId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
     public Concepto Concepto { get; private set; } = null!;
-    public Cliente? Cliente { get; private set; }          // 🔥 NULLABLE
-    public Persona? Persona { get; private set; }          // 🔥 NULLABLE
+    public Cliente? Cliente { get; private set; }          // NULLABLE
+    public Persona? Persona { get; private set; }          // NULLABLE
     public Cuenta Cuenta { get; private set; } = null!;
     public FormaPago FormaPago { get; private set; } = null!;
     public Usuario Usuario { get; private set; } = null!;
@@ -62,8 +62,8 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         Cantidad importe,
         FechaRegistro fecha,
         ConceptoId conceptoId,
-        ClienteId? clienteId,      // 🔥 NULLABLE
-        PersonaId? personaId,      // 🔥 NULLABLE
+        ClienteId? clienteId,      // NULLABLE
+        PersonaId? personaId,      // NULLABLE
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         UsuarioId usuarioId,
@@ -81,7 +81,7 @@ public sealed class Ingreso : AbsEntity<IngresoId>
             usuarioId,
             descripcion);
 
-        // 🔥 Lanzar evento de dominio cuando se crea un ingreso
+        // Lanzar evento de dominio cuando se crea un ingreso
         ingreso.AddDomainEvent(new IngresoCreadoEvent(ingreso.Id, cuentaId, importe));
 
         return ingreso;
@@ -94,14 +94,14 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         Cantidad importe,
         FechaRegistro fecha,
         ConceptoId conceptoId,
-        ClienteId? clienteId,      // 🔥 NULLABLE
-        PersonaId? personaId,      // 🔥 NULLABLE
+        ClienteId? clienteId,      // NULLABLE
+        PersonaId? personaId,      // NULLABLE
         CuentaId cuentaId,
         FormaPagoId formaPagoId,
         UsuarioId usuarioId,
         Descripcion? descripcion)
     {
-        // 🔥 Guardar valores anteriores para el evento
+        // Guardar valores anteriores para el evento
         var cuentaIdAnterior = CuentaId;
         var importeAnterior = Importe;
 
@@ -115,7 +115,7 @@ public sealed class Ingreso : AbsEntity<IngresoId>
         UsuarioId = usuarioId;
         Descripcion = descripcion;
 
-        // 🔥 Lanzar evento solo si cambió la cuenta o el importe
+        // Lanzar evento solo si cambió la cuenta o el importe
         if (!cuentaIdAnterior.Equals(cuentaId) || !importeAnterior.Equals(importe))
         {
             AddDomainEvent(new IngresoActualizadoEvent(
@@ -132,7 +132,7 @@ public sealed class Ingreso : AbsEntity<IngresoId>
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina un ingreso
+        // Lanzar evento de dominio cuando se elimina un ingreso
         AddDomainEvent(new IngresoEliminadoEvent(Id, CuentaId, Importe));
     }
 }

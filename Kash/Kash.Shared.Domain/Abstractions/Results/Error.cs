@@ -29,6 +29,6 @@ public record Error(string Code, string Name, string Message, ErrorType Type)
     public static Error Failure(string code, string name, string message) =>
         new(code, name, message, ErrorType.Failure);
 
-    // 🔥 Constructor auxiliar para cuando creas errores custom sin pasar el enum explícitamente (fallback a Failure)
+    // Constructor auxiliar para cuando creas errores custom sin pasar el enum explícitamente (fallback a Failure)
     public Error(string Code, string Name, string Message) : this(Code, Name, Message, ErrorType.Failure) { }
 }

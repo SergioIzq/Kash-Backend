@@ -13,7 +13,7 @@ public readonly record struct UsuarioId : IGuidValueObject
         Value = Guid.Empty;
     }
 
-    // ✅ CONSTRUCTOR (Infraestructura):
+    // CONSTRUCTOR (Infraestructura):
     // Debe ser permisivo porque EF Core y los serializadores (JSON) 
     // a veces instancian esto con valores por defecto (Guid.Empty) temporalmente.
     private UsuarioId(Guid value)
@@ -21,7 +21,7 @@ public readonly record struct UsuarioId : IGuidValueObject
         Value = value;
     }
 
-    // ✅ FACTORY METHOD (Dominio):
+    // FACTORY METHOD (Dominio):
     // Aquí es donde aplicas las reglas de negocio.
     // Tu código de aplicación SIEMPRE debe usar UsuarioId.Create(...)
     public static Result<UsuarioId> Create(Guid value)

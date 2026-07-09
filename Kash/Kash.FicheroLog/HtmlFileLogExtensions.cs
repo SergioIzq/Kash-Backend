@@ -40,7 +40,7 @@ public static class HtmlFileLogExtensions
 
     /// <summary>
     /// Configura Serilog para escribir logs en archivos HTML con filtrado automático
-    /// 🔥 FIX: Ahora usa HtmlLogHooks para estructura HTML completa
+    /// FIX: Ahora usa HtmlLogHooks para estructura HTML completa
     /// </summary>
     public static LoggerConfiguration WriteToHtmlFile(
         this LoggerSinkConfiguration sinkConfiguration,
@@ -58,7 +58,7 @@ public static class HtmlFileLogExtensions
         var filePattern = GetFilePattern(options);
         var filePath = Path.Combine(options.LogDirectory, filePattern);
 
-        // 🔥 FIX: Agregar hooks para estructura HTML completa
+        // FIX: Agregar hooks para estructura HTML completa
         return sinkConfiguration.File(
             formatter: new HtmlLogFormatter(),
             path: filePath,
@@ -68,7 +68,7 @@ public static class HtmlFileLogExtensions
             rollOnFileSizeLimit: options.RollOnFileSizeLimit,
             shared: true,
             flushToDiskInterval: TimeSpan.FromSeconds(1),
-            hooks: new HtmlLogHooks(options.PageTitle) // 🔥 IMPORTANTE: Agregar hooks
+            hooks: new HtmlLogHooks(options.PageTitle) // IMPORTANTE: Agregar hooks
         ).Filter.ByIncludingOnly(logEvent =>
             DatabaseAndErrorsFilter.ShouldInclude(
                 logEvent,

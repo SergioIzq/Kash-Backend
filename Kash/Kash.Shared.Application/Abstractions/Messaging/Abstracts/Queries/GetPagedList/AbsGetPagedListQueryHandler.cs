@@ -10,10 +10,10 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
 {
     /// <summary>
     /// Handler base para consultas paginadas.
-    /// ✅ OPTIMIZADO: Usa paginación a nivel de base de datos para evitar cargar toda la tabla en memoria.
-    /// 🔧 FIX: Usa GetPagedReadModelsAsync para evitar problemas de mapeo con Value Objects.
-    /// 🚀 CACHE: Implementa cache con Redis para requests repetidos (~5ms en lugar de 370ms).
-    /// 🔥 Sistema de versionado para invalidación automática de listas.
+    /// OPTIMIZADO: Usa paginación a nivel de base de datos para evitar cargar toda la tabla en memoria.
+    /// FIX: Usa GetPagedReadModelsAsync para evitar problemas de mapeo con Value Objects.
+    /// CACHE: Implementa cache con Redis para requests repetidos (~5ms en lugar de 370ms).
+    /// Sistema de versionado para invalidación automática de listas.
     /// </summary>
     public abstract class GetPagedListQueryHandler<TEntity, TId, TDto, TQuery>
         : AbsQueryHandler<TEntity, TId>, IRequestHandler<TQuery, Result<PagedList<TDto>>>
@@ -22,10 +22,10 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         where TDto : class
         where TId : IGuidValueObject
     {
-        // 🔥 ÚNICO REPOSITORIO: Solo usamos IReadRepository
+        // ÚNICO REPOSITORIO: Solo usamos IReadRepository
         protected readonly IReadRepository<TEntity, TDto, TId> _dtoRepository;
 
-        // 🔥 Constructor simplificado
+        // Constructor simplificado
         public GetPagedListQueryHandler(
             IReadRepository<TEntity, TDto, TId> dtoRepository,
             ICacheService cacheService)
@@ -35,7 +35,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         }
 
         /// <summary>
-        /// 🔑 MÉTODO ABSTRACTO OPCIONAL: Permite aplicar filtros adicionales antes de paginar.
+        /// MÉTODO ABSTRACTO OPCIONAL: Permite aplicar filtros adicionales antes de paginar.
         /// Si no se sobrescribe, se usa paginación directa desde el repositorio.
         /// </summary>
         protected virtual Task<PagedList<TDto>> ApplyFiltersAsync(
@@ -48,7 +48,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
 
         public virtual async Task<Result<PagedList<TDto>>> Handle(TQuery query, CancellationToken cancellationToken)
         {
-            // 🔥 1. Obtener versión actual de la lista (se invalida cuando hay CUD)
+            // 1. Obtener versión actual de la lista (se invalida cuando hay CUD)
             string versionKey = $"list_version:{typeof(TEntity).Name}:{query.UsuarioId}";
             string? listVersion = await _cacheService.GetAsync<string>(versionKey);
 
@@ -56,7 +56,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
             if (string.IsNullOrEmpty(listVersion))
             {
                 listVersion = Guid.NewGuid().ToString();
-                // 🔥 REDUCIDO: TTL más corto para evitar problemas de sincronización (de 5/10 min a 2/3 min)
+                // REDUCIDO: TTL más corto para evitar problemas de sincronización (de 5/10 min a 2/3 min)
                 await _cacheService.SetAsync(
                     versionKey,
                     listVersion,
@@ -65,7 +65,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
             }
 
             // 2. Construir clave de caché que incluye la versión
-            // 🔥 MEJORADO: Incluir searchTerm, sortColumn y sortOrder en la clave de caché
+            // MEJORADO: Incluir searchTerm, sortColumn y sortOrder en la clave de caché
             string cacheKey = $"{typeof(TEntity).Name}:paged:{query.UsuarioId}:{listVersion}:{query.Page}:{query.PageSize}:{query.SearchTerm}:{query.SortColumn}:{query.SortOrder}";
 
             // 3. Intentar obtener de caché
@@ -73,7 +73,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
 
             if (cachedResult != null)
             {
-                return Result.Success(cachedResult); // ⚡ ~5ms desde cache
+                return Result.Success(cachedResult); // ~5ms desde cache
             }
 
             // 4. Intentar obtener filtros personalizados del handler concreto
@@ -91,12 +91,12 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
                 return Result.Success(customFiltered);
             }
 
-            // 5. 🔥 OPTIMIZACIÓN: Usar paginación a nivel de base de datos
+            // 5. OPTIMIZACIÓN: Usar paginación a nivel de base de datos
             PagedList<TDto> pagedDtos;
 
             if (query.UsuarioId.HasValue)
             {
-                // 🚀 USA ÍNDICES: Filtrar por usuario (reduce 370ms a ~50ms)
+                // USA ÍNDICES: Filtrar por usuario (reduce 370ms a ~50ms)
                 pagedDtos = await _dtoRepository.GetPagedReadModelsByUserAsync(
                     query.UsuarioId.Value,
                     query.Page,
@@ -115,7 +115,7 @@ namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries
                     cancellationToken);
             }
 
-            // 6. 🔥 CACHE: Guardar en cache con TTL reducido para mejor consistencia
+            // 6. CACHE: Guardar en cache con TTL reducido para mejor consistencia
             await _cacheService.SetAsync(
                 cacheKey,
                 pagedDtos,

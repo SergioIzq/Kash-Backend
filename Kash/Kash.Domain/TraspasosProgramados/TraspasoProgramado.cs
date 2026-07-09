@@ -83,7 +83,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
             descripcion
         );
 
-        // 🔥 LANZAR EVENTO DE DOMINIO
+        // LANZAR EVENTO DE DOMINIO
         traspaso.AddDomainEvent(new TraspasoProgramadoCreadoEvent(
             traspaso.Id.Value,
             frecuencia,
@@ -98,7 +98,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
 
     /// <summary>
     /// Actualiza todos los datos del traspaso programado.
-    /// 🔥 Dispara evento de dominio si cambian las cuentas o el importe.
+    /// Dispara evento de dominio si cambian las cuentas o el importe.
     /// </summary>
     public Result Update(
         CuentaId cuentaOrigenId,
@@ -119,7 +119,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
         if (fechaEjecucion < DateTime.Today)
             return Result.Failure(Error.Validation("La fecha de ejecución debe ser futura."));
 
-        // 🔥 Guardar valores anteriores para el evento
+        // Guardar valores anteriores para el evento
         var cuentaOrigenAnterior = CuentaOrigenId;
         var cuentaDestinoAnterior = CuentaDestinoId;
         var importeAnterior = Importe;
@@ -133,7 +133,7 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
         Activo = activo;
         Descripcion = descripcion;
 
-        // 🔥 Lanzar evento solo si cambió alguna cuenta o el importe
+        // Lanzar evento solo si cambió alguna cuenta o el importe
         if (!cuentaOrigenAnterior.Equals(cuentaOrigenId) ||
             !cuentaDestinoAnterior.Equals(cuentaDestinoId) ||
             !importeAnterior.Equals(importe))
@@ -176,11 +176,11 @@ public sealed class TraspasoProgramado : AbsEntity<TraspasoProgramadoId>
 
     /// <summary>
     /// Marca el traspaso programado como eliminado y lanza el evento de dominio.
-    /// 🔥 Dispara TraspasoProgramadoEliminadoEvent.
+    /// Dispara TraspasoProgramadoEliminadoEvent.
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina
+        // Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new TraspasoProgramadoEliminadoEvent(
             HangfireJobId,
             Id,

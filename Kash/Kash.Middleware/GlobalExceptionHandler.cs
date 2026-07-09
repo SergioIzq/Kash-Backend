@@ -53,7 +53,7 @@ public sealed class GlobalExceptionHandler
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
 
-        // 4. 🔥 IMPORTANTE: Envolvemos el error en tu estructura Result estandarizada
+        // 4. IMPORTANTE: Envolvemos el error en tu estructura Result estandarizada
         var result = Result.Failure(domainError);
 
         // 5. Serializamos directamente al Body

@@ -1,4 +1,4 @@
-using Kash.Shared.Domain.Events;
+ï»¿using Kash.Shared.Domain.Events;
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
@@ -6,7 +6,7 @@ namespace Kash.Domain.TraspasosProgramados.Eventos;
 
 /// <summary>
 /// Evento de dominio que se dispara cuando se actualiza un TraspasoProgramado.
-/// Permite cancelar el job anterior y reprogramar uno nuevo si cambió el importe o las cuentas.
+/// Permite cancelar el job anterior y reprogramar uno nuevo si cambiel importe o las cuentas.
 /// </summary>
 public sealed record TraspasoProgramadoActualizadoEvent(
     TraspasoProgramadoId TraspasoProgramadoId,

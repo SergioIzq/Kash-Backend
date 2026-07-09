@@ -1,12 +1,12 @@
 ﻿using Kash.Application.Features.Traspasos.Commands;
 using Kash.Application.Features.Traspasos.Queries;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -28,7 +28,7 @@ public class TraspasosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -64,7 +64,7 @@ public class TraspasosController : AbsController
         {
             CuentaOrigenId = request.CuentaOrigenId,
             CuentaDestinoId = request.CuentaDestinoId,
-            UsuarioId = usuarioId, // 👈 Seguridad: Usar ID validado
+            UsuarioId = usuarioId, // Seguridad: Usar ID validado
             Importe = request.Importe,
             Fecha = request.Fecha,
             Descripcion = request.Descripcion

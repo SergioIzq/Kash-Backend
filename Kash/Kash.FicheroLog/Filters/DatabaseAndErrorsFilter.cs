@@ -1,4 +1,4 @@
-using Serilog.Events;
+ï»¿using Serilog.Events;
 
 namespace Kash.FicheroLog.Filters;
 
@@ -20,13 +20,13 @@ public sealed class DatabaseAndErrorsFilter
 
     public static bool ShouldInclude(LogEvent logEvent, bool includeDatabaseOps, bool includeWarnings, bool includeErrors)
     {
-        // Siempre incluir errores y excepciones si está configurado
+        // Siempre incluir errores y excepciones si estconfigurado
         if (includeErrors && logEvent.Level >= LogEventLevel.Error)
         {
             return true;
         }
 
-        // Incluir warnings si está configurado
+        // Incluir warnings si estconfigurado
         if (includeWarnings && logEvent.Level == LogEventLevel.Warning)
         {
             return true;

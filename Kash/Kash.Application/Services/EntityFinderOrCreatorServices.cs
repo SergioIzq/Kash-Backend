@@ -1,4 +1,4 @@
-using Kash.Domain;
+ï»¿using Kash.Domain;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Application.Interfaces;
 using Kash.Shared.Domain.Interfaces.Repositories;
@@ -8,7 +8,7 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Services;
 
 /// <summary>
-/// Servicio para buscar o crear Categorías.
+/// Servicio para buscar o crear Categorï¿½as.
 /// </summary>
 public class CategoriaFinderOrCreatorService : ICategoriaFinderOrCreatorService
 {
@@ -30,7 +30,7 @@ public class CategoriaFinderOrCreatorService : ICategoriaFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -40,7 +40,7 @@ public class CategoriaFinderOrCreatorService : ICategoriaFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             var categorias = await _readRepository.SearchForAutocompleteAsync(
@@ -57,18 +57,18 @@ public class CategoriaFinderOrCreatorService : ICategoriaFinderOrCreatorService
                 return matchExacto.Id;
             }
 
-            // 3. Crear nueva categoría
+            // 3. Crear nueva categorï¿½a
             var nombreVO = Nombre.Create(nombre).Value;
             var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
-            var descripcionVO = new Descripcion(""); // Descripción vacía por defecto
+            var descripcionVO = new Descripcion(""); // Descripciï¿½n vacï¿½a por defecto
             var nuevaCategoria = Categoria.Create(nombreVO, usuarioIdVO, descripcionVO);
             _writeRepository.Add(nuevaCategoria);
 
             return nuevaCategoria.Id.Value;
         }
 
-        // Si no se proporcionó ni ID ni nombre, lanzar error (Categoria es obligatoria para Concepto)
-        throw new ArgumentException("Se requiere ID o Nombre para buscar o crear una Categoría.");
+        // Si no se proporcionni ID ni nombre, lanzar error (Categoria es obligatoria para Concepto)
+        throw new ArgumentException("Se requiere ID o Nombre para buscar o crear una Categorï¿½a.");
     }
 }
 
@@ -95,7 +95,7 @@ public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Validar que se proporcionó CategoriaId (obligatorio para Concepto)
+        // 1. Validar que se proporcionCategoriaId (obligatorio para Concepto)
         if (additionalData == null || !additionalData.TryGetValue("CategoriaId", out var categoriaIdObj))
         {
             throw new ArgumentException("Se requiere CategoriaId para crear un Concepto.");
@@ -103,7 +103,7 @@ public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
 
         var categoriaId = CategoriaId.Create((Guid)categoriaIdObj).Value;
 
-        // 2. Buscar por ID si se proporcionó
+        // 2. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -113,7 +113,7 @@ public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
             }
         }
 
-        // 3. Buscar por nombre (case-insensitive) si se proporcionó
+        // 3. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             var conceptos = await _readRepository.SearchForAutocompleteAsync(
@@ -139,7 +139,7 @@ public class ConceptoFinderOrCreatorService : IConceptoFinderOrCreatorService
             return nuevoConcepto.Id.Value;
         }
 
-        // Si llegamos aquí, no se proporcionó ni ID ni nombre
+        // Si llegamos aqu, no se proporcionni ID ni nombre
         throw new ArgumentException("Se requiere ID o Nombre para buscar o crear un Concepto.");
     }
 }
@@ -167,7 +167,7 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -177,7 +177,7 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             // Crear la entidad temporal para buscar o crear
@@ -185,7 +185,7 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
             var usuarioIdVO = UsuarioId.Create(usuarioId).Value;
             var nuevaFormaPago = FormaPago.Create(nombreVO, usuarioIdVO);
 
-            // Usar el método FindOrCreateAsync que reutiliza si existe
+            // Usar el mï¿½todo FindOrCreateAsync que reutiliza si existe
             var result = await _writeRepository.FindOrCreateAsync(nuevaFormaPago, cancellationToken);
 
             if (result.IsSuccess)
@@ -194,7 +194,7 @@ public class FormaPagoFinderOrCreatorService : IFormaPagoFinderOrCreatorService
             }
         }
 
-        // Si llegamos aquí, no se proporcionó ni ID ni nombre
+        // Si llegamos aqu, no se proporcionni ID ni nombre
         return null;
     }
 }
@@ -222,7 +222,7 @@ public class CuentaFinderOrCreatorService : ICuentaFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -232,7 +232,7 @@ public class CuentaFinderOrCreatorService : ICuentaFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             // Crear la entidad temporal para buscar o crear
@@ -241,7 +241,7 @@ public class CuentaFinderOrCreatorService : ICuentaFinderOrCreatorService
             var cantidadVO = Cantidad.Create(0).Value;
             var nuevaCuenta = Cuenta.Create(nombreVO, cantidadVO, usuarioIdVO);
 
-            // Usar el método FindOrCreateAsync que reutiliza si existe
+            // Usar el mï¿½todo FindOrCreateAsync que reutiliza si existe
             var result = await _writeRepository.FindOrCreateAsync(nuevaCuenta, cancellationToken);
 
             if (result.IsSuccess)
@@ -250,7 +250,7 @@ public class CuentaFinderOrCreatorService : ICuentaFinderOrCreatorService
             }
         }
 
-        // Si llegamos aquí, no se proporcionó ni ID ni nombre
+        // Si llegamos aqu, no se proporcionni ID ni nombre
         throw new ArgumentException("Se requiere ID o Nombre para buscar o crear una Cuenta.");
     }
 }
@@ -278,7 +278,7 @@ public class ClienteFinderOrCreatorService : IClienteFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -288,7 +288,7 @@ public class ClienteFinderOrCreatorService : IClienteFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             var clientes = await _readRepository.SearchForAutocompleteAsync(
@@ -314,7 +314,7 @@ public class ClienteFinderOrCreatorService : IClienteFinderOrCreatorService
             return nuevoCliente.Id.Value;
         }
 
-        // Cliente es opcional, retornar null si no se proporcionó nada
+        // Cliente es opcional, retornar null si no se proporcionnada
         return null;
     }
 }
@@ -342,7 +342,7 @@ public class ProveedorFinderOrCreatorService : IProveedorFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -352,7 +352,7 @@ public class ProveedorFinderOrCreatorService : IProveedorFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             var clientes = await _readRepository.SearchForAutocompleteAsync(
@@ -378,7 +378,7 @@ public class ProveedorFinderOrCreatorService : IProveedorFinderOrCreatorService
             return nuevoProveedor.Id.Value;
         }
 
-        // Cliente es opcional, retornar null si no se proporcionó nada
+        // Cliente es opcional, retornar null si no se proporcionnada
         return null;
     }
 }
@@ -406,7 +406,7 @@ public class PersonaFinderOrCreatorService : IPersonaFinderOrCreatorService
         Dictionary<string, object>? additionalData = null,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscar por ID si se proporcionó
+        // 1. Buscar por ID si se proporcionï¿½
         if (id.HasValue)
         {
             var existing = await _readRepository.GetReadModelByIdAsync(id.Value, cancellationToken);
@@ -416,7 +416,7 @@ public class PersonaFinderOrCreatorService : IPersonaFinderOrCreatorService
             }
         }
 
-        // 2. Buscar por nombre (case-insensitive) si se proporcionó
+        // 2. Buscar por nombre (case-insensitive) si se proporcionï¿½
         if (!string.IsNullOrWhiteSpace(nombre))
         {
             var personas = await _readRepository.SearchForAutocompleteAsync(
@@ -443,7 +443,7 @@ public class PersonaFinderOrCreatorService : IPersonaFinderOrCreatorService
             return nuevaPersona.Id.Value;
         }
 
-        // Persona es opcional, retornar null si no se proporcionó nada
+        // Persona es opcional, retornar null si no se proporcionnada
         return null;
     }
 }

@@ -1,4 +1,4 @@
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Kash.Application.Features.Inversiones.Commands.Import.Models;
 using Kash.Application.Interfaces;
@@ -44,7 +44,7 @@ public sealed class TradeRepublicCsvParser : IInversionParser
             try
             {
                 // 1. Obtener tipo de operación (soportando español, inglés y alemán)
-                if (!csv.TryGetField("Tipo", out string typ) &&
+                if (!csv.TryGetField("Tipo", out string? typ) &&
                     !csv.TryGetField("Type", out typ) &&
                     !csv.TryGetField("Typ", out typ))
                 {
@@ -52,7 +52,7 @@ public sealed class TradeRepublicCsvParser : IInversionParser
                 }
 
                 // Filtrar solo compras o ejecuciones de planes de inversión
-                bool esCompra = typ.Equals("Compra", StringComparison.OrdinalIgnoreCase) ||
+                bool esCompra = typ!.Equals("Compra", StringComparison.OrdinalIgnoreCase) ||
                                 typ.Contains("Plan de inversi", StringComparison.OrdinalIgnoreCase) ||
                                 typ.Equals("Kauf", StringComparison.OrdinalIgnoreCase) ||
                                 typ.Equals("Buy", StringComparison.OrdinalIgnoreCase);
@@ -63,27 +63,27 @@ public sealed class TradeRepublicCsvParser : IInversionParser
                 // 2. Extraer campos con compatibilidad multi-idioma
                 var isin = csv.GetField("ISIN") ?? throw new FormatException("Falta la columna ISIN");
 
-                if (!csv.TryGetField("Descripción", out string nombre) && !csv.TryGetField("Nombre", out nombre) && !csv.TryGetField("Name", out nombre))
+                if (!csv.TryGetField("Descripción", out string? nombre) && !csv.TryGetField("Nombre", out nombre) && !csv.TryGetField("Name", out nombre))
                     throw new FormatException("Falta la columna Descripción/Nombre");
 
-                if (!csv.TryGetField("Cantidad", out string stucke) && !csv.TryGetField("Shares", out stucke) && !csv.TryGetField("Stücke", out stucke))
+                if (!csv.TryGetField("Cantidad", out string? stucke) && !csv.TryGetField("Shares", out stucke) && !csv.TryGetField("Stücke", out stucke))
                     throw new FormatException("Falta la columna Cantidad");
 
-                if (!csv.TryGetField("Precio", out string kurs) && !csv.TryGetField("Cotización", out kurs) && !csv.TryGetField("Price", out kurs) && !csv.TryGetField("Kurs", out kurs))
+                if (!csv.TryGetField("Precio", out string? kurs) && !csv.TryGetField("Cotización", out kurs) && !csv.TryGetField("Price", out kurs) && !csv.TryGetField("Kurs", out kurs))
                     throw new FormatException("Falta la columna Precio/Cotización");
 
-                if (!csv.TryGetField("Divisa", out string wahrung) && !csv.TryGetField("Moneda", out wahrung) && !csv.TryGetField("Currency", out wahrung) && !csv.TryGetField("Währung", out wahrung))
+                if (!csv.TryGetField("Divisa", out string? wahrung) && !csv.TryGetField("Moneda", out wahrung) && !csv.TryGetField("Currency", out wahrung) && !csv.TryGetField("Währung", out wahrung))
                     throw new FormatException("Falta la columna Divisa/Moneda");
 
-                if (!csv.TryGetField("Fecha", out string datum) && !csv.TryGetField("Date", out datum) && !csv.TryGetField("Datum", out datum))
+                if (!csv.TryGetField("Fecha", out string? datum) && !csv.TryGetField("Date", out datum) && !csv.TryGetField("Datum", out datum))
                     throw new FormatException("Falta la columna Fecha");
 
                 // 3. Limpiar y parsear números (soportando formato europeo ej: 1.690,00)
-                var cantidadLimpia = stucke.Replace(".", "").Replace(",", ".");
+                var cantidadLimpia = stucke!.Replace(".", "").Replace(",", ".");
                 if (!decimal.TryParse(cantidadLimpia, NumberStyles.Any, CultureInfo.InvariantCulture, out var cantidad) || cantidad <= 0)
                     throw new FormatException("Cantidad inválida o cero");
 
-                var precioLimpio = kurs.Replace(".", "").Replace(",", ".");
+                var precioLimpio = kurs!.Replace(".", "").Replace(",", ".");
                 if (!decimal.TryParse(precioLimpio, NumberStyles.Any, CultureInfo.InvariantCulture, out var precio) || precio <= 0)
                     throw new FormatException("Precio de compra inválido");
 
@@ -94,9 +94,9 @@ public sealed class TradeRepublicCsvParser : IInversionParser
 
                 // 5. Resolver y añadir
                 var ticker = await _isinResolver.ResolveAsync(isin, cancellationToken);
-                var tipo = ParserHelpers.InferirTipo(isin, nombre);
+                var tipo = ParserHelpers.InferirTipo(isin, nombre!);
 
-                rows.Add(new InversionImportDto(nombre, ticker, tipo, cantidad, precio, wahrung, fecha, null, "Trade Republic"));
+                rows.Add(new InversionImportDto(nombre!, ticker, tipo, cantidad, precio, wahrung!, fecha, null, "Trade Republic"));
             }
             catch (Exception ex)
             {

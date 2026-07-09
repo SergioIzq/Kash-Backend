@@ -1,12 +1,12 @@
-using Kash.Shared.Application.Abstractions.Servicies;
+ï»¿using Kash.Shared.Application.Abstractions.Servicies;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
 namespace Kash.Infrastructure.Services;
 
 /// <summary>
-/// Implementación del servicio de caché distribuida.
-/// Utiliza IDistributedCache de .NET para abstraer el proveedor de caché subyacente.
+/// Implementacin del servicio de cachdistribuida.
+/// Utiliza IDistributedCache de .NET para abstraer el proveedor de cachsubyacente.
 /// </summary>
 public class DistributedCacheService : ICacheService
 {
@@ -18,7 +18,7 @@ public class DistributedCacheService : ICacheService
     }
 
     /// <summary>
-    /// Obtiene un valor de la caché de forma asíncrona.
+    /// Obtiene un valor de la cachde forma asncrona.
     /// </summary>
     public async Task<T?> GetAsync<T>(string key)
     {
@@ -40,7 +40,7 @@ public class DistributedCacheService : ICacheService
     }
 
     /// <summary>
-    /// Establece un valor en la caché con opciones de expiración.
+    /// Establece un valor en la cachcon opciones de expiracin.
     /// </summary>
     public async Task SetAsync<T>(string key, T value, TimeSpan? slidingExpiration = null, TimeSpan? absoluteExpiration = null)
     {
@@ -69,7 +69,7 @@ public class DistributedCacheService : ICacheService
     }
 
     /// <summary>
-    /// Elimina un valor de la caché.
+    /// Elimina un valor de la cachï¿½.
     /// </summary>
     public async Task RemoveAsync(string key)
     {
@@ -77,7 +77,7 @@ public class DistributedCacheService : ICacheService
     }
 
     /// <summary>
-    /// Verifica si una clave existe en la caché.
+    /// Verifica si una clave existe en la cachï¿½.
     /// </summary>
     public async Task<bool> ExistsAsync(string key)
     {
@@ -86,23 +86,23 @@ public class DistributedCacheService : ICacheService
     }
 
     /// <summary>
-    /// ?? LIMITACIÓN: Invalida por patrón (no soportado en IDistributedCache estándar).
-    /// Esta implementación no hace nada porque IDistributedCache no soporta pattern matching.
+    /// ?? LIMITACIï¿½N: Invalida por patrï¿½n (no soportado en IDistributedCache estï¿½ndar).
+    /// Esta implementaciï¿½n no hace nada porque IDistributedCache no soporta pattern matching.
     /// 
     /// ?? Si necesitas esta funcionalidad:
     /// 1. Usa Redis con StackExchange.Redis directamente
-    /// 2. O confía en el sistema de versionado de listas que invalida automáticamente
+    /// 2. O confï¿½a en el sistema de versionado de listas que invalida automï¿½ticamente
     /// 
-    /// El sistema de versionado funciona así:
-    /// - Cada lista tiene una clave de versión: "list_version:Entity:UserId"
+    /// El sistema de versionado funciona asï¿½:
+    /// - Cada lista tiene una clave de versiï¿½n: "list_version:Entity:UserId"
     /// - Cuando se hace CUD, se elimina esta clave
-    /// - Al hacer GET, se genera una nueva versión
-    /// - Las claves antiguas quedan huérfanas y expiran naturalmente
+    /// - Al hacer GET, se genera una nueva versiï¿½n
+    /// - Las claves antiguas quedan huï¿½rfanas y expiran naturalmente
     /// </summary>
     public Task InvalidateByPatternAsync(string pattern)
     {
-        // IDistributedCache estándar no soporta invalidación por patrón
-        // El sistema de versionado de listas maneja esto automáticamente
+        // IDistributedCache estï¿½ndar no soporta invalidaciï¿½n por patrï¿½n
+        // El sistema de versionado de listas maneja esto automï¿½ticamente
         return Task.CompletedTask;
     }
 }

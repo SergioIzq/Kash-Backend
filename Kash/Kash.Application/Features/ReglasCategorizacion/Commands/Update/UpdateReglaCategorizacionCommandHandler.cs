@@ -1,4 +1,4 @@
-using Kash.Domain;
+﻿using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Application.Dtos;
@@ -22,7 +22,7 @@ public sealed class UpdateReglaCategorizacionCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Aplica los cambios del comando a la entidad.
+    /// HOOK: Aplica los cambios del comando a la entidad.
     /// </summary>
     protected override void ApplyChanges(
         ReglaCategorizacion entity,

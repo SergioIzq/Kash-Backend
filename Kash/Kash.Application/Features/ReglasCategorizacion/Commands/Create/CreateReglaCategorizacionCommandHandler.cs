@@ -1,4 +1,4 @@
-using Kash.Domain;
+﻿using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Application.Interfaces;
@@ -21,7 +21,7 @@ public sealed class CreateReglaCategorizacionCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Crea la entidad de dominio. La validación de campos ocurre dentro de
+    /// HOOK: Crea la entidad de dominio. La validación de campos ocurre dentro de
     /// ReglaCategorizacion.Create, que lanza ArgumentException-compatible Result.Failure
     /// capturado como excepción por la clase base si se usa .Value sobre un Result fallido.
     /// </summary>
@@ -42,7 +42,7 @@ public sealed class CreateReglaCategorizacionCommandHandler
             command.Activo,
             usuarioId);
 
-        // 🔥 Propagamos el mensaje de validación real como ArgumentException,
+        // Propagamos el mensaje de validación real como ArgumentException,
         // que la clase base convierte en Error.Validation (en vez de un error genérico).
         if (result.IsFailure)
         {

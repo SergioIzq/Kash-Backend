@@ -1,4 +1,4 @@
-using Kash.Shared.Application.Abstractions.Servicies;
+ï»¿using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Domain.Abstractions;
 using Kash.Shared.Domain.Abstractions.Results;
 using Kash.Shared.Domain.Interfaces;
@@ -8,9 +8,9 @@ using MediatR;
 namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 
 /// <summary>
-/// Handler base para obtener elementos recientes ultra-rápidos.
-/// ? Con cache de corta duración (30 segundos) para mejorar performance
-/// ? Resultados limitados (máximo 5-50 items)
+/// Handler base para obtener elementos recientes ultra-rï¿½pidos.
+/// ? Con cache de corta duraciï¿½n (30 segundos) para mejorar performance
+/// ? Resultados limitados (mï¿½ximo 5-50 items)
 /// ? Optimizado para <10ms de respuesta
 /// </summary>
 public abstract class GetRecentQueryHandler<TEntity, TDto, TId, TQuery>
@@ -35,7 +35,7 @@ public abstract class GetRecentQueryHandler<TEntity, TDto, TId, TQuery>
     }
     protected virtual string GetCacheKeySuffix(TQuery query)
     {
-        return string.Empty; // Por defecto vacío
+        return string.Empty; // Por defecto vacï¿½o
     }
 
     public virtual async Task<Result<IEnumerable<TDto>>> Handle(TQuery query, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public abstract class GetRecentQueryHandler<TEntity, TDto, TId, TQuery>
             return Result.Failure<IEnumerable<TDto>>(Error.Validation("El ID de usuario es requerido."));
         }
 
-        // Obtener sufijo de caché (ej: ":cat_12345")
+        // Obtener sufijo de cach(ej: ":cat_12345")
         var cacheSuffix = GetCacheKeySuffix(query);
 
         string cacheKey = $"{typeof(TEntity).Name}:recent:{query.UsuarioId}:{query.Limit}{cacheSuffix}";

@@ -2,12 +2,12 @@
 
 <div align="center">
 
-![CI/CD Pipeline](https://github.com/SergioIzq/AhorroLand-Backend/workflows/CI%2FCD%20Backend%20-%20Docker%20Build%20%26%20Push/badge.svg)
-![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/ahorroland-backend?sort=semver&logo=docker)
-![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/ahorroland-backend/latest)
-![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/ahorroland-backend)
-![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
-![License](https://img.shields.io/github/license/SergioIzq/AhorroLand-Backend)
+![CI/CD Pipeline](https://github.com/SergioIzq/Kash-Backend/workflows/CI%2FCD%20Backend%20-%20Docker%20Build%20%26%20Push/badge.svg)
+![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/kash-backend?sort=semver&logo=docker)
+![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/kash-backend/latest)
+![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/kash-backend)
+![.NET Version](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
+![License](https://img.shields.io/github/license/SergioIzq/Kash-Backend)
 
 </div>
 
@@ -20,7 +20,7 @@ Este es el backend de la aplicación de gestión económica personal/profesional
 ## 🌐 Complemento del Frontend
 
 Este backend da soporte a la interfaz alojada en:  
-👉 [https://ahorroland.sergioizq.es](https://ahorroland.sergioizq.es)
+👉 [https://kash.sergioizq.com](https://kash.sergioizq.com)
 
 ---
 
@@ -80,7 +80,7 @@ El backend expone una API RESTful que cubre los siguientes módulos:
 ## 📌 Notas
 
 - Este backend requiere de un **frontend** para la interacción del usuario. El frontend está disponible en:  
-  👉 [https://ahorroland.sergioizq.es](https://ahorroland.sergioizq.es)
+  👉 [https://kash.sergioizq.com](https://kash.sergioizq.com)
 - La **autenticación** se maneja a través de JWT, por lo que es necesario un token válido para acceder a los endpoints protegidos.
 - **CORS** está habilitado para permitir que el frontend y el backend se comuniquen sin problemas de restricciones de origen cruzado.
 

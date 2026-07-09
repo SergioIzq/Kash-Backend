@@ -158,7 +158,7 @@ public sealed class ResultHandlerMiddleware
         context.Response.ContentType = "application/json";
         context.Response.Headers.ContentLength = null; // El tamaño va a cambiar
 
-        // 🔥 CLAVE: Usamos Result.Failure para mantener la consistencia con el GlobalExceptionHandler
+        // CLAVE: Usamos Result.Failure para mantener la consistencia con el GlobalExceptionHandler
         var result = Result.Failure(error);
 
         await JsonSerializer.SerializeAsync(outputStream, result, JsonOptions);

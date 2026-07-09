@@ -10,8 +10,8 @@ namespace Kash.Infrastructure.Persistence.Query
 {
     /// <summary>
     /// Repositorio de lectura base abstracto implementado con Dapper.
-    /// ✅ OPTIMIZADO: Usa DTOs directamente desde SQL sin mapeo intermedio.
-    /// 🔧 Usa configuración declarativa para eliminar el batiburrillo de overrides.
+    /// OPTIMIZADO: Usa DTOs directamente desde SQL sin mapeo intermedio.
+    /// Usa configuración declarativa para eliminar el batiburrillo de overrides.
     /// </summary>
     /// <typeparam name="T">La entidad que debe heredar de AbsEntity</typeparam>
     /// <typeparam name="TReadModel">El modelo de lectura (DTO plano para Dapper)</typeparam>
@@ -40,7 +40,7 @@ namespace Kash.Infrastructure.Persistence.Query
         #region Configuration - Override ÚNICO requerido
 
         /// <summary>
-        /// 🔥 ÚNICO MÉTODO QUE DEBE SOBRESCRIBIRSE: Configura el repositorio.
+        /// ÚNICO MÉTODO QUE DEBE SOBRESCRIBIRSE: Configura el repositorio.
         /// Retorna un objeto ReadRepositoryConfiguration con todas las opciones.
         /// </summary>
         protected abstract ReadRepositoryConfiguration ConfigureRepository();
@@ -222,7 +222,7 @@ SELECT
 
         /// <summary>
         /// Construye la cláusula WHERE para la búsqueda con soporte para texto, números y fechas.
-        /// ⚠️ IMPORTANTE: Excluye automáticamente columnas que contengan 'id' para evitar búsquedas en GUIDs.
+        /// IMPORTANTE: Excluye automáticamente columnas que contengan 'id' para evitar búsquedas en GUIDs.
         /// </summary>
         private string BuildSearchWhereClause(string searchTerm, DynamicParameters parameters)
         {
@@ -240,7 +240,7 @@ SELECT
 
             if (textColumns.Count > 0)
             {
-                // 🔥 MODIFICACIÓN: Aplicamos LOWER() a la columna y usaremos el parámetro en minúsculas
+                // MODIFICACIÓN: Aplicamos LOWER() a la columna y usaremos el parámetro en minúsculas
                 var textConditions = textColumns.Select(col => $"LOWER({col}) LIKE @SearchTerm");
                 conditions.AddRange(textConditions);
 
@@ -310,7 +310,7 @@ SELECT
         #region IReadRepository Implementation - Métodos optimizados con DTOs
 
         /// <summary>
-        /// 🚀 OPTIMIZADO: Obtiene el DTO con cache opcional.
+        /// OPTIMIZADO: Obtiene el DTO con cache opcional.
         /// </summary>
         public virtual async Task<TReadModel?> GetReadModelByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
@@ -353,7 +353,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 OPTIMIZADO: Retorna DTOs directamente sin allocations extras.
+        /// OPTIMIZADO: Retorna DTOs directamente sin allocations extras.
         /// </summary>
         public virtual async Task<IEnumerable<TReadModel>> GetAllReadModelsAsync(CancellationToken cancellationToken = default)
         {
@@ -367,7 +367,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 OPTIMIZADO: Paginación a nivel de base de datos (RECOMENDADO).
+        /// OPTIMIZADO: Paginación a nivel de base de datos (RECOMENDADO).
         /// Retorna DTOs directamente mapeados desde la BD.
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsAsync(
@@ -404,7 +404,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 OPTIMIZADO: Paginación filtrada por usuario (USA ÍNDICES).
+        /// OPTIMIZADO: Paginación filtrada por usuario (USA ÍNDICES).
         /// Reduce el tiempo de consulta de 370ms a ~50ms.
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
@@ -446,7 +446,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 NUEVO: Paginación con búsqueda y ordenamiento dinámico.
+        /// NUEVO: Paginación con búsqueda y ordenamiento dinámico.
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
        Guid usuarioId,
@@ -484,7 +484,7 @@ SELECT
             // Construir cláusula ORDER BY dinámica
             var orderBy = BuildOrderByClause(sortColumn, sortOrder);
 
-            // 🚀 OPTIMIZACIÓN: Query única con múltiples resultsets
+            // OPTIMIZACIÓN: Query única con múltiples resultsets
             var sql = $@"
       {baseQuery}
         {whereClause}
@@ -504,7 +504,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 NUEVO: Búsqueda rápida para autocomplete (ultra-optimizada).
+        /// NUEVO: Búsqueda rápida para autocomplete (ultra-optimizada).
         /// Limita resultados y usa solo columnas necesarias para máxima velocidad.
         /// </summary>
         public virtual async Task<IEnumerable<TReadModel>> SearchForAutocompleteAsync(
@@ -554,7 +554,7 @@ SELECT
         }
 
         /// <summary>
-        /// 🚀 NUEVO: Obtiene los elementos más recientes de un usuario.
+        /// NUEVO: Obtiene los elementos más recientes de un usuario.
         /// Ultra-rápido: usa índice en (id_usuario, fecha_creacion).
         /// </summary>
         public virtual async Task<IEnumerable<TReadModel>> GetRecentAsync(
@@ -609,6 +609,9 @@ SELECT
         /// <summary>
         /// Construye filtros dinámicos para WHERE clause
         /// </summary>
+        private static readonly System.Text.RegularExpressions.Regex ValidColumnName =
+            new(@"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$", System.Text.RegularExpressions.RegexOptions.Compiled);
+
         protected string BuildDynamicFilters(Dictionary<string, object> filters, DynamicParameters parameters)
         {
             if (filters == null || filters.Count == 0) return string.Empty;
@@ -616,11 +619,18 @@ SELECT
             var conditions = new List<string>();
             foreach (var filter in filters)
             {
+                // El nombre de columna nunca se parametriza en SQL: lo validamos como identificador
+                // seguro (letras/números/guion bajo, con alias opcional) antes de interpolarlo.
+                if (!ValidColumnName.IsMatch(filter.Key))
+                {
+                    throw new ArgumentException($"Nombre de columna no válido en filtro dinámico: '{filter.Key}'.", nameof(filters));
+                }
+
                 // Generamos un nombre de parámetro único para evitar colisiones
                 var paramName = $"Filter_{filter.Key.Replace(".", "_")}";
                 conditions.Add($"{filter.Key} = @{paramName}");
 
-                // 🔥 FIX: Convertir strings que son GUIDs válidos a tipo Guid
+                // FIX: Convertir strings que son GUIDs válidos a tipo Guid
                 var paramValue = filter.Value;
                 if (filter.Value is string stringValue && Guid.TryParse(stringValue, out var guidValue))
                 {

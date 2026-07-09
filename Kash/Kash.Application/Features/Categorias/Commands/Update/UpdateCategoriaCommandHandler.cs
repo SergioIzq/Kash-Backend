@@ -12,7 +12,7 @@ using Kash.Shared.Domain.ValueObjects.Ids;
 namespace Kash.Application.Features.Categorias.Commands;
 
 /// <summary>
-/// ✅ REFACTORIZADO: Handler simplificado usando hooks de la clase base.
+/// REFACTORIZADO: Handler simplificado usando hooks de la clase base.
 /// Reducido de ~80 líneas a ~35 líneas (56% menos código).
 /// </summary>
 public sealed class UpdateCategoriaCommandHandler
@@ -32,7 +32,7 @@ public sealed class UpdateCategoriaCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Aplica los cambios del comando a la entidad.
+    /// HOOK: Aplica los cambios del comando a la entidad.
     /// </summary>
     protected override void ApplyChanges(Categoria entity, UpdateCategoriaCommand command, Dictionary<string, object>? dependencies = null)
     {
@@ -43,7 +43,7 @@ public sealed class UpdateCategoriaCommandHandler
     }
 
     /// <summary>
-    /// 🔥 HOOK: Validación y actualización con repositorio específico.
+    /// HOOK: Validación y actualización con repositorio específico.
     /// Valida unicidad del nombre y marca la entidad como modificada.
     /// </summary>
     protected override async Task<(Result ValidationResult, bool EntityUpdated)> ValidateAndUpdateInContextAsync(

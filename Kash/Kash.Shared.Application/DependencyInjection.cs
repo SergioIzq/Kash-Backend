@@ -16,7 +16,7 @@ public static class DependencyInyection
         config.Scan(Assembly.GetExecutingAssembly());
 
         // ==============================================================================
-        // 🔥 MAPEO AUTOMÁTICO GLOBAL DE VALUE OBJECTS (Para que no pete nunca más)
+        // MAPEO AUTOMÁTICO GLOBAL DE VALUE OBJECTS (Para que no pete nunca más)
         // ==============================================================================
 
         // A. Enseñar a Mapster a desempaquetar 'Cantidad' a 'decimal' siempre

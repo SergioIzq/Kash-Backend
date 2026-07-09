@@ -83,7 +83,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
             usuarioId,
             descripcion);
 
-        // 🔥 LANZAR EVENTO DE DOMINIO
+        // LANZAR EVENTO DE DOMINIO
         ingresoProgram.AddDomainEvent(new IngresoProgramadoCreadoEvent(
             ingresoProgram.Id.Value,
             frecuencia,
@@ -98,7 +98,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
     /// </summary>
     public Result Reprogramar(DateTime nuevaFecha, Frecuencia nuevaFrecuencia)
     {
-        // ⭐ Aplica reglas de negocio aquí (ej: la nueva fecha debe ser futura)
+        // Aplica reglas de negocio aquí (ej: la nueva fecha debe ser futura)
         if (nuevaFecha < DateTime.Today)
         {
             return Result.Failure(Error.Validation("La reprogramación debe ser para una fecha futura."));
@@ -149,7 +149,7 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
     /// </summary>
     public void Desactivar()
     {
-        // ⭐ Aplica reglas de negocio aquí (ej: solo si no está ya ejecutado)
+        // Aplica reglas de negocio aquí (ej: solo si no está ya ejecutado)
         Activo = false;
         // Opcional: Levantar un evento de dominio
     }
@@ -164,11 +164,11 @@ public sealed class IngresoProgramado : AbsEntity<IngresoProgramadoId>
 
     /// <summary>
     /// Marca el ingreso programado como eliminado y lanza el evento de dominio.
-    /// 🔥 Dispara IngresoProgramadoEliminadoEvent.
+    /// Dispara IngresoProgramadoEliminadoEvent.
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina
+        // Lanzar evento de dominio cuando se elimina
         AddDomainEvent(new IngresoProgramadoEliminadoEvent(
             Id,
             HangfireJobId,

@@ -3,6 +3,7 @@ using Kash.Shared.Domain.Abstractions;
 using Kash.Shared.Domain.Interfaces;
 using Kash.Shared.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Reflection;
 
 public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
@@ -10,6 +11,25 @@ public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     where TId : IGuidValueObject
 {
     protected readonly KashDbContext _context;
+
+    // Compilado una única vez por tipo TId cerrado, en lugar de reflexión en cada llamada.
+    private static readonly Func<Guid, TId> _idFactory = BuildIdFactory();
+
+    private static Func<Guid, TId> BuildIdFactory()
+    {
+        var method = typeof(TId).GetMethod(
+            "CreateFromDatabase",
+            BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: [typeof(Guid)],
+            modifiers: null)
+            ?? throw new InvalidOperationException(
+                $"{typeof(TId).Name} debe exponer un método estático 'CreateFromDatabase(Guid)' para usarse como TId en {nameof(AbsWriteRepository<T, TId>)}.");
+
+        var parameter = Expression.Parameter(typeof(Guid), "id");
+        var call = Expression.Call(method, parameter);
+        return Expression.Lambda<Func<Guid, TId>>(call, parameter).Compile();
+    }
 
     public AbsWriteRepository(KashDbContext context)
     {
@@ -25,13 +45,7 @@ public abstract class AbsWriteRepository<T, TId> : IWriteRepository<T, TId>
     {
         if (id == Guid.Empty) return null;
 
-        // 🔥 CORRECCIÓN: Usamos Activator con BindingFlags para encontrar constructores PRIVADOS
-        var idValueObject = (TId)Activator.CreateInstance(
-            typeof(TId),
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, // Busca privados y públicos
-            null,
-            [id],
-            null)!;
+        var idValueObject = _idFactory(id);
 
         return await _context.Set<T>()
             .FindAsync([idValueObject], cancellationToken);

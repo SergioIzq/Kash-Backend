@@ -2,13 +2,13 @@
 using Kash.Application.Features.Conceptos.Queries;
 using Kash.Application.Features.Conceptos.Queries.Recent;
 using Kash.Application.Features.Conceptos.Queries.Search;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -30,7 +30,7 @@ public class ConceptosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)
@@ -104,14 +104,16 @@ public class ConceptosController : AbsController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateConceptoRequest request)
     {
-        // Asignación inteligente de UsuarioId (Token o Request)
-        var usuarioId = GetCurrentUserId();
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized)
+        {
+            return unauthorized;
+        }
 
         var command = new CreateConceptoCommand
         {
             Nombre = request.Nombre,
             CategoriaId = request.CategoriaId,
-            UsuarioId = usuarioId!.Value
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);

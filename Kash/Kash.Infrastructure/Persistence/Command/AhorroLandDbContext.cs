@@ -51,7 +51,7 @@ public class KashDbContext : DbContext
             modelBuilder.Entity(type);
         }
 
-        // 3. ✅ FIX CRÍTICO: Aplicar configuraciones desde Infrastructure (no Domain)
+        // 3. FIX CRÍTICO: Aplicar configuraciones desde Infrastructure (no Domain)
         // Las configuraciones (IEntityTypeConfiguration) están en Infrastructure.Persistence.Command.Configurations
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 

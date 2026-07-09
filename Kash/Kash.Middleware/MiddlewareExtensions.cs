@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+ï»¿using Microsoft.AspNetCore.Builder;
 
 namespace Kash.Middleware;
 
@@ -18,7 +18,7 @@ public static class MiddlewareExtensions
 
     /// <summary>
     /// Registra el middleware de manejo de objetos Result con errores
-    /// DEBE registrarse DESPUÉS de UseRouting() pero ANTES de UseEndpoints()
+    /// DEBE registrarse DESPUï¿½S de UseRouting() pero ANTES de UseEndpoints()
     /// </summary>
     public static IApplicationBuilder UseResultHandler(this IApplicationBuilder app)
     {
@@ -26,7 +26,7 @@ public static class MiddlewareExtensions
     }
 
     /// <summary>
-    /// ?? NUEVO: Registra el middleware que deshabilita el caché HTTP del navegador.
+    /// ?? NUEVO: Registra el middleware que deshabilita el cachHTTP del navegador.
     /// Previene que Ctrl+R use datos cacheados obsoletos.
     /// DEBE registrarse ANTES de UseResponseCompression() para que los headers se apliquen correctamente.
     /// </summary>
@@ -42,7 +42,7 @@ public static class MiddlewareExtensions
     {
         app.UseGlobalExceptionHandler();
         app.UseResultHandler();
-        app.UseNoCache(); // ?? Agregamos el middleware de no-caché
+        app.UseNoCache(); // ?? Agregamos el middleware de no-cachï¿½
         return app;
     }
 }

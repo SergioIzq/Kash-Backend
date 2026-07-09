@@ -1,12 +1,12 @@
-using Kash.Domain;
+ï»¿using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Application.Features.Ingresos.Commands;
 
 /// <summary>
-/// Comando para crear un ingreso con soporte de auto-creación de entidades relacionadas.
-/// Si se proporciona un nombre y el ID no existe, se creará la entidad automáticamente.
+/// Comando para crear un ingreso con soporte de auto-creaciï¿½n de entidades relacionadas.
+/// Si se proporciona un nombre y el ID no existe, se crearla entidad automticamente.
 /// </summary>
 public sealed record CreateIngresoCommand : AbsCreateCommand<Ingreso, IngresoId>
 {
@@ -23,40 +23,40 @@ public sealed record CreateIngresoCommand : AbsCreateCommand<Ingreso, IngresoId>
     public required Guid FormaPagoId { get; init; }
     public required Guid UsuarioId { get; init; }
 
-    // ?? Nombres opcionales para auto-creación
+    // ?? Nombres opcionales para auto-creaciï¿½n
     /// <summary>
-    /// Nombre de la categoría. Si CategoriaId no existe y se proporciona este valor,
-    /// se creará automáticamente la categoría.
+    /// Nombre de la categorï¿½a. Si CategoriaId no existe y se proporciona este valor,
+    /// se crearautomticamente la categora.
     /// </summary>
     public string? CategoriaNombre { get; init; }
 
     /// <summary>
     /// Nombre del concepto. Si ConceptoId no existe y se proporciona este valor,
-    /// se creará automáticamente el concepto (con la categoría especificada o creada).
+    /// se crearautomticamente el concepto (con la categora especificada o creada).
     /// </summary>
     public string? ConceptoNombre { get; init; }
 
     /// <summary>
     /// Nombre del cliente. Si ClienteId no existe y se proporciona este valor,
-    /// se creará automáticamente el cliente.
+    /// se crearautomticamente el cliente.
     /// </summary>
     public string? ClienteNombre { get; init; }
 
     /// <summary>
     /// Nombre de la persona. Si PersonaId no existe y se proporciona este valor,
-    /// se creará automáticamente la persona.
+    /// se crearautomticamente la persona.
     /// </summary>
     public string? PersonaNombre { get; init; }
 
     /// <summary>
     /// Nombre de la cuenta. Si CuentaId no existe y se proporciona este valor,
-    /// se creará automáticamente la cuenta.
+    /// se crearautomticamente la cuenta.
     /// </summary>
     public string? CuentaNombre { get; init; }
 
     /// <summary>
     /// Nombre de la forma de pago. Si FormaPagoId no existe y se proporciona este valor,
-    /// se creará automáticamente la forma de pago.
+    /// se crearautomticamente la forma de pago.
     /// </summary>
     public string? FormaPagoNombre { get; init; }
 }

@@ -83,7 +83,7 @@ FechaRegistro fecha,
                 descripcion
          );
 
-        // 🔥 Lanzar evento de dominio cuando se crea un gasto
+        // Lanzar evento de dominio cuando se crea un gasto
         gasto.AddDomainEvent(new GastoCreadoEvent(gasto.Id, cuentaId, importe));
 
         return gasto;
@@ -100,7 +100,7 @@ FechaRegistro fecha,
         UsuarioId usuarioId,
         Descripcion? descripcion)
     {
-        // 🔥 Guardar valores anteriores para el evento
+        // Guardar valores anteriores para el evento
         var cuentaIdAnterior = CuentaId;
         var importeAnterior = Importe;
 
@@ -114,7 +114,7 @@ FechaRegistro fecha,
         UsuarioId = usuarioId;
         Descripcion = descripcion;
 
-        // 🔥 Lanzar evento solo si cambió la cuenta o el importe
+        // Lanzar evento solo si cambió la cuenta o el importe
         if (!cuentaIdAnterior.Equals(cuentaId) || !importeAnterior.Equals(importe))
         {
             AddDomainEvent(new GastoActualizadoEvent(
@@ -131,7 +131,7 @@ FechaRegistro fecha,
     /// </summary>
     public void MarkAsDeleted()
     {
-        // 🔥 Lanzar evento de dominio cuando se elimina un gasto
+        // Lanzar evento de dominio cuando se elimina un gasto
         AddDomainEvent(new GastoEliminadoEvent(Id, CuentaId, Importe));
     }
 }

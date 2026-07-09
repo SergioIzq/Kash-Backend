@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.GastosProgramados.Commands;
 using Kash.Application.Features.GastosProgramados.Queries;
 using Kash.Domain;
-using Kash.NuevaApi.Controllers.Base;
+using Kash.Api.Controllers.Base;
 using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
@@ -10,7 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kash.NuevaApi.Controllers;
+namespace Kash.Api.Controllers;
 
 [Authorize]
 [ApiController]
@@ -32,7 +32,7 @@ public class GastosProgramadosController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        // ✅ OPTIMIZACIÓN: Usamos el helper de la clase base
+        // OPTIMIZACIÓN: Usamos el helper de la clase base
         var usuarioId = GetCurrentUserId();
 
         if (usuarioId is null)

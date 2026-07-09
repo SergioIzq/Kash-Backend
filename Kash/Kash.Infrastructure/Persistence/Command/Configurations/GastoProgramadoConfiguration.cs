@@ -18,7 +18,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                 value => GastoProgramadoId.CreateFromDatabase(value)
             ); ;
 
-            // ✅ Configurar conversión de Value Object Cantidad
+            // Configurar conversión de Value Object Cantidad
             builder.Property(e => e.Importe)
       .HasColumnName("importe")
       .HasColumnType("decimal(18,2)")
@@ -27,7 +27,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
           importe => importe.Valor,
           value => Cantidad.CreateFromDatabase(value));
 
-            // ✅ Configurar conversión de Value Objects de IDs
+            // Configurar conversión de Value Objects de IDs
             builder.Property(e => e.CuentaId)
         .HasColumnName("id_cuenta")
    .IsRequired()
@@ -35,7 +35,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
         cuentaId => cuentaId.Value,
            value => CuentaId.CreateFromDatabase(value));
 
-            // ✅ Estos NO son nullable en la entidad, son structs requeridos
+            // Estos NO son nullable en la entidad, son structs requeridos
             builder.Property(e => e.ProveedorId)
 .HasColumnName("id_proveedor")
 .IsRequired(false)
@@ -71,7 +71,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                 conceptoId => conceptoId.Value,
                  value => ConceptoId.CreateFromDatabase(value));
 
-            // ✅ FIX CRÍTICO: Configurar Frecuencia como Value Object
+            // FIX CRÍTICO: Configurar Frecuencia como Value Object
             builder.Property(e => e.Frecuencia)
                     .HasColumnName("frecuencia")
                    .HasColumnType("varchar(100)")
@@ -80,7 +80,7 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
                     frecuencia => frecuencia.Value,
                  value => Frecuencia.CreateFromDatabase(value));
 
-            // ✅ Configurar Descripcion nullable
+            // Configurar Descripcion nullable
             builder.Property(e => e.Descripcion)
     .HasColumnName("descripcion")
      .HasColumnType("varchar(200)")
@@ -89,17 +89,17 @@ namespace Kash.Infrastructure.Persistence.Command.Configurations.Configurations
          descripcion => descripcion.HasValue ? descripcion.Value._Value : null,
        value => string.IsNullOrEmpty(value) ? null : new Descripcion(value));
 
-            // ✅ FechaEjecucion
+            // FechaEjecucion
             builder.Property(e => e.FechaEjecucion)
           .HasColumnName("fecha_ejecucion")
                .IsRequired();
 
-            // ✅ Activo
+            // Activo
             builder.Property(e => e.Activo)
             .HasColumnName("activo")
           .IsRequired();
 
-            // ✅ HangfireJobId
+            // HangfireJobId
             builder.Property(e => e.HangfireJobId)
     .HasColumnName("hangfire_job_id")
   .HasColumnType("varchar(100)")
