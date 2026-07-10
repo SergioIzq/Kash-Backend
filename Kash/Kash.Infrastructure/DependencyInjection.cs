@@ -1,7 +1,6 @@
 ﻿using Kash.Infrastructure.Configuration.Settings;
 using Kash.Infrastructure.DataAccess;
 using Kash.Infrastructure.Persistence.Command;
-using Kash.Infrastructure.Persistence.Interceptors;
 using Kash.Infrastructure.Persistence.Query;
 using Kash.Infrastructure.Persistence.Warmup;
 using Kash.Infrastructure.Services;
@@ -11,7 +10,9 @@ using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Application.Interfaces;
 using Kash.Shared.Application.Servicies;
 using SergioIzq.Domain.Kernel.Interfaces;
-using SergioIzq.Domain.Kernel.Interfaces.Repositories;
+using SergioIzq.Infrastructure.Kernel.DependencyInjection;
+using SergioIzq.Infrastructure.Kernel.Persistence;
+using SergioIzq.Infrastructure.Kernel.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,7 @@ namespace Kash.Infrastructure
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
 
-            services.AddScoped<DomainEventDispatcherInterceptor>();
+            services.AddKernelUnitOfWork(); // IUnitOfWork + DomainEventDispatcherInterceptor (Scoped)
 
             services.AddDbContext<KashDbContext>((sp, options) =>
   {
@@ -57,6 +58,10 @@ namespace Kash.Infrastructure
       }
   });
 
+            // SergioIzq.Infrastructure.Kernel.UnitOfWork pide un DbContext genérico por constructor;
+            // AddDbContext<KashDbContext> solo registra el tipo concreto, así que lo exponemos también.
+            services.AddScoped<DbContext>(sp => sp.GetRequiredService<KashDbContext>());
+
             // NUEVO: Registrar MediatR handlers desde Infrastructure (Event Handlers)
             services.AddMediatR(cfg =>
              cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
@@ -68,7 +73,6 @@ namespace Kash.Infrastructure
 
             // 4️⃣ Configuración y Servicios Core
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Servicio de caché
             services.AddScoped<ICacheService, DistributedCacheService>();
@@ -87,20 +91,8 @@ namespace Kash.Infrastructure
             // 6️⃣ Repositorios Manuales (Dashboard)
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
 
-            // 7️⃣ Scrutor: Repositorios Automáticos
-            services.Scan(scan => scan
-              .FromAssemblies(Assembly.GetExecutingAssembly())
-              .AddClasses(classes => classes.AssignableTo(typeof(IWriteRepository<,>)))
-                 .AsImplementedInterfaces()
-                .WithScopedLifetime());
-
-            services.Scan(scan => scan
-        .FromAssemblies(Assembly.GetExecutingAssembly())
-            .AddClasses(classes => classes.Where(type =>
-          type.GetInterfaces().Any(i => i.IsGenericType &&
-               i.GetGenericTypeDefinition() == typeof(IReadRepository<,,>))))
-          .AsImplementedInterfaces()
-              .WithScopedLifetime());
+            // 7️⃣ Repositorios Automáticos (Scrutor, vía SergioIzq.Infrastructure.Kernel)
+            services.AddKernelRepositories(Assembly.GetExecutingAssembly());
 
             services.AddScoped<IDomainValidator, DapperDomainValidator>();
 

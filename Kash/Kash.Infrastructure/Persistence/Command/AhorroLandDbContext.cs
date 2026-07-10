@@ -1,5 +1,4 @@
 ﻿using Kash.Domain;
-using Kash.Infrastructure.Persistence.Interceptors;
 using SergioIzq.Domain.Kernel.Abstractions;
 using SergioIzq.Domain.Kernel.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -9,20 +8,17 @@ namespace Kash.Infrastructure.Persistence.Command;
 
 public class KashDbContext : DbContext
 {
-    private readonly DomainEventDispatcherInterceptor _domainEventDispatcher;
-
-    public KashDbContext(
-        DbContextOptions<KashDbContext> options,
-        DomainEventDispatcherInterceptor domainEventDispatcher)
+    // El interceptor de eventos de dominio se registra una única vez, en el
+    // AddDbContext<KashDbContext>(...) de DependencyInjection.cs. Antes también
+    // se inyectaba aquí y se añadía otra vez en OnConfiguring -> el mismo interceptor
+    // quedaba registrado dos veces y sus hooks se disparaban dos veces por guardado.
+    public KashDbContext(DbContextOptions<KashDbContext> options)
         : base(options)
     {
-        _domainEventDispatcher = domainEventDispatcher;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.AddInterceptors(_domainEventDispatcher);
-
 #if DEBUG
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();

@@ -1,4 +1,4 @@
-﻿using Kash.Infrastructure.Persistence.Query;
+﻿using SergioIzq.Infrastructure.Kernel.Persistence;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

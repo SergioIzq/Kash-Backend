@@ -1,4 +1,4 @@
-﻿using Kash.Infrastructure.Persistence.Query;
+﻿using SergioIzq.Infrastructure.Kernel.Persistence;
 using SergioIzq.Domain.Kernel.Abstractions;
 using SergioIzq.Domain.Kernel.Interfaces;
 using Dapper;

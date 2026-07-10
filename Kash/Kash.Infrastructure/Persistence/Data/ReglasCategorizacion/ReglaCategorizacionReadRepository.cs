@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Kash.Application.Interfaces.Repositories;
 using Kash.Domain;
-using Kash.Infrastructure.Persistence.Query;
+using SergioIzq.Infrastructure.Kernel.Persistence;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Domain.ValueObjects.Ids;
 

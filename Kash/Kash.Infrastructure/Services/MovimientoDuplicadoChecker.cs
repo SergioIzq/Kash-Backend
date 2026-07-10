@@ -1,6 +1,6 @@
 using Dapper;
 using Kash.Application.Interfaces.Repositories;
-using Kash.Infrastructure.Persistence.Query;
+using SergioIzq.Infrastructure.Kernel.Persistence;
 
 namespace Kash.Infrastructure.Services;
 

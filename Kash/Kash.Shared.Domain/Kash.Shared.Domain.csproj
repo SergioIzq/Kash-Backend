@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SergioIzq.Domain.Kernel" Version="0.1.3" />
+    <PackageReference Include="SergioIzq.Domain.Kernel" Version="0.1.4" />
   </ItemGroup>
 
 </Project>

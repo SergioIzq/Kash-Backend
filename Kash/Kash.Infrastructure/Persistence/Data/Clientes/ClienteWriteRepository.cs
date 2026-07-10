@@ -1,6 +1,7 @@
 ﻿using Kash.Domain;
 using Kash.Domain.Errors;
 using Kash.Infrastructure.Persistence.Command;
+using SergioIzq.Infrastructure.Kernel.Persistence;
 using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
