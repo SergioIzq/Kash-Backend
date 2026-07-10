@@ -1,6 +1,7 @@
 ﻿using Kash.Domain;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Application.Interfaces;
+using SergioIzq.Application.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;

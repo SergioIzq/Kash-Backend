@@ -1,4 +1,4 @@
-using Kash.Shared.Application.Abstractions.Services;
+using SergioIzq.Application.Kernel.Services;
 using Kash.Shared.Application.Dtos;
 using System.Collections.Concurrent;
 

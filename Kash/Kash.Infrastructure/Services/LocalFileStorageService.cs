@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Application.Servicies; // Tu interfaz
+﻿using SergioIzq.Application.Kernel.Services; // Tu interfaz
 using Microsoft.AspNetCore.Hosting; // Para IWebHostEnvironment
 using Microsoft.AspNetCore.Http;    // Para IHttpContextAccessor
 

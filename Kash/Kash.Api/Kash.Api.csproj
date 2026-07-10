@@ -18,8 +18,8 @@
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="SergioIzq.Logging.HtmlFile" Version="0.1.4" />
-		<PackageReference Include="SergioIzq.AspNetCore.Kernel" Version="0.1.4" />
+		<PackageReference Include="SergioIzq.Logging.HtmlFile" Version="0.1.5" />
+		<PackageReference Include="SergioIzq.AspNetCore.Kernel" Version="0.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>

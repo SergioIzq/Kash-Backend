@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Application.Abstractions.Servicies;
+﻿using SergioIzq.Application.Kernel.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 

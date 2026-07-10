@@ -1,5 +1,5 @@
 ﻿using Hangfire;
-using Kash.Shared.Application.Abstractions.Servicies;
+using SergioIzq.Application.Kernel.Services;
 using System.Linq.Expressions;
 
 namespace Kash.Infrastructure.Services.Scheduling;

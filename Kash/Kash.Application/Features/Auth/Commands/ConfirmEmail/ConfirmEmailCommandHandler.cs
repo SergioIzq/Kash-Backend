@@ -1,5 +1,5 @@
 using Kash.Domain;
-using Kash.Shared.Application.Abstractions.Messaging;
+using SergioIzq.Application.Kernel.Messaging;
 using Kash.Shared.Domain.Abstractions.Errors;
 using SergioIzq.Domain.Kernel.Abstractions.Results;
 using SergioIzq.Domain.Kernel.Interfaces;

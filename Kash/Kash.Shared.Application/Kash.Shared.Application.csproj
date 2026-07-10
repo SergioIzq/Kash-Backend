@@ -9,8 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Mapster" Version="10.0.10" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.10" />
-    <PackageReference Include="MediatR" Version="14.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.17" />
+    <PackageReference Include="SergioIzq.Application.Kernel" Version="0.1.5" />
   </ItemGroup>
 
   <ItemGroup>

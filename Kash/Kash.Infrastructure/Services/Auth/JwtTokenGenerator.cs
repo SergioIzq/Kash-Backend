@@ -1,5 +1,6 @@
 using Kash.Domain;
 using Kash.Shared.Application.Interfaces;
+using SergioIzq.Application.Kernel.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

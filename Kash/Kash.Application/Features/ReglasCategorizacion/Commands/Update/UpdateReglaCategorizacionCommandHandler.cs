@@ -1,8 +1,9 @@
 ﻿using Kash.Domain;
-using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
-using Kash.Shared.Application.Abstractions.Servicies;
+using SergioIzq.Application.Kernel.Messaging.Abstracts.Commands;
+using SergioIzq.Application.Kernel.Services;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Application.Interfaces;
+using SergioIzq.Application.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;

@@ -1,4 +1,5 @@
 using Kash.Shared.Application.Interfaces;
+using SergioIzq.Application.Kernel.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace Kash.Infrastructure.Services.Auth;

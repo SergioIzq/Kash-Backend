@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Application.Abstractions.Messaging;
+﻿using SergioIzq.Application.Kernel.Messaging;
 using Kash.Shared.Application.Dtos;
 namespace Kash.Application.Features.Auth.Queries;
 

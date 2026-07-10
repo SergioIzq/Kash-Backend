@@ -1,6 +1,6 @@
 ﻿using Kash.Domain;
-using Kash.Shared.Application.Abstractions.Messaging;
-using Kash.Shared.Application.Abstractions.Services;
+using SergioIzq.Application.Kernel.Messaging;
+using SergioIzq.Application.Kernel.Services;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Domain.Abstractions.Errors;
 using SergioIzq.Domain.Kernel.Abstractions.Results;

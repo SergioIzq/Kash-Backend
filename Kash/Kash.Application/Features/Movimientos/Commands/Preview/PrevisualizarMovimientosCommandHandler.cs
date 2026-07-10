@@ -3,6 +3,7 @@ using Kash.Application.Features.Movimientos.Commands.Import.Models;
 using Kash.Application.Features.Movimientos.Commands.Import.Parsers;
 using Kash.Application.Interfaces.Repositories;
 using Kash.Shared.Application.Interfaces;
+using SergioIzq.Application.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 

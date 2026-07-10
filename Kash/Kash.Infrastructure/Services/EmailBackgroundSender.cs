@@ -1,5 +1,6 @@
 ﻿using Kash.Infrastructure.Configuration.Settings;
 using Kash.Shared.Application.Dtos;
+using SergioIzq.Application.Kernel.Services;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Hosting;
