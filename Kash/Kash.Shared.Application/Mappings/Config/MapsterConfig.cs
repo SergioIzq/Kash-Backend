@@ -1,7 +1,8 @@
-﻿using Kash.Domain;
+using Kash.Domain;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
+using SergioIzq.Application.Kernel.Mapping;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,30 +19,16 @@ public static class MapsterConfig
         // Recomendado: Para evitar bucles infinitos en relaciones circulares
         config.Default.PreserveReference(true);
 
-        // Recomendado: Ignorar nulos al mapear si quieres evitar sobrescribir datos con nulls (opcional)
-        // config.Default.IgnoreNullValues(true);
-
         // ---------------------------------------------------------
         // 1. MAPEOS GLOBALES PARA VALUE OBJECTS (PRIMITIVIZACIÓN)
         // ---------------------------------------------------------
-        // Al definir esto aquí, Mapster sabrá automáticamente cómo convertir
-        // Gasto.Importe (Cantidad) -> GastoDto.Importe (decimal)
-        // sin que tengas que repetirlo en cada DTO.
 
         // --- IDs ---
-        config.NewConfig<UsuarioId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<Guid, UsuarioId>().MapWith(src => UsuarioId.CreateFromDatabase(src));
+        // Registra ambas direcciones (Id→Guid e Guid→Id vía CreateFromDatabase) para TODOS los
+        // IGuidValueObject del assembly, sin mantener la lista a mano al añadir Ids nuevos.
+        config.RegisterGuidValueObjects(typeof(UsuarioId).Assembly);
 
-        config.NewConfig<GastoId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<ConceptoId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<ProveedorId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<PersonaId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<CuentaId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<FormaPagoId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<CategoriaId, Guid>().MapWith(src => src.Value);
-        config.NewConfig<ReglaCategorizacionId, Guid>().MapWith(src => src.Value);
-
-        // --- Valores de Dominio ---
+        // --- Valores de Dominio (específicos de Kash) ---
         config.NewConfig<Cantidad, decimal>().MapWith(src => src.Valor);
         config.NewConfig<FechaRegistro, DateTime>().MapWith(src => src.Valor);
 

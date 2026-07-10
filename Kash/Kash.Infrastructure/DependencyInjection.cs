@@ -1,14 +1,8 @@
-﻿using Kash.Infrastructure.Configuration.Settings;
-using Kash.Infrastructure.DataAccess;
 using Kash.Infrastructure.Persistence.Command;
 using Kash.Infrastructure.Persistence.Query;
-using Kash.Infrastructure.Persistence.Warmup;
-using Kash.Infrastructure.Services;
 using Kash.Infrastructure.Services.Auth;
-using SergioIzq.Application.Kernel.Services;
 using Kash.Shared.Application.Interfaces;
-using SergioIzq.Application.Kernel.Interfaces;
-using SergioIzq.Domain.Kernel.Interfaces;
+using SergioIzq.AspNetCore.Kernel.DependencyInjection;
 using SergioIzq.Infrastructure.Kernel.DependencyInjection;
 using SergioIzq.Infrastructure.Kernel.Persistence;
 using SergioIzq.Infrastructure.Kernel.Persistence.Interceptors;
@@ -70,22 +64,22 @@ namespace Kash.Infrastructure
             // Eliminamos services.AddScoped<IDbConnection> para evitar conexiones vivas innecesarias.
             services.AddScoped<IDbConnectionFactory, SqlDbConnectionFactory>();
 
-            // 4️⃣ Configuración y Servicios Core
-            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            // 4️⃣ Servicios del kernel: caché, email en cola, scheduler Hangfire,
+            // validador de dominio, warm-up de BD, y los servicios web
+            // (IUserContext por claims, IPasswordHasher, IFileStorageService en wwwroot)
+            services.AddKernelCache();
+            services.AddKernelEmail(configuration);
+            services.AddKernelJobScheduling();
+            services.AddKernelDomainValidator();
+            services.AddKernelDatabaseWarmup();
+            services.AddKernelUserContext();
+            services.AddKernelPasswordHasher();
+            services.AddKernelFileStorage();
 
-            // Servicio de caché
-            services.AddScoped<ICacheService, DistributedCacheService>();
-
-            // Registro de IFileStorageService (Faltaba antes)
-            services.AddHttpContextAccessor();
-            services.AddScoped<IFileStorageService, LocalFileStorageService>();
-
-            // 5️⃣ Auth & Email
-            services.AddScoped<IPasswordHasher, PasswordHasherService>();
+            // 5️⃣ Auth específica de Kash: adapter de IJwtTokenGenerator(Usuario) sobre el
+            // generador genérico del kernel (KernelJwtTokenGenerator lo registra
+            // AddKernelJwtAuthentication en Program.cs)
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-            services.AddSingleton<QueuedEmailService>();
-            services.AddSingleton<IEmailService>(sp => sp.GetRequiredService<QueuedEmailService>());
-            services.AddHostedService<EmailBackgroundSender>();
 
             // 6️⃣ Repositorios Manuales (Dashboard)
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
@@ -93,24 +87,17 @@ namespace Kash.Infrastructure
             // 7️⃣ Repositorios Automáticos (Scrutor, vía SergioIzq.Infrastructure.Kernel)
             services.AddKernelRepositories(Assembly.GetExecutingAssembly());
 
-            services.AddScoped<IDomainValidator, DapperDomainValidator>();
-
-            // 8️⃣ Scrutor: Servicios Infraestructura
+            // 8️⃣ Scrutor: Servicios Infraestructura específicos de Kash
             services.Scan(scan => scan
               .FromAssemblies(Assembly.GetExecutingAssembly())
             .AddClasses(classes => classes.InNamespaces("Kash.Infrastructure.Services")
-             .Where(c => !typeof(BackgroundService).IsAssignableFrom(c)
-                && c != typeof(QueuedEmailService)
-       && c != typeof(LocalFileStorageService)))
+             .Where(c => !typeof(BackgroundService).IsAssignableFrom(c)))
           .AsImplementedInterfaces()
                      .WithScopedLifetime());
 
             // HttpClient para resolución ISIN → Ticker (Yahoo Finance)
             services.AddHttpClient("YahooFinance", c =>
                 c.BaseAddress = new Uri("https://query1.finance.yahoo.com"));
-
-            // 9️⃣ Warmup
-            services.AddHostedService<DatabaseWarmupService>();
 
             return services;
         }
