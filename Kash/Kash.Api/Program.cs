@@ -1,6 +1,6 @@
 ﻿using Kash.Application;
-using Kash.FicheroLog;
-using Kash.FicheroLog.Formatters;
+using SergioIzq.Logging.HtmlFile;
+using SergioIzq.Logging.HtmlFile.Formatters;
 using Kash.Infrastructure;
 using Kash.Infrastructure.Configuration;
 using Kash.Infrastructure.TypesHandlers;

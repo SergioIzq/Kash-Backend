@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kash.Middleware", "Kash.Mid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kash.Infrastructure", "Kash.Infrastructure\Kash.Infrastructure.csproj", "{28E105F9-45FF-B8F2-AC66-4DF32C014DC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kash.FicheroLog", "Kash.FicheroLog\Kash.FicheroLog.csproj", "{2829E4A1-4575-9543-67A6-D7DDC5A003CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kash.Shared.Application", "Kash.Shared.Application\Kash.Shared.Application.csproj", "{52F1394D-C395-A37B-4F72-E37EBBE0D882}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kash.Shared.Domain", "Kash.Shared.Domain\Kash.Shared.Domain.csproj", "{887315FD-538E-0446-3E0B-BA4994A24311}"
@@ -47,10 +45,6 @@ Global
 		{28E105F9-45FF-B8F2-AC66-4DF32C014DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28E105F9-45FF-B8F2-AC66-4DF32C014DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28E105F9-45FF-B8F2-AC66-4DF32C014DC1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2829E4A1-4575-9543-67A6-D7DDC5A003CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2829E4A1-4575-9543-67A6-D7DDC5A003CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2829E4A1-4575-9543-67A6-D7DDC5A003CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2829E4A1-4575-9543-67A6-D7DDC5A003CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{52F1394D-C395-A37B-4F72-E37EBBE0D882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{52F1394D-C395-A37B-4F72-E37EBBE0D882}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52F1394D-C395-A37B-4F72-E37EBBE0D882}.Release|Any CPU.ActiveCfg = Release|Any CPU
