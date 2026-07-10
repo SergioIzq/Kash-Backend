@@ -2,7 +2,7 @@
 using Kash.Application.Features.Categorias.Queries;
 using Kash.Application.Features.Categorias.Queries.Recent;
 using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results; // Para Error
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

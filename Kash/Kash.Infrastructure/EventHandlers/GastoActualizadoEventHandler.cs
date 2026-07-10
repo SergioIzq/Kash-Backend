@@ -1,7 +1,7 @@
 ﻿using Kash.Domain;
 using Kash.Domain.Gastos.Eventos;
-using Kash.Shared.Domain.Interfaces;
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Interfaces;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
 using Microsoft.Extensions.Logging;

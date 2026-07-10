@@ -5,7 +5,7 @@ using Kash.Application.Features.Movimientos.Commands.Import.Parsers;
 using Kash.Application.Interfaces.Repositories;
 using Kash.Shared.Application.Dtos;
 using Kash.Shared.Application.Interfaces;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

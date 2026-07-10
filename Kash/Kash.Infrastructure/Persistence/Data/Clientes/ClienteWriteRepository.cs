@@ -1,7 +1,7 @@
 ﻿using Kash.Domain;
 using Kash.Domain.Errors;
 using Kash.Infrastructure.Persistence.Command;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Infrastructure.Persistence.Data.Clientes

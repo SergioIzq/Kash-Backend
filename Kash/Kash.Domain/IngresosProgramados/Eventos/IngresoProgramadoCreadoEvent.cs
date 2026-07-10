@@ -1,4 +1,4 @@
-using Kash.Shared.Domain.Events;
+using SergioIzq.Domain.Kernel.Events;
 using Kash.Shared.Domain.ValueObjects;
 
 namespace Kash.Domain.IngresosProgramados.Eventos;

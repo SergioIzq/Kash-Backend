@@ -2,7 +2,7 @@
 using Kash.Application.Features.GastosProgramados.Queries;
 using Kash.Domain;
 using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using Mapster;

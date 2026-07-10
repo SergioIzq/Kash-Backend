@@ -2,7 +2,7 @@
 using Kash.Shared.Application.Abstractions.Messaging;
 using Kash.Shared.Application.Interfaces;
 using Kash.Shared.Domain.Abstractions.Errors;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 

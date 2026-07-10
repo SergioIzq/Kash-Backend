@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Domain.Abstractions.Results;
+﻿using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;

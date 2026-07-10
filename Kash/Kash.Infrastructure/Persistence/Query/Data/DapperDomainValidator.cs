@@ -1,6 +1,6 @@
 ﻿using Kash.Infrastructure.Persistence.Query;
-using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Interfaces;
 using Dapper;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;

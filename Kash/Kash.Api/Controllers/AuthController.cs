@@ -9,7 +9,7 @@ using Kash.Application.Features.Auth.Commands.UploadAvatar;
 using Kash.Application.Features.Auth.Queries;
 using Kash.Api.Controllers.Base; // Usamos tu controlador base
 using Kash.Api.Extensions; // Para cookies si las usas como extensiones
-using Kash.Shared.Domain.Abstractions.Results; // Para Result
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

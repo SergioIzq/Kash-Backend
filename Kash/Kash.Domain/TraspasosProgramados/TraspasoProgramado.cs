@@ -1,6 +1,6 @@
 ﻿using Kash.Domain.TraspasosProgramados.Eventos;
-using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using System.ComponentModel.DataAnnotations.Schema;

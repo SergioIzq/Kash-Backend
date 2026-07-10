@@ -1,4 +1,4 @@
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 
 namespace Kash.Shared.Application.Interfaces;
 

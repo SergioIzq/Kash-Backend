@@ -2,8 +2,8 @@
 
 using Kash.Domain;
 using Kash.Shared.Application.Abstractions.Messaging;
-using Kash.Shared.Domain.Abstractions.Results;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Interfaces;
 using Kash.Shared.Domain.ValueObjects;
 
 public sealed class UpdateUserProfileCommandHandler : ICommandHandler<UpdateUserProfileCommand> // Asume que hereda ICommand<Result>

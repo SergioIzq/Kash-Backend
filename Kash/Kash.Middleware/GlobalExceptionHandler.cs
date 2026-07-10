@@ -1,5 +1,5 @@
-﻿using Kash.Shared.Domain.Abstractions.Errors;
-using Kash.Shared.Domain.Abstractions.Results;
+﻿using SergioIzq.Domain.Kernel.Abstractions.Errors;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;

@@ -1,5 +1,5 @@
-﻿using Kash.Shared.Domain.Abstractions.Enums;
-using Kash.Shared.Domain.Abstractions.Results;
+﻿using SergioIzq.Domain.Kernel.Abstractions.Enums;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

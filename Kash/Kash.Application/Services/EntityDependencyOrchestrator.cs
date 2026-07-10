@@ -1,5 +1,5 @@
 using Kash.Shared.Application.Interfaces;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 
 namespace Kash.Application.Services;
 

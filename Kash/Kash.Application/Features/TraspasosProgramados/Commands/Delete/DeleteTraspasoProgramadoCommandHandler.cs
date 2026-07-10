@@ -2,8 +2,8 @@
 using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Application.Interfaces;
-using Kash.Shared.Domain.Interfaces;
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Interfaces;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Application.Features.TraspasosProgramados.Commands;

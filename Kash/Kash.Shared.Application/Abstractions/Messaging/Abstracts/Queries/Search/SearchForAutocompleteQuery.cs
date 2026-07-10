@@ -1,6 +1,6 @@
-using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Abstractions.Results;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Interfaces;
 using MediatR;
 
 namespace Kash.Shared.Application.Abstractions.Messaging.Abstracts.Queries;

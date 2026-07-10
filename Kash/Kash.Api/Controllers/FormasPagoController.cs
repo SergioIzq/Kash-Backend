@@ -3,7 +3,7 @@ using Kash.Application.Features.FormasPago.Queries;
 using Kash.Application.Features.FormasPago.Queries.Recent;
 using Kash.Application.Features.FormasPago.Queries.Search; // Asegúrate de tener este namespace
 using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

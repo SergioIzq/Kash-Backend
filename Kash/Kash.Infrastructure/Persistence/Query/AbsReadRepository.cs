@@ -1,7 +1,7 @@
-﻿using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Interfaces;
-using Kash.Shared.Domain.Interfaces.Repositories;
-using Kash.Shared.Domain.Results;
+﻿using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Interfaces;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Dapper;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;

@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Domain.Interfaces;
+﻿using SergioIzq.Domain.Kernel.Interfaces;
 
 namespace Kash.Application.Interfaces
 {

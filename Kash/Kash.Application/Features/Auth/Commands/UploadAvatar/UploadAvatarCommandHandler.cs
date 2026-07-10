@@ -2,9 +2,9 @@
 using Kash.Shared.Application.Abstractions.Messaging;
 using Kash.Shared.Application.Abstractions.Servicies;
 using Kash.Shared.Application.Servicies;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.Helpers;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Interfaces;
 using Kash.Shared.Domain.ValueObjects;
 
 namespace Kash.Application.Features.Auth.Commands.UploadAvatar;

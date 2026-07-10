@@ -1,5 +1,5 @@
 using Kash.Application.Features.Movimientos.Commands.Import.Models;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 
 namespace Kash.Application.Features.Movimientos.Commands.Preview;

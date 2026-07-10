@@ -2,7 +2,7 @@
 using Kash.Application.Features.Inversiones.Commands.Import;
 using Kash.Application.Features.Inversiones.Queries;
 using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

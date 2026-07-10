@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.ReglasCategorizacion.Commands;
 using Kash.Application.Features.ReglasCategorizacion.Queries;
 using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

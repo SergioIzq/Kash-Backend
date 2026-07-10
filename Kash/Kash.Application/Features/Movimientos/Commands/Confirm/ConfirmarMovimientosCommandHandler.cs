@@ -2,7 +2,7 @@ using Kash.Application.Features.Gastos.Commands;
 using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Movimientos.Commands.Import.Models;
 using Kash.Shared.Application.Interfaces;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

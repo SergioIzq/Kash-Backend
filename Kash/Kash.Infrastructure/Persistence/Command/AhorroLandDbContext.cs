@@ -1,7 +1,7 @@
 ﻿using Kash.Domain;
 using Kash.Infrastructure.Persistence.Interceptors;
-using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

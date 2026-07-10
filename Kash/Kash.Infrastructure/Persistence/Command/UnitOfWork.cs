@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Domain.Interfaces;
+﻿using SergioIzq.Domain.Kernel.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;

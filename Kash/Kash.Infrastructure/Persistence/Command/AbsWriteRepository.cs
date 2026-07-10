@@ -1,7 +1,7 @@
 ﻿using Kash.Infrastructure.Persistence.Command;
-using Kash.Shared.Domain.Abstractions;
-using Kash.Shared.Domain.Interfaces;
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Abstractions;
+using SergioIzq.Domain.Kernel.Interfaces;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
