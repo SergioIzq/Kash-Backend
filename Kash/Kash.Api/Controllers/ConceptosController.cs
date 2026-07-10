@@ -2,7 +2,7 @@
 using Kash.Application.Features.Conceptos.Queries;
 using Kash.Application.Features.Conceptos.Queries.Recent;
 using Kash.Application.Features.Conceptos.Queries.Search;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 ﻿using Kash.Application.Features.Gastos.Commands;
 using Kash.Application.Features.Gastos.Queries;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

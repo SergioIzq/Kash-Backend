@@ -7,7 +7,7 @@ using Kash.Application.Features.Auth.Commands.ResetPassword;
 using Kash.Application.Features.Auth.Commands.UpdateUserProfile;
 using Kash.Application.Features.Auth.Commands.UploadAvatar;
 using Kash.Application.Features.Auth.Queries;
-using Kash.Api.Controllers.Base; // Usamos tu controlador base
+using SergioIzq.AspNetCore.Kernel.Controllers; // Usamos tu controlador base
 using Kash.Api.Extensions; // Para cookies si las usas como extensiones
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Result
 using MediatR;

@@ -4,7 +4,7 @@ using SergioIzq.Logging.HtmlFile.Formatters;
 using Kash.Infrastructure;
 using Kash.Infrastructure.Configuration;
 using Kash.Infrastructure.TypesHandlers;
-using Kash.Middleware;
+using SergioIzq.AspNetCore.Kernel.Middleware;
 using Kash.Shared.Application;
 using Dapper;
 using Hangfire;
@@ -282,7 +282,7 @@ try
     app.UseSerilogRequestLogging();
     
     // Middleware de manejo de excepciones y resultados (PRIMERO)
-    app.UseKashExceptionHandling();
+    app.UseKernelExceptionHandling();
     
     app.UseRateLimiter();
 

@@ -1,5 +1,5 @@
 ﻿using Kash.Application.Features.Dashboard.Queries;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using Kash.Shared.Application.Dtos;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Result y Error
 using MediatR;

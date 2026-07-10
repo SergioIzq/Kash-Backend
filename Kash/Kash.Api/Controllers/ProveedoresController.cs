@@ -2,7 +2,7 @@
 using Kash.Application.Features.Proveedores.Queries;
 using Kash.Application.Features.Proveedores.Queries.Recent;
 using Kash.Application.Features.Proveedores.Queries.Search; // Asegúrate de tener este namespace
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.GastosProgramados.Commands;
 using Kash.Application.Features.GastosProgramados.Queries;
 using Kash.Domain;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using Kash.Shared.Domain.ValueObjects;
 using Kash.Shared.Domain.ValueObjects.Ids;

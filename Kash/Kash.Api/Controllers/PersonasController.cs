@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.Personas.Commands;
 using Kash.Application.Features.Personas.Queries;
 using Kash.Application.Features.Personas.Queries.Recent;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

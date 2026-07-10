@@ -1,6 +1,6 @@
 ﻿using Kash.Application.Features.TraspasosProgramados.Commands;
 using Kash.Application.Features.TraspasosProgramados.Queries;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

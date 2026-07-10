@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.Inversiones.Commands;
 using Kash.Application.Features.Inversiones.Commands.Import;
 using Kash.Application.Features.Inversiones.Queries;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

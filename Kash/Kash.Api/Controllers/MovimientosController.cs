@@ -2,7 +2,7 @@
 using Kash.Application.Features.Movimientos.Commands.Import;
 using Kash.Application.Features.Movimientos.Commands.Import.Models;
 using Kash.Application.Features.Movimientos.Commands.Preview;
-using Kash.Api.Controllers.Base;
+using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
