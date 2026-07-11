@@ -33,39 +33,28 @@ public class GastosProgramadosController : AbsController
         [FromQuery] string sortOrder = "")
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            // Retornamos un 401 usando el formato estandarizado
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetGastosProgramadosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetGastoProgramadoByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateGastoProgramadoRequest request)
     {
         // 1. Obtener ID del usuario
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         // 2. Crear comando con el ID del usuario inyectado
         var command = new CreateGastoProgramadoCommand
@@ -85,7 +74,7 @@ public class GastosProgramadosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
@@ -101,10 +90,7 @@ public class GastosProgramadosController : AbsController
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGastoProgramadoRequest request)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var command = new UpdateGastoProgramadoCommand
         {
@@ -124,19 +110,17 @@ public class GastosProgramadosController : AbsController
             PersonaId = request.PersonaId,
             CuentaId = request.CuentaId,
             FormaPagoId = request.FormaPagoId,
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteGastoProgramadoCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

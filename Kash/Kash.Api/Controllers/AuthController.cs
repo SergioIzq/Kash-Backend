@@ -115,17 +115,14 @@ public class AuthController : AbsController // Heredamos de AbsController
     public async Task<IActionResult> ConfirmarCorreo([FromQuery] string token)
     {
         var command = new ConfirmEmailCommand(token);
-        var result = await _sender.Send(command);
-
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpPost("resend-confirmation")]
     [AllowAnonymous] // Usualmente se permite reenviar sin estar logueado si olvidaste confirmar
     public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationEmailCommand request)
     {
-        var result = await _sender.Send(request);
-        return HandleResult(result);
+        return await SendAndHandleAsync(request);
     }
 
     /// <summary>
@@ -173,8 +170,7 @@ public class AuthController : AbsController // Heredamos de AbsController
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
     {
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>
@@ -197,9 +193,7 @@ public class AuthController : AbsController // Heredamos de AbsController
             request.Apellidos
         );
 
-        var result = await _sender.Send(command);
-
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>

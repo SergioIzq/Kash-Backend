@@ -27,21 +27,14 @@ public class ClientesController : AbsController
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchTerm = "", [FromQuery] string sortColumn = "", [FromQuery] string sortOrder = "")
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            // Retornamos un 401 usando el formato estandarizado
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetClientesPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -50,20 +43,14 @@ public class ClientesController : AbsController
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new SearchClientesQuery(search, limit)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -72,28 +59,21 @@ public class ClientesController : AbsController
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetRecentClientesQuery(limit)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetClienteByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
@@ -128,16 +108,14 @@ public class ClientesController : AbsController
             Nombre = request.Nombre
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result); // Retorna 200 con el dato actualizado
+        return await SendAndHandleAsync(command); // Retorna 200 con el dato actualizado
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteClienteCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result); // Retorna 204 No Content si es éxito
+        return await SendAndHandleAsync(command); // Retorna 204 No Content si es éxito
     }
 }
 

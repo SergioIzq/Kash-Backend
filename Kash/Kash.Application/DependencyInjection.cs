@@ -36,6 +36,10 @@ namespace Kash.Application
             // Registrar servicios automáticamente por marker interface (SergioIzq.Application.Kernel)
             services.AddMarkedServices(typeof(DependencyInyection).Assembly);
 
+            // Orquestador de dependencias del kernel (antes se registraba vía marker;
+            // la implementación vive ahora en el paquete y se registra explícitamente)
+            services.AddKernelDependencyOrchestration();
+
             return services;
         }
     }

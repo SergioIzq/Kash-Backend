@@ -29,29 +29,21 @@ public class TraspasosController : AbsController
         [FromQuery] string sortOrder = "")
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            // Retornamos un 401 usando el formato estandarizado
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetTraspasosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetTraspasoByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
@@ -93,16 +85,14 @@ public class TraspasosController : AbsController
             Descripcion = request.Descripcion
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteTraspasoCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

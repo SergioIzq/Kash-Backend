@@ -12,8 +12,8 @@
 		     llegan ahora transitivamente desde SergioIzq.AspNetCore.Kernel -->
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="SergioIzq.Logging.HtmlFile" Version="0.2.1" />
-		<PackageReference Include="SergioIzq.AspNetCore.Kernel" Version="0.2.1" />
+		<PackageReference Include="SergioIzq.Logging.HtmlFile" Version="0.2.5" />
+		<PackageReference Include="SergioIzq.AspNetCore.Kernel" Version="0.2.5" />
 	</ItemGroup>
 
 	<ItemGroup>

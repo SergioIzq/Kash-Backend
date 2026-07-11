@@ -33,12 +33,7 @@ public class DashboardController : AbsController
         [FromQuery] Guid? categoriaId = null)
     {
         // 1. Obtener Usuario (Helper base)
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Token inválido o usuario no identificado.")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         // 2. Validación de fechas (Regla de presentación/api)
         // Usamos Result.Failure con Error.Validation para mantener el formato estándar
@@ -48,15 +43,13 @@ public class DashboardController : AbsController
         }
 
         var query = new GetDashboardResumenQuery(
-            usuarioId.Value,
+            usuarioId,
             fechaInicio,
             fechaFin,
             cuentaId,
             categoriaId);
 
-        var result = await _sender.Send(query);
-
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -65,12 +58,7 @@ public class DashboardController : AbsController
     [HttpGet("historico")]
     public async Task<IActionResult> GetHistorico([FromQuery] int meses = 6)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Token inválido o usuario no identificado.")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         // Validación de rango
         if (meses < 1 || meses > 12)
@@ -79,7 +67,7 @@ public class DashboardController : AbsController
         }
 
         // Reutilizamos la query principal (o podrías crear una específica GetDashboardHistoryQuery para ser más eficiente)
-        var query = new GetDashboardResumenQuery(usuarioId.Value);
+        var query = new GetDashboardResumenQuery(usuarioId);
         var result = await _sender.Send(query);
 
         if (result.IsFailure)

@@ -1,6 +1,6 @@
 using Kash.Application.Features.IngresosProgramados.Commands.Execute;
 using Kash.Domain.IngresosProgramados.Eventos;
-using Kash.Infrastructure.Services.Scheduling;
+using SergioIzq.Infrastructure.Kernel.Scheduling;
 using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,7 @@ public sealed class IngresoProgramadoCreadoEventHandler : INotificationHandler<I
         try
         {
             var cronExpression = CronExpressionConverter.ConvertirFrecuenciaACron(
-                notification.Frecuencia,
+                notification.Frecuencia.Value,
                 notification.FechaEjecucion
             );
 
