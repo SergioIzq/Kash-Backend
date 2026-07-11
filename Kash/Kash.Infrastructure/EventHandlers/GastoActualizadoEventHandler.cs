@@ -1,6 +1,5 @@
 ﻿using Kash.Domain;
 using Kash.Domain.Gastos.Eventos;
-using SergioIzq.Domain.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
@@ -15,16 +14,13 @@ namespace Kash.Infrastructure.EventHandlers;
 public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoActualizadoEvent>
 {
     private readonly IWriteRepository<Cuenta, CuentaId> _cuentaRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GastoActualizadoEventHandler> _logger;
 
     public GastoActualizadoEventHandler(
           IWriteRepository<Cuenta, CuentaId> cuentaRepository,
-          IUnitOfWork unitOfWork,
           ILogger<GastoActualizadoEventHandler> logger)
     {
         _cuentaRepository = cuentaRepository;
-        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -72,7 +68,6 @@ public sealed class GastoActualizadoEventHandler : INotificationHandler<GastoAct
                 }
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                    "Saldo actualizado por modificaci�n de gasto {GastoId}: Cuenta anterior {CuentaAnterior} ({ImporteAnterior}) -> Cuenta nueva {CuentaNueva} ({ImporteNuevo})",

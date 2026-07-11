@@ -1,6 +1,5 @@
 using Kash.Domain;
 using Kash.Domain.Traspasos.Eventos;
-using SergioIzq.Domain.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
@@ -15,16 +14,13 @@ namespace Kash.Infrastructure.EventHandlers;
 public sealed class TraspasoActualizadoEventHandler : INotificationHandler<TraspasoActualizadoEvent>
 {
     private readonly IWriteRepository<Cuenta, CuentaId> _cuentaRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<TraspasoActualizadoEventHandler> _logger;
 
     public TraspasoActualizadoEventHandler(
     IWriteRepository<Cuenta, CuentaId> cuentaRepository,
-          IUnitOfWork unitOfWork,
           ILogger<TraspasoActualizadoEventHandler> logger)
     {
         _cuentaRepository = cuentaRepository;
-        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -75,7 +71,6 @@ public sealed class TraspasoActualizadoEventHandler : INotificationHandler<Trasp
             }
 
             // 3. Guardar todos los cambios
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Saldo actualizado por modificación de traspaso {TraspasoId}: " +

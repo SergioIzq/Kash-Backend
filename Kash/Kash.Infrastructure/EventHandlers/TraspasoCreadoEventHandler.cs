@@ -1,6 +1,5 @@
 using Kash.Domain;
 using Kash.Domain.Traspasos.Eventos;
-using SergioIzq.Domain.Kernel.Interfaces;
 using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
@@ -15,16 +14,13 @@ namespace Kash.Infrastructure.EventHandlers;
 public sealed class TraspasoCreadoEventHandler : INotificationHandler<TraspasoCreadoEvent>
 {
     private readonly IWriteRepository<Cuenta, CuentaId> _cuentaRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<TraspasoCreadoEventHandler> _logger;
 
     public TraspasoCreadoEventHandler(
         IWriteRepository<Cuenta, CuentaId> cuentaRepository,
-     IUnitOfWork unitOfWork,
      ILogger<TraspasoCreadoEventHandler> logger)
     {
         _cuentaRepository = cuentaRepository;
-        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -65,7 +61,6 @@ public sealed class TraspasoCreadoEventHandler : INotificationHandler<TraspasoCr
             _cuentaRepository.Update(cuentaDestino);
 
             // 5. Guardar cambios
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
               "Saldo actualizado por traspaso {TraspasoId}: Cuenta origen {CuentaOrigen} -{Importe} ? Cuenta destino {CuentaDestino} +{Importe}",
