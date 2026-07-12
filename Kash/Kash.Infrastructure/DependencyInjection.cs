@@ -81,8 +81,10 @@ namespace Kash.Infrastructure
             // AddKernelJwtAuthentication en Program.cs)
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-            // 6️⃣ Repositorios Manuales (Dashboard)
+            // 6️⃣ Repositorios Manuales (Dashboard + Reportes)
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
+            services.AddScoped<ApplicationInterface.IReporteRepository, ReporteRepository>();
+            services.AddScoped<ApplicationInterface.IPresupuestoPdfGenerator, Reporting.PresupuestoPdfGenerator>();
 
             // 7️⃣ Repositorios Automáticos (Scrutor, vía SergioIzq.Infrastructure.Kernel)
             services.AddKernelRepositories(Assembly.GetExecutingAssembly());

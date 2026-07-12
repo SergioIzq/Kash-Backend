@@ -1,4 +1,5 @@
 using Dapper;
+using Kash.Application.Features.Movimientos.Commands.Import;
 using Kash.Application.Interfaces.Repositories;
 using SergioIzq.Infrastructure.Kernel.Persistence;
 
@@ -57,5 +58,55 @@ public sealed class MovimientoDuplicadoChecker : IMovimientoDuplicadoChecker
                 cancellationToken: cancellationToken));
 
         return count > 0;
+    }
+
+    public async Task<HashSet<string>> CargarClavesExistentesAsync(
+        Guid usuarioId, string? cuentaNombre, DateTime desde, DateTime hasta,
+        CancellationToken cancellationToken = default)
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+
+        const string sql = @"
+            SELECT 'Gasto' AS Tipo, DATE(g.fecha) AS Fecha, g.importe AS Importe, g.descripcion AS Descripcion
+            FROM gastos g
+            LEFT JOIN cuentas cta ON g.id_cuenta = cta.id
+            WHERE g.id_usuario = @UsuarioId
+              AND DATE(g.fecha) BETWEEN @Desde AND @Hasta
+              AND (@CuentaNombre IS NULL OR cta.nombre = @CuentaNombre)
+            UNION ALL
+            SELECT 'Ingreso' AS Tipo, DATE(i.fecha) AS Fecha, i.importe AS Importe, i.descripcion AS Descripcion
+            FROM ingresos i
+            LEFT JOIN cuentas cta ON i.id_cuenta = cta.id
+            WHERE i.id_usuario = @UsuarioId
+              AND DATE(i.fecha) BETWEEN @Desde AND @Hasta
+              AND (@CuentaNombre IS NULL OR cta.nombre = @CuentaNombre)";
+
+        var filas = await connection.QueryAsync<ClaveRow>(
+            new CommandDefinition(sql,
+                new
+                {
+                    UsuarioId = usuarioId,
+                    Desde = desde.Date,
+                    Hasta = hasta.Date,
+                    CuentaNombre = string.IsNullOrWhiteSpace(cuentaNombre) ? null : cuentaNombre
+                },
+                cancellationToken: cancellationToken));
+
+        var claves = new HashSet<string>();
+        foreach (var fila in filas)
+        {
+            claves.Add(MovimientoDedupKey.Construir(
+                fila.Tipo == "Gasto", fila.Fecha, fila.Importe, fila.Descripcion));
+        }
+
+        return claves;
+    }
+
+    private sealed record ClaveRow
+    {
+        public string Tipo { get; init; } = string.Empty;
+        public DateTime Fecha { get; init; }
+        public decimal Importe { get; init; }
+        public string? Descripcion { get; init; }
     }
 }

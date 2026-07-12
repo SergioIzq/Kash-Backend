@@ -19,6 +19,9 @@ Log.Information("🚀 Iniciando Kash API en .NET 10...");
 
 BootstrapExtensions.SetKernelCulture("es-ES");
 
+// QuestPDF: licencia Community (gratuita para uso individual / <$1M facturación).
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 try
 {
     var builder = WebApplication.CreateSlimBuilder(args);
