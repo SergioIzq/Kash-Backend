@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using SergioIzq.Infrastructure.Kernel.Persistence;
+using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using System.Data;
 

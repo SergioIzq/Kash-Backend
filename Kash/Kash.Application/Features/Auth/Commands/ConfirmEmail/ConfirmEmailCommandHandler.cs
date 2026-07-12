@@ -1,8 +1,8 @@
 using Kash.Domain;
-using Kash.Shared.Application.Abstractions.Messaging;
+using SergioIzq.Application.Kernel.Messaging;
 using Kash.Shared.Domain.Abstractions.Errors;
-using Kash.Shared.Domain.Abstractions.Results;
-using Kash.Shared.Domain.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Interfaces;
 
 namespace Kash.Application.Features.Auth.Commands.ConfirmEmail;
 

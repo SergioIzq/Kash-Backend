@@ -1,5 +1,5 @@
 ﻿using Kash.Domain;
-using Kash.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
+using SergioIzq.Application.Kernel.Messaging.Abstracts.Commands;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Application.Features.TraspasosProgramados.Commands;

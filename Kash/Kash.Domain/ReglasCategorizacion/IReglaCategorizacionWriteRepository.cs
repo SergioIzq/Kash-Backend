@@ -1,4 +1,4 @@
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Domain

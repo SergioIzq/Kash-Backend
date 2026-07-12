@@ -1,6 +1,6 @@
 using Kash.Application.Features.GastosProgramados.Commands.Execute;
 using Kash.Domain.GastosProgramados.Eventos;
-using Kash.Infrastructure.Services.Scheduling;
+using SergioIzq.Infrastructure.Kernel.Scheduling;
 using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -31,7 +31,7 @@ public sealed class GastoProgramadoCreadoEventHandler : INotificationHandler<Gas
         {
             // ?? OPTIMIZACIÓN 1: Convertir frecuencia a CRON (método optimizado)
             var cronExpression = CronExpressionConverter.ConvertirFrecuenciaACron(
-                notification.Frecuencia,
+                notification.Frecuencia.Value,
                 notification.FechaEjecucion
             );
 

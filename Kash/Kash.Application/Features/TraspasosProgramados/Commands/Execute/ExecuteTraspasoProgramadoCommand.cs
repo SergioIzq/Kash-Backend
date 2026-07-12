@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Application.Abstractions.Messaging;
+﻿using SergioIzq.Application.Kernel.Messaging;
 
 namespace Kash.Application.Features.TraspasosProgramados.Commands.Execute;
 

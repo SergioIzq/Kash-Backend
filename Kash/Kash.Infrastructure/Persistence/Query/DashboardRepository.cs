@@ -1,4 +1,5 @@
 ﻿using Kash.Shared.Application.Dtos;
+using SergioIzq.Infrastructure.Kernel.Persistence;
 using Dapper;
 using System.Globalization;
 using ApplicationInterface = Kash.Application.Interfaces;

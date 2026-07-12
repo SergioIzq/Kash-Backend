@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Interfaces;
-using Kash.Shared.Application.Abstractions.Messaging;
+using SergioIzq.Application.Kernel.Messaging;
 using Kash.Shared.Application.Dtos;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 
 namespace Kash.Application.Features.Dashboard.Queries;
 

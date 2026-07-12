@@ -1,4 +1,5 @@
 using Kash.Shared.Domain.ValueObjects.Ids;
+using SergioIzq.Infrastructure.Kernel.TypesHandlers;
 using Dapper;
 
 namespace Kash.Infrastructure.TypesHandlers
@@ -10,7 +11,7 @@ namespace Kash.Infrastructure.TypesHandlers
             // ? Registrar handler para Guid que maneja tanto BINARY(16) como strings UUID
             SqlMapper.AddTypeHandler(new GuidBinaryTypeHandler());
 
-            // ? Registrar handlers para Value Objects específicos
+            // ? Registrar handlers para Value Objects especï¿½ficos
             SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<UsuarioId>(g => UsuarioId.Create(g).Value));
             SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<ClienteId>(g => ClienteId.Create(g).Value));
             SqlMapper.AddTypeHandler(new GuidValueObjectTypeHandler<CategoriaId>(g => CategoriaId.Create(g).Value));

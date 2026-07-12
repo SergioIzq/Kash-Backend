@@ -2,8 +2,8 @@
 using Kash.Application.Features.FormasPago.Queries;
 using Kash.Application.Features.FormasPago.Queries.Recent;
 using Kash.Application.Features.FormasPago.Queries.Search; // Asegúrate de tener este namespace
-using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
+using SergioIzq.AspNetCore.Kernel.Controllers;
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,21 +31,14 @@ public class FormasPagoController : AbsController
         [FromQuery] string sortOrder = "")
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            // Retornamos un 401 usando el formato estandarizado
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetFormasPagoPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -54,20 +47,14 @@ public class FormasPagoController : AbsController
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] int limit = 10)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new SearchFormasPagoQuery(search, limit)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -76,28 +63,21 @@ public class FormasPagoController : AbsController
     [HttpGet("recent")]
     public async Task<IActionResult> GetRecent([FromQuery] int limit = 5)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetRecentFormasPagoQuery(limit)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetFormaPagoByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
@@ -131,16 +111,14 @@ public class FormasPagoController : AbsController
             Nombre = request.Nombre
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteFormaPagoCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Interfaces;
 using Kash.Domain;
 using Kash.Domain.Traspasos.Eventos;
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 // Este Event Handler maneja la lógica de actualización de saldos.

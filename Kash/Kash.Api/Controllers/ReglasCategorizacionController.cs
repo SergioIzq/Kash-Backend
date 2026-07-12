@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.ReglasCategorizacion.Commands;
 using Kash.Application.Features.ReglasCategorizacion.Queries;
-using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.AspNetCore.Kernel.Controllers;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,33 +32,27 @@ public class ReglasCategorizacionController : AbsController
         [FromQuery] string sortColumn = "",
         [FromQuery] string sortOrder = "")
     {
-        var usuarioId = GetCurrentUserId();
-        if (usuarioId is null)
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetReglasCategorizacionPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetReglaCategorizacionByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateReglaCategorizacionRequest request)
     {
-        var usuarioId = GetCurrentUserId();
-        if (usuarioId is null)
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var command = new CreateReglaCategorizacionCommand
         {
@@ -70,7 +64,7 @@ public class ReglasCategorizacionController : AbsController
             FormaPagoNombre = request.FormaPagoNombre,
             Prioridad = request.Prioridad,
             Activo = request.Activo,
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
@@ -97,16 +91,14 @@ public class ReglasCategorizacionController : AbsController
             Activo = request.Activo
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteReglaCategorizacionCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

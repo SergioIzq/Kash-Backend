@@ -1,4 +1,4 @@
-﻿using Kash.Shared.Domain.Interfaces;
+﻿using SergioIzq.Domain.Kernel.Interfaces;
 using Kash.Shared.Domain.ValueObjects;
 
 namespace Kash.Domain.Traspasos.Eventos
