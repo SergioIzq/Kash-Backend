@@ -1,8 +1,8 @@
 ﻿using Kash.Application.Features.Inversiones.Commands;
 using Kash.Application.Features.Inversiones.Commands.Import;
 using Kash.Application.Features.Inversiones.Queries;
-using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.AspNetCore.Kernel.Controllers;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,18 +30,14 @@ public class InversionesController : AbsController
         [FromQuery] string? sortColumn = null,
         [FromQuery] string? sortOrder = null)
     {
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetInversionesQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -52,8 +48,7 @@ public class InversionesController : AbsController
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetInversionByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>
@@ -116,8 +111,7 @@ public class InversionesController : AbsController
             Plataforma   = request.Plataforma
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>
@@ -129,8 +123,7 @@ public class InversionesController : AbsController
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteInversionCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>
@@ -152,8 +145,7 @@ public class InversionesController : AbsController
         _ = await stream.ReadAsync(bytes);
 
         var command = new ImportarInversionesCommand(bytes, brokerFormat);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

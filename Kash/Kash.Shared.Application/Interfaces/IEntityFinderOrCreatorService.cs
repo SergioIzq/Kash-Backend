@@ -1,3 +1,5 @@
+using SergioIzq.Application.Kernel.Interfaces;
+
 namespace Kash.Shared.Application.Interfaces;
 
 /// <summary>

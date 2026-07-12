@@ -3,7 +3,8 @@ using Kash.Application.Features.Movimientos.Commands.Import.Models;
 using Kash.Application.Features.Movimientos.Commands.Import.Parsers;
 using Kash.Application.Interfaces.Repositories;
 using Kash.Shared.Application.Interfaces;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Application.Kernel.Interfaces;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using MediatR;
 
 namespace Kash.Application.Features.Movimientos.Commands.Preview;
@@ -53,6 +54,14 @@ public sealed class PrevisualizarMovimientosCommandHandler
         // Reglas activas del usuario, ya ordenadas por prioridad: se cargan una sola vez por petición.
         var reglas = (await _reglaReadRepository.GetActivasOrdenadasAsync(usuarioId.Value, cancellationToken)).ToList();
 
+        // Deduplicación contra BD: una sola query con las claves del rango del fichero,
+        // en vez de una consulta por fila (que hacía lenta la previsualización).
+        var clavesExistentes = parse.Filas.Count > 0
+            ? await _duplicadoChecker.CargarClavesExistentesAsync(
+                usuarioId.Value, map.CuentaNombre,
+                parse.Filas.Min(f => f.Fecha), parse.Filas.Max(f => f.Fecha), cancellationToken)
+            : new HashSet<string>();
+
         var movimientos = new List<MovimientoPreviewDto>(parse.Filas.Count);
         var vistos = new HashSet<string>();
         var i = 0;
@@ -62,16 +71,10 @@ public sealed class PrevisualizarMovimientosCommandHandler
             var esGasto = mov.Tipo == TipoMovimiento.Gasto;
             var tipoStr = esGasto ? "gasto" : "ingreso";
 
-            // Duplicado dentro del fichero
-            var clave = $"{mov.Fecha:yyyy-MM-dd}|{mov.Tipo}|{mov.Importe}|{mov.Descripcion}";
+            // Duplicado dentro del fichero o ya existente en BD (misma clave canónica).
+            var clave = MovimientoDedupKey.Construir(esGasto, mov.Fecha, mov.Importe, mov.Descripcion);
             var duplicadoEnFichero = !vistos.Add(clave);
-
-            // Duplicado en base de datos
-            var duplicadoEnBd = esGasto
-                ? await _duplicadoChecker.ExisteGastoAsync(
-                    usuarioId.Value, mov.Fecha, mov.Importe, mov.Descripcion, map.CuentaNombre, cancellationToken)
-                : await _duplicadoChecker.ExisteIngresoAsync(
-                    usuarioId.Value, mov.Fecha, mov.Importe, mov.Descripcion, map.CuentaNombre, cancellationToken);
+            var duplicadoEnBd = clavesExistentes.Contains(clave);
 
             // Auto-categorización por reglas: si alguna coincide, sustituye a los valores por defecto.
             var regla = ReglaCategorizacionMatcher.Encontrar(reglas, mov.Descripcion, tipoStr);

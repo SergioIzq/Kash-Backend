@@ -1,7 +1,6 @@
 using Kash.Domain;
 using Kash.Domain.Traspasos.Eventos;
-using Kash.Shared.Domain.Interfaces;
-using Kash.Shared.Domain.Interfaces.Repositories;
+using SergioIzq.Domain.Kernel.Interfaces.Repositories;
 using Kash.Shared.Domain.ValueObjects.Ids;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -15,16 +14,13 @@ namespace Kash.Infrastructure.EventHandlers;
 public sealed class TraspasoEliminadoEventHandler : INotificationHandler<TraspasoEliminadoEvent>
 {
     private readonly IWriteRepository<Cuenta, CuentaId> _cuentaRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<TraspasoEliminadoEventHandler> _logger;
 
     public TraspasoEliminadoEventHandler(
         IWriteRepository<Cuenta, CuentaId> cuentaRepository,
-        IUnitOfWork unitOfWork,
         ILogger<TraspasoEliminadoEventHandler> logger)
     {
         _cuentaRepository = cuentaRepository;
-        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -67,7 +63,6 @@ public sealed class TraspasoEliminadoEventHandler : INotificationHandler<Traspas
             }
 
             // 3. Guardar cambios
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
             "Saldo revertido por eliminación de traspaso {TraspasoId}: " +

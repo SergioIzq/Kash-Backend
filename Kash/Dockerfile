@@ -11,10 +11,6 @@ COPY Kash.Domain/Kash.Domain.csproj Kash.Domain/
 COPY Kash.Infrastructure/Kash.Infrastructure.csproj Kash.Infrastructure/
 COPY Kash.Shared.Application/Kash.Shared.Application.csproj Kash.Shared.Application/
 COPY Kash.Shared.Domain/Kash.Shared.Domain.csproj Kash.Shared.Domain/
-COPY Kash.Middleware/Kash.Middleware.csproj Kash.Middleware/
-
-# 🔥 NUEVO: Añadido proyecto FicheroLog detectado en el .sln
-COPY Kash.FicheroLog/Kash.FicheroLog.csproj Kash.FicheroLog/
 
 # Restaurar dependencias
 RUN dotnet restore

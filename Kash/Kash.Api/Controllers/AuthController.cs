@@ -7,9 +7,9 @@ using Kash.Application.Features.Auth.Commands.ResetPassword;
 using Kash.Application.Features.Auth.Commands.UpdateUserProfile;
 using Kash.Application.Features.Auth.Commands.UploadAvatar;
 using Kash.Application.Features.Auth.Queries;
-using Kash.Api.Controllers.Base; // Usamos tu controlador base
+using SergioIzq.AspNetCore.Kernel.Controllers; // Usamos tu controlador base
 using Kash.Api.Extensions; // Para cookies si las usas como extensiones
-using Kash.Shared.Domain.Abstractions.Results; // Para Result
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -115,17 +115,14 @@ public class AuthController : AbsController // Heredamos de AbsController
     public async Task<IActionResult> ConfirmarCorreo([FromQuery] string token)
     {
         var command = new ConfirmEmailCommand(token);
-        var result = await _sender.Send(command);
-
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpPost("resend-confirmation")]
     [AllowAnonymous] // Usualmente se permite reenviar sin estar logueado si olvidaste confirmar
     public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationEmailCommand request)
     {
-        var result = await _sender.Send(request);
-        return HandleResult(result);
+        return await SendAndHandleAsync(request);
     }
 
     /// <summary>
@@ -173,8 +170,7 @@ public class AuthController : AbsController // Heredamos de AbsController
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
     {
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>
@@ -197,9 +193,7 @@ public class AuthController : AbsController // Heredamos de AbsController
             request.Apellidos
         );
 
-        var result = await _sender.Send(command);
-
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     /// <summary>

@@ -1,7 +1,7 @@
 ﻿using Kash.Application.Features.IngresosProgramados.Commands;
 using Kash.Application.Features.IngresosProgramados.Queries;
-using Kash.Api.Controllers.Base;
-using Kash.Shared.Domain.Abstractions.Results; // Para Error y Result
+using SergioIzq.AspNetCore.Kernel.Controllers;
+using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,41 +29,28 @@ public class IngresosProgramadosController : AbsController
         [FromQuery] string sortOrder = "")
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            // Retornamos un 401 usando el formato estandarizado
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetIngresosProgramadosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetIngresoProgramadoByIdQuery(id);
-        var result = await _sender.Send(query);
-        return HandleResult(result);
+        return await SendAndHandleAsync(query);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIngresoProgramadoRequest request)
     {
         // 1. Obtener ID del usuario
-        var usuarioId = GetCurrentUserId();
-
-        if (usuarioId is null)
-        {
-            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado")));
-        }
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         // 2. Crear comando con UsuarioId inyectado
         var command = new CreateIngresoProgramadoCommand
@@ -83,7 +70,7 @@ public class IngresosProgramadosController : AbsController
             CategoriaNombre = request.CategoriaNombre,
             CuentaNombre = request.CuentaNombre,
             FormaPagoNombre = request.FormaPagoNombre,
-            UsuarioId = usuarioId.Value
+            UsuarioId = usuarioId
         };
 
         var result = await _sender.Send(command);
@@ -122,16 +109,14 @@ public class IngresosProgramadosController : AbsController
             UsuarioId = request.UsuarioId
         };
 
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var command = new DeleteIngresoProgramadoCommand(id);
-        var result = await _sender.Send(command);
-        return HandleResult(result);
+        return await SendAndHandleAsync(command);
     }
 }
 

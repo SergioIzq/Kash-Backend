@@ -1,5 +1,5 @@
 using Kash.Domain;
-using Kash.Shared.Domain.Abstractions.Results;
+using SergioIzq.Domain.Kernel.Abstractions.Results;
 using Kash.Shared.Domain.ValueObjects.Ids;
 
 namespace Kash.Application.Services;

@@ -1,6 +1,6 @@
 using Kash.Application.Features.TraspasosProgramados.Commands.Execute;
 using Kash.Domain.TraspasosProgramados.Eventos;
-using Kash.Infrastructure.Services.Scheduling;
+using SergioIzq.Infrastructure.Kernel.Scheduling;
 using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,7 @@ public sealed class TraspasoProgramadoCreadoEventHandler : INotificationHandler<
         try
         {
             var cronExpression = CronExpressionConverter.ConvertirFrecuenciaACron(
-                notification.Frecuencia,
+                notification.Frecuencia.Value,
                 notification.FechaEjecucion
             );
 
