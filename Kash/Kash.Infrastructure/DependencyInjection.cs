@@ -85,6 +85,7 @@ namespace Kash.Infrastructure
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
             services.AddScoped<ApplicationInterface.IReporteRepository, ReporteRepository>();
             services.AddScoped<ApplicationInterface.IPresupuestoPdfGenerator, Reporting.PresupuestoPdfGenerator>();
+            services.AddScoped<ApplicationInterface.IPresupuestoExcelGenerator, Reporting.PresupuestoExcelGenerator>();
 
             // 7️⃣ Repositorios Automáticos (Scrutor, vía SergioIzq.Infrastructure.Kernel)
             services.AddKernelRepositories(Assembly.GetExecutingAssembly());
