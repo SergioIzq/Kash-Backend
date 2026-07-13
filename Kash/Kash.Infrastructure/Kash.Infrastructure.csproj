@@ -28,6 +28,7 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="QuestPDF" Version="2026.7.1" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="SergioIzq.Infrastructure.Kernel" Version="0.2.6" />
     <PackageReference Include="SergioIzq.AspNetCore.Kernel" Version="0.2.6" />
   </ItemGroup>
