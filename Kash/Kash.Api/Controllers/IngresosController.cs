@@ -1,5 +1,8 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Ingresos.Queries;
+using Kash.Application.Features.Ingresos.Queries.GetExcel;
+using Kash.Application.Features.Ingresos.Queries.Habituales;
+using Kash.Application.Features.Ingresos.Queries.Sugerencia;
 using SergioIzq.AspNetCore.Kernel.Controllers;
 using SergioIzq.Domain.Kernel.Abstractions.Results; // Para Error y Result
 using MediatR;
@@ -39,10 +42,75 @@ public class IngresosController : AbsController
         return await SendAndHandleAsync(query);
     }
 
+    /// <summary>
+    /// Genera y descarga un Excel con los Ingresos del usuario que cumplen los filtros indicados
+    /// (todos opcionales y combinables), sin paginar.
+    /// </summary>
+    [HttpGet("excel")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetExcel(
+        [FromQuery] DateTime? fechaInicio,
+        [FromQuery] DateTime? fechaFin,
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid[]? conceptoIds,
+        [FromQuery] Guid[]? categoriaIds,
+        [FromQuery] Guid[]? clienteIds,
+        [FromQuery] Guid[]? personaIds,
+        CancellationToken cancellationToken)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetIngresosExcelQuery(usuarioId, fechaInicio, fechaFin, searchTerm, conceptoIds, categoriaIds, clienteIds, personaIds);
+        var result = await _sender.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return File(result.Value.Contenido, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", result.Value.NombreArchivo);
+        }
+
+        return HandleResult(result);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetIngresoByIdQuery(id);
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Obtiene la combinación (cuenta, forma de pago, importe, cliente, persona) del
+    /// ingreso más reciente registrado por el usuario para un concepto dado, para pre-rellenar
+    /// un alta nueva. Devuelve una lista vacía si el concepto no tiene ingresos previos.
+    /// </summary>
+    [HttpGet("sugerencia")]
+    public async Task<IActionResult> GetSugerencia([FromQuery] Guid conceptoId)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetSugerenciaIngresoQuery(conceptoId)
+        {
+            UsuarioId = usuarioId
+        };
+
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Combinaciones completas de ingreso (concepto, categoría, cuenta, forma de pago, cliente,
+    /// persona) más repetidas por el usuario, para ofrecerlas como accesos rápidos de un toque.
+    /// </summary>
+    [HttpGet("habituales")]
+    public async Task<IActionResult> GetHabituales([FromQuery] int limit = 6)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetHabitualesIngresosQuery(limit)
+        {
+            UsuarioId = usuarioId
+        };
+
         return await SendAndHandleAsync(query);
     }
 

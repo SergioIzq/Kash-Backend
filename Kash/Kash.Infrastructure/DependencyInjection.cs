@@ -84,8 +84,17 @@ namespace Kash.Infrastructure
             // 6️⃣ Repositorios Manuales (Dashboard + Reportes)
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
             services.AddScoped<ApplicationInterface.IReporteRepository, ReporteRepository>();
+            services.AddScoped<ApplicationInterface.IConceptoPaginadoRepository, ConceptoPaginadoRepository>();
+            services.AddScoped<ApplicationInterface.IGastoHabitualesRepository, GastoHabitualesRepository>();
+            services.AddScoped<ApplicationInterface.IIngresoHabitualesRepository, IngresoHabitualesRepository>();
+            services.AddScoped<ApplicationInterface.IGastoSugerenciaRepository, GastoSugerenciaRepository>();
+            services.AddScoped<ApplicationInterface.IIngresoSugerenciaRepository, IngresoSugerenciaRepository>();
+            services.AddScoped<ApplicationInterface.IGastoExportRepository, GastoExportRepository>();
+            services.AddScoped<ApplicationInterface.IIngresoExportRepository, IngresoExportRepository>();
             services.AddScoped<ApplicationInterface.IPresupuestoPdfGenerator, Reporting.PresupuestoPdfGenerator>();
             services.AddScoped<ApplicationInterface.IPresupuestoExcelGenerator, Reporting.PresupuestoExcelGenerator>();
+            services.AddScoped<ApplicationInterface.IGastoExcelGenerator, Reporting.GastoExcelGenerator>();
+            services.AddScoped<ApplicationInterface.IIngresoExcelGenerator, Reporting.IngresoExcelGenerator>();
 
             // 7️⃣ Repositorios Automáticos (Scrutor, vía SergioIzq.Infrastructure.Kernel)
             services.AddKernelRepositories(Assembly.GetExecutingAssembly());
