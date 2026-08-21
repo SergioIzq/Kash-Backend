@@ -1,5 +1,7 @@
 ﻿using Kash.Application.Features.Gastos.Commands;
 using Kash.Application.Features.Gastos.Queries;
+using Kash.Application.Features.Gastos.Queries.Habituales;
+using Kash.Application.Features.Gastos.Queries.Sugerencia;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,6 +45,41 @@ public class GastosController : AbsController
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetGastoByIdQuery(id);
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Obtiene la combinación (cuenta, forma de pago, importe, proveedor, persona) del
+    /// gasto más reciente registrado por el usuario para un concepto dado, para pre-rellenar
+    /// un alta nueva. Devuelve una lista vacía si el concepto no tiene gastos previos.
+    /// </summary>
+    [HttpGet("sugerencia")]
+    public async Task<IActionResult> GetSugerencia([FromQuery] Guid conceptoId)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetSugerenciaGastoQuery(conceptoId)
+        {
+            UsuarioId = usuarioId
+        };
+
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Combinaciones completas de gasto (concepto, categoría, cuenta, forma de pago, proveedor,
+    /// persona) más repetidas por el usuario, para ofrecerlas como accesos rápidos de un toque.
+    /// </summary>
+    [HttpGet("habituales")]
+    public async Task<IActionResult> GetHabituales([FromQuery] int limit = 6)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetHabitualesGastosQuery(limit)
+        {
+            UsuarioId = usuarioId
+        };
+
         return await SendAndHandleAsync(query);
     }
 
