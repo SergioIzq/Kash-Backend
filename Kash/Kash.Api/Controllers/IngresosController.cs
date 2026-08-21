@@ -1,5 +1,6 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Ingresos.Queries;
+using Kash.Application.Features.Ingresos.Queries.GetExcel;
 using Kash.Application.Features.Ingresos.Queries.Habituales;
 using Kash.Application.Features.Ingresos.Queries.Sugerencia;
 using SergioIzq.AspNetCore.Kernel.Controllers;
@@ -39,6 +40,36 @@ public class IngresosController : AbsController
         };
 
         return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Genera y descarga un Excel con los Ingresos del usuario que cumplen los filtros indicados
+    /// (todos opcionales y combinables), sin paginar.
+    /// </summary>
+    [HttpGet("excel")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetExcel(
+        [FromQuery] DateTime? fechaInicio,
+        [FromQuery] DateTime? fechaFin,
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid[]? conceptoIds,
+        [FromQuery] Guid[]? categoriaIds,
+        [FromQuery] Guid[]? clienteIds,
+        [FromQuery] Guid[]? personaIds,
+        CancellationToken cancellationToken)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetIngresosExcelQuery(usuarioId, fechaInicio, fechaFin, searchTerm, conceptoIds, categoriaIds, clienteIds, personaIds);
+        var result = await _sender.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return File(result.Value.Contenido, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", result.Value.NombreArchivo);
+        }
+
+        return HandleResult(result);
     }
 
     [HttpGet("{id}")]
