@@ -28,14 +28,16 @@ public class ConceptosController : AbsController
         [FromQuery] int pageSize = 10,
         [FromQuery] string searchTerm = "",
         [FromQuery] string sortColumn = "",
-        [FromQuery] string sortOrder = "")
+        [FromQuery] string sortOrder = "",
+        [FromQuery] string? categoriaId = null)
     {
         // OPTIMIZACIÓN: Usamos el helper de la clase base
         if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
 
         var query = new GetConceptosPagedListQuery(page, pageSize, searchTerm, sortColumn, sortOrder)
         {
-            UsuarioId = usuarioId
+            UsuarioId = usuarioId,
+            CategoriaId = categoriaId
         };
 
         return await SendAndHandleAsync(query);

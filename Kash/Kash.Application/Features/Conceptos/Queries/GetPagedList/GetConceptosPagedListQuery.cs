@@ -15,4 +15,6 @@ public sealed record GetConceptosPagedListQuery : AbsGetPagedListQuery<Concepto,
         : base(page, pageSize, searchTerm ?? "", sortColumn ?? "", sortOrder ?? "")
     {
     }
+
+    public string? CategoriaId { get; init; }
 }
