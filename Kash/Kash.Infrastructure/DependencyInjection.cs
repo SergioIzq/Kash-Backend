@@ -84,6 +84,7 @@ namespace Kash.Infrastructure
             // 6️⃣ Repositorios Manuales (Dashboard + Reportes)
             services.AddScoped<ApplicationInterface.IDashboardRepository, DashboardRepository>();
             services.AddScoped<ApplicationInterface.IReporteRepository, ReporteRepository>();
+            services.AddScoped<ApplicationInterface.IConceptoPaginadoRepository, ConceptoPaginadoRepository>();
             services.AddScoped<ApplicationInterface.IGastoHabitualesRepository, GastoHabitualesRepository>();
             services.AddScoped<ApplicationInterface.IIngresoHabitualesRepository, IngresoHabitualesRepository>();
             services.AddScoped<ApplicationInterface.IGastoSugerenciaRepository, GastoSugerenciaRepository>();
