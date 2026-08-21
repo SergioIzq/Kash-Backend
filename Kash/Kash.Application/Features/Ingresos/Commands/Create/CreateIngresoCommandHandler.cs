@@ -1,4 +1,5 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
+using Kash.Application.Features.Ingresos.Queries.Habituales;
 using Kash.Domain;
 using SergioIzq.Application.Kernel.Messaging.Abstracts.Commands;
 using SergioIzq.Application.Kernel.Services;
@@ -155,5 +156,15 @@ public sealed class CreateIngresoCommandHandler
             formaPagoId,
             usuarioId,
             descripcionVO);
+    }
+
+    /// <summary>
+    /// HOOK: invalida la caché de "ingresos habituales" del usuario tras crear un ingreso, para
+    /// que la siguiente consulta refleje ya la nueva combinación/frecuencia en vez de esperar a
+    /// que expire el TTL de 30s (ver GetHabitualesIngresosQueryHandler).
+    /// </summary>
+    protected override Task OnEntityCreatedAsync(Ingreso entity, Guid entityId, CancellationToken cancellationToken)
+    {
+        return _cacheService.RemoveAsync(GetHabitualesIngresosQueryHandler.CacheKey(entity.UsuarioId.Value));
     }
 }

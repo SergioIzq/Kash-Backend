@@ -1,4 +1,5 @@
 ﻿using Kash.Application.Features.Gastos.Commands;
+using Kash.Application.Features.Gastos.Queries.Habituales;
 using Kash.Domain;
 using SergioIzq.Application.Kernel.Messaging.Abstracts.Commands;
 using SergioIzq.Application.Kernel.Services;
@@ -155,6 +156,16 @@ public sealed class CreateGastoCommandHandler
             formaPagoId,
             usuarioId,
             descripcionVO);
+    }
+
+    /// <summary>
+    /// HOOK: invalida la caché de "gastos habituales" del usuario tras crear un gasto, para que
+    /// la siguiente consulta refleje ya la nueva combinación/frecuencia en vez de esperar a que
+    /// expire el TTL de 30s (ver GetHabitualesGastosQueryHandler).
+    /// </summary>
+    protected override Task OnEntityCreatedAsync(Gasto entity, Guid entityId, CancellationToken cancellationToken)
+    {
+        return _cacheService.RemoveAsync(GetHabitualesGastosQueryHandler.CacheKey(entity.UsuarioId.Value));
     }
 }
 
