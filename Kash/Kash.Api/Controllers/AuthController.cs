@@ -1,5 +1,6 @@
 ﻿using Kash.Application.Features.Auth.Commands.ConfirmEmail;
 using Kash.Application.Features.Auth.Commands.ForgotPassword;
+using Kash.Application.Features.Auth.Commands.GenerateApiToken;
 using Kash.Application.Features.Auth.Commands.Login;
 using Kash.Application.Features.Auth.Commands.Register;
 using Kash.Application.Features.Auth.Commands.ResendConfirmationEmail;
@@ -146,6 +147,45 @@ public class AuthController : AbsController // Heredamos de AbsController
 
         // 3. Devolvemos el resultado (que ahora incluye nombre, apellido, etc.)
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Genera (o regenera) el token de API personal del usuario, pensado para integraciones
+    /// de larga duración (p. ej. un Atajo de iOS) que no pueden depender del JWT de sesión de
+    /// 12h. El valor en claro solo se devuelve en esta respuesta; regenerarlo invalida el
+    /// token anterior de inmediato.
+    /// </summary>
+    [HttpPost("api-token")]
+    [Authorize]
+    public async Task<IActionResult> GenerateApiToken()
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId == null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+        }
+
+        var command = new GenerateApiTokenCommand(userId.Value);
+        return await SendAndHandleAsync(command);
+    }
+
+    /// <summary>
+    /// Indica si el usuario tiene un token de API activo y desde cuándo, sin revelar su valor.
+    /// </summary>
+    [HttpGet("api-token")]
+    [Authorize]
+    public async Task<IActionResult> GetApiTokenStatus()
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId == null)
+        {
+            return Unauthorized(Result.Failure(Error.Unauthorized("Usuario no autenticado.")));
+        }
+
+        var query = new GetApiTokenStatusQuery(userId.Value);
+        return await SendAndHandleAsync(query);
     }
 
     /// <summary>

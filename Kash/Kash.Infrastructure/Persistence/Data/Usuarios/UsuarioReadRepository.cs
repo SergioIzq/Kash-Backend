@@ -112,6 +112,31 @@ public sealed class UsuarioReadRepository : AbsReadRepository<Usuario, UsuarioDt
         return MapRowToUsuario(row);
     }
 
+    public async Task<Usuario?> GetByApiTokenHashAsync(string apiTokenHash, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT
+                id,
+                correo,
+                nombre,
+                apellidos,
+                contrasena,
+                token_confirmacion,
+                activo,
+                token_recuperacion,
+                token_recuperacion_expiracion
+            FROM usuarios
+            WHERE api_token_hash = @ApiTokenHash
+            LIMIT 1";
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var row = await connection.QueryFirstOrDefaultAsync(sql, new { ApiTokenHash = apiTokenHash });
+
+        if (row == null) return null;
+
+        return MapRowToUsuario(row);
+    }
+
     // Método helper limpio que convierte dynamic (BD) -> Dominio
     private Usuario MapRowToUsuario(dynamic row)
     {
