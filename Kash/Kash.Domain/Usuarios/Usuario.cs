@@ -47,6 +47,8 @@ public sealed class Usuario : AbsEntity<UsuarioId>
     public DateTime? TokenRecuperacionExpiracion { get; private set; }
     public bool Activo { get; private set; }
     public AvatarUrl? Avatar { get; private set; }
+    public string? ApiTokenHash { get; private set; }
+    public DateTime? ApiTokenCreatedAt { get; private set; }
 
 
     /// <summary>
@@ -89,6 +91,18 @@ public sealed class Usuario : AbsEntity<UsuarioId>
         AvatarUrl avatar)
     {
         Avatar = avatar;
+    }
+
+    /// <summary>
+    /// Genera (o regenera) el token de API personal del usuario. El hash ya viene calculado
+    /// desde Application (el dominio nunca conoce el algoritmo de hashing). Sobrescribir el
+    /// hash anterior es el único mecanismo de revocación de este diseño: el token previo deja
+    /// de coincidir con cualquier valor almacenado.
+    /// </summary>
+    public void GenerarTokenApi(string hash)
+    {
+        ApiTokenHash = hash;
+        ApiTokenCreatedAt = DateTime.UtcNow;
     }
 
 

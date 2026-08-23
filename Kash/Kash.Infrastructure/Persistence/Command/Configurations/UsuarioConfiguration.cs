@@ -67,6 +67,20 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
             .HasColumnName("token_recuperacion_expiracion")
             .IsRequired(false);
 
+        // --- TOKEN DE API PERSONAL (Nullable) ---
+        builder.Property(e => e.ApiTokenHash)
+            .HasColumnName("api_token_hash")
+            .HasColumnType("varchar(64)") // hash SHA-256 en hexadecimal
+            .IsRequired(false);
+
+        builder.Property(e => e.ApiTokenCreatedAt)
+            .HasColumnName("api_token_created_at")
+            .IsRequired(false);
+
+        builder.HasIndex(e => e.ApiTokenHash)
+            .IsUnique()
+            .HasDatabaseName("idx_usuario_api_token_hash");
+
         // --- ACTIVO ---
         builder.Property(e => e.Activo)
             .HasColumnName("activo")
