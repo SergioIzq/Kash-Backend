@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
-    <PackageReference Include="SergioIzq.Application.Kernel" Version="0.2.6" />
+    <PackageReference Include="SergioIzq.Application.Kernel" Version="0.2.9" />
   </ItemGroup>
 
 </Project>
