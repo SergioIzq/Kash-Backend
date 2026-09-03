@@ -23,7 +23,7 @@
   <ItemGroup>
     <!-- Dapper, Hangfire.Core, MailKit/MimeKit, Scrutor y System.IdentityModel.Tokens.Jwt
          llegan ahora transitivamente desde los paquetes SergioIzq.*.Kernel -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.17" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
