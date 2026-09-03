@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mapster" Version="10.0.10" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.10" />
-    <PackageReference Include="SergioIzq.Application.Kernel" Version="0.2.6" />
+    <PackageReference Include="Mapster" Version="10.0.12" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.12" />
+    <PackageReference Include="SergioIzq.Application.Kernel" Version="0.2.9" />
   </ItemGroup>
 
   <ItemGroup>
