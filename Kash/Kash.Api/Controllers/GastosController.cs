@@ -1,6 +1,7 @@
 ﻿using Kash.Application.Features.Gastos.Commands;
 using Kash.Application.Features.Gastos.Queries;
 using Kash.Application.Features.Gastos.Queries.GetExcel;
+using Kash.Application.Features.Gastos.Queries.GetPeriodo;
 using Kash.Application.Features.Gastos.Queries.Habituales;
 using Kash.Application.Features.Gastos.Queries.Sugerencia;
 using MediatR;
@@ -38,6 +39,24 @@ public class GastosController : AbsController
         {
             UsuarioId = usuarioId
         };
+
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Obtiene los Gastos del usuario cuya fecha de transacción cae dentro de un rango indicado,
+    /// paginados, para vistas de movimientos rápidos filtrables por periodo.
+    /// </summary>
+    [HttpGet("periodo")]
+    public async Task<IActionResult> GetPorPeriodo(
+        [FromQuery] DateTime fechaInicio,
+        [FromQuery] DateTime fechaFin,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetGastosPorPeriodoQuery(usuarioId, fechaInicio, fechaFin, page, pageSize);
 
         return await SendAndHandleAsync(query);
     }

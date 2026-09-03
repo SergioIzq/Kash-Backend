@@ -91,6 +91,8 @@ namespace Kash.Infrastructure
             services.AddScoped<ApplicationInterface.IIngresoSugerenciaRepository, IngresoSugerenciaRepository>();
             services.AddScoped<ApplicationInterface.IGastoExportRepository, GastoExportRepository>();
             services.AddScoped<ApplicationInterface.IIngresoExportRepository, IngresoExportRepository>();
+            services.AddScoped<ApplicationInterface.IGastoPeriodoRepository, GastoPeriodoRepository>();
+            services.AddScoped<ApplicationInterface.IIngresoPeriodoRepository, IngresoPeriodoRepository>();
             services.AddScoped<ApplicationInterface.IPresupuestoPdfGenerator, Reporting.PresupuestoPdfGenerator>();
             services.AddScoped<ApplicationInterface.IPresupuestoExcelGenerator, Reporting.PresupuestoExcelGenerator>();
             services.AddScoped<ApplicationInterface.IGastoExcelGenerator, Reporting.GastoExcelGenerator>();

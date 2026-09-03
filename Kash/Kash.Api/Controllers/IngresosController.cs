@@ -1,6 +1,7 @@
 ﻿using Kash.Application.Features.Ingresos.Commands;
 using Kash.Application.Features.Ingresos.Queries;
 using Kash.Application.Features.Ingresos.Queries.GetExcel;
+using Kash.Application.Features.Ingresos.Queries.GetPeriodo;
 using Kash.Application.Features.Ingresos.Queries.Habituales;
 using Kash.Application.Features.Ingresos.Queries.Sugerencia;
 using SergioIzq.AspNetCore.Kernel.Controllers;
@@ -38,6 +39,24 @@ public class IngresosController : AbsController
         {
             UsuarioId = usuarioId
         };
+
+        return await SendAndHandleAsync(query);
+    }
+
+    /// <summary>
+    /// Obtiene los Ingresos del usuario cuya fecha de transacción cae dentro de un rango indicado,
+    /// paginados, para vistas de movimientos rápidos filtrables por periodo.
+    /// </summary>
+    [HttpGet("periodo")]
+    public async Task<IActionResult> GetPorPeriodo(
+        [FromQuery] DateTime fechaInicio,
+        [FromQuery] DateTime fechaFin,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (RequireCurrentUserId(out var usuarioId) is { } unauthorized) return unauthorized;
+
+        var query = new GetIngresosPorPeriodoQuery(usuarioId, fechaInicio, fechaFin, page, pageSize);
 
         return await SendAndHandleAsync(query);
     }
