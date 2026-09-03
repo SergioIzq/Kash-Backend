@@ -1,5 +1,4 @@
 using Kash.Shared.Application.Dtos;
-using SergioIzq.Domain.Kernel.Abstractions.Results;
 
 namespace Kash.Application.Interfaces;
 
@@ -10,7 +9,7 @@ namespace Kash.Application.Interfaces;
 /// </summary>
 public interface IGastoPeriodoRepository
 {
-    Task<PagedList<GastoDto>> GetPagedByPeriodoAsync(
+    Task<PeriodoResult<GastoDto>> GetPagedByPeriodoAsync(
         Guid usuarioId,
         DateTime fechaInicio,
         DateTime fechaFin,

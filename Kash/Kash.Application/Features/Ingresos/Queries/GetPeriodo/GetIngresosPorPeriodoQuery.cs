@@ -15,4 +15,4 @@ public sealed record GetIngresosPorPeriodoQuery(
     DateTime FechaFin,
     int Page,
     int PageSize
-) : IQuery<PagedList<IngresoDto>>;
+) : IQuery<PeriodoResult<IngresoDto>>;

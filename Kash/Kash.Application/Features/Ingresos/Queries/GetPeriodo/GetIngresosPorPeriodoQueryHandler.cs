@@ -8,7 +8,7 @@ namespace Kash.Application.Features.Ingresos.Queries.GetPeriodo;
 /// <summary>
 /// Obtiene los Ingresos del usuario que cumplen el rango de fechas indicado, paginados.
 /// </summary>
-public sealed class GetIngresosPorPeriodoQueryHandler : IQueryHandler<GetIngresosPorPeriodoQuery, PagedList<IngresoDto>>
+public sealed class GetIngresosPorPeriodoQueryHandler : IQueryHandler<GetIngresosPorPeriodoQuery, PeriodoResult<IngresoDto>>
 {
     private readonly IIngresoPeriodoRepository _periodoRepository;
 
@@ -17,13 +17,13 @@ public sealed class GetIngresosPorPeriodoQueryHandler : IQueryHandler<GetIngreso
         _periodoRepository = periodoRepository;
     }
 
-    public async Task<Result<PagedList<IngresoDto>>> Handle(
+    public async Task<Result<PeriodoResult<IngresoDto>>> Handle(
         GetIngresosPorPeriodoQuery request,
         CancellationToken cancellationToken)
     {
         if (request.FechaInicio > request.FechaFin)
         {
-            return Result.Failure<PagedList<IngresoDto>>(
+            return Result.Failure<PeriodoResult<IngresoDto>>(
                 Error.Validation("La fecha de inicio no puede ser posterior a la fecha de fin."));
         }
 
