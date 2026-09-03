@@ -15,7 +15,7 @@ public sealed class GastoPeriodoRepository : ApplicationInterface.IGastoPeriodoR
         _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public async Task<PagedList<GastoDto>> GetPagedByPeriodoAsync(
+    public async Task<PeriodoResult<GastoDto>> GetPagedByPeriodoAsync(
         Guid usuarioId,
         DateTime fechaInicio,
         DateTime fechaFin,
@@ -32,13 +32,13 @@ public sealed class GastoPeriodoRepository : ApplicationInterface.IGastoPeriodoR
         parametros.Add("FechaInicio", fechaInicio);
         parametros.Add("FechaFin", fechaFin);
 
-        var countSql = $@"
-            SELECT COUNT(*)
+        var totalesSql = $@"
+            SELECT COUNT(*) AS TotalCount, COALESCE(SUM(g.importe), 0) AS SumaImporte
             FROM gastos g
             WHERE {whereClause}";
 
-        var totalCount = await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(countSql, parametros, cancellationToken: cancellationToken));
+        var totales = await connection.QuerySingleAsync<TotalesPeriodo>(
+            new CommandDefinition(totalesSql, parametros, cancellationToken: cancellationToken));
 
         parametros.Add("PageSize", pageSize);
         parametros.Add("Offset", (page - 1) * pageSize);
@@ -76,6 +76,13 @@ public sealed class GastoPeriodoRepository : ApplicationInterface.IGastoPeriodoR
         var items = await connection.QueryAsync<GastoDto>(
             new CommandDefinition(sql, parametros, cancellationToken: cancellationToken));
 
-        return new PagedList<GastoDto>(items.ToList(), page, pageSize, totalCount);
+        var pagina = new PagedList<GastoDto>(items.ToList(), page, pageSize, (int)totales.TotalCount);
+
+        return new PeriodoResult<GastoDto>(pagina, totales.SumaImporte);
     }
+
+    // COUNT(*) llega como BIGINT/Int64 de MySQL; Dapper exige coincidencia exacta de tipos
+    // al materializar un record por constructor (a diferencia de ExecuteScalarAsync<int>,
+    // que sí convierte implícitamente).
+    private sealed record TotalesPeriodo(long TotalCount, decimal SumaImporte);
 }

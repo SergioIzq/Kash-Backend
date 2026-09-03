@@ -8,7 +8,7 @@ namespace Kash.Application.Features.Gastos.Queries.GetPeriodo;
 /// <summary>
 /// Obtiene los Gastos del usuario que cumplen el rango de fechas indicado, paginados.
 /// </summary>
-public sealed class GetGastosPorPeriodoQueryHandler : IQueryHandler<GetGastosPorPeriodoQuery, PagedList<GastoDto>>
+public sealed class GetGastosPorPeriodoQueryHandler : IQueryHandler<GetGastosPorPeriodoQuery, PeriodoResult<GastoDto>>
 {
     private readonly IGastoPeriodoRepository _periodoRepository;
 
@@ -17,13 +17,13 @@ public sealed class GetGastosPorPeriodoQueryHandler : IQueryHandler<GetGastosPor
         _periodoRepository = periodoRepository;
     }
 
-    public async Task<Result<PagedList<GastoDto>>> Handle(
+    public async Task<Result<PeriodoResult<GastoDto>>> Handle(
         GetGastosPorPeriodoQuery request,
         CancellationToken cancellationToken)
     {
         if (request.FechaInicio > request.FechaFin)
         {
-            return Result.Failure<PagedList<GastoDto>>(
+            return Result.Failure<PeriodoResult<GastoDto>>(
                 Error.Validation("La fecha de inicio no puede ser posterior a la fecha de fin."));
         }
 

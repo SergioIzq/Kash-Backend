@@ -15,4 +15,4 @@ public sealed record GetGastosPorPeriodoQuery(
     DateTime FechaFin,
     int Page,
     int PageSize
-) : IQuery<PagedList<GastoDto>>;
+) : IQuery<PeriodoResult<GastoDto>>;
